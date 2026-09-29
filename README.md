@@ -223,36 +223,58 @@ flutter pub get
 flutter run
 ```
 
-### 2.1 Device Preview (ver as telas em vários aparelhos)
+### 2.1 Device Preview — emular o celular no Chrome
 
-Para conferir o comportamento responsivo (RNF01) sem trocar de
-emulador, existe um entrypoint de desenvolvimento que envolve o app no
+Para conferir o comportamento responsivo (RNF01) sem trocar de emulador,
+o app tem um ponto de entrada de desenvolvimento que o envolve no
 `device_preview`:
 
 ```bash
-flutter run -t dev/main_dev.dart
+# abre direto no Chrome, com o app dentro da moldura de um celular
+flutter run -d chrome -t dev/main_dev.dart
 ```
 
-A barra lateral permite trocar de aparelho, girar a tela, alternar o
-dark mode, ajustar o tamanho do texto e ligar o teclado virtual.
+Outras opções úteis:
+
+```bash
+# emulador Android / iOS físico, já com a moldura do aparelho
+flutter run -t dev/main_dev.dart
+
+# só servir (útil para testar no celular na mesma rede)
+flutter run -d web-server -t dev/main_dev.dart
+```
+
+A barra lateral do DevicePreview permite trocar de aparelho, girar a
+tela, alternar o dark mode, ajustar o tamanho do texto e ligar o teclado
+virtual.
 
 Aparelhos mais úteis para conferir o app:
 
-| Referência | Device |
-|------------|--------|
-| Tela pequena (checar overflow) | `Devices.ios.iPhoneSE` · `Devices.android.smallPhone` |
-| Base do design | `Devices.ios.iPhone13` |
-| Tela grande | `Devices.ios.iPhone16ProMax` · `Devices.android.bigPhone` |
+| Situação | Device |
+|----------|--------|
+| Checar overflow em tela pequena | `Devices.ios.iPhoneSE` · `Devices.android.smallPhone` |
+| Base do design | `Devices.ios.iPhone13` (padrão) |
+| Tela grande | `Devices.ios.iPhone16ProMax` |
 | Tablet | `Devices.ios.iPad` · `Devices.android.mediumTablet` |
 
-> O arquivo fica em `dev/` e **não** em `lib/` de propósito: o
-> `device_preview` é uma `dev_dependency` e não deve entrar no build de
-> produção. Comparando os dois builds fica evidente:
+**No Chrome, a API é acessada em `http://localhost:8081/api`.** A API em
+Go já responde com `Access-Control-Allow-Origin: *`, então o navegador
+consegue chamar o backend normalmente — o login funciona direto no
+Chrome, sem configuração extra.
 
-> ```bash
-> flutter build bundle -t dev/main_dev.dart   # 73,5 MB (com preview)
-> flutter build bundle                        # 66,3 MB (produção)
-> ```
+O DevicePreview não é só uma moldura: ele troca o `MediaQuery` do app
+pelo tamanho real do aparelho. Isso é verificado automaticamente em
+`test/device_preview_test.dart` (iPhone 13 → 390x844, iPhone SE →
+375x667, iPhone 16 Pro Max → 440x956).
+
+O arquivo fica em `dev/` e **não** em `lib/` de propósito: o
+`device_preview` é uma `dev_dependency` e não deve entrar no build de
+produção. Comparando os dois builds fica evidente:
+
+```bash
+flutter build bundle -t dev/main_dev.dart   # 73,5 MB (com preview)
+flutter build bundle                        # 66,3 MB (produção)
+```
 
 ### Endereço da API
 
@@ -274,15 +296,16 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (41 testes)
+flutter test             # suíte completa (44 testes)
 ```
 
-A suíte é dividida em quatro arquivos:
+A suíte é dividida em cinco arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
 | `test/widget_test.dart` | Regras de RBAC, estado da sessão, widgets | Não |
 | `test/bindings_test.dart` | Grafo de dependências do `MainBinding` e guardas de rota | Não |
+| `test/device_preview_test.dart` | DevicePreview aplica o tamanho real do aparelho | Não |
 | `test/fluxo_rotas_test.dart` | Navegação, guards, validação e restauração de sessão | Não |
 | `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
 
