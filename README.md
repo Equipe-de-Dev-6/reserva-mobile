@@ -67,6 +67,11 @@ lib/
     ├── dialogo_logout.dart
     ├── estado_vazio.dart
     └── mensagem_erro.dart
+
+dev/
+└── main_dev.dart                 Entry point de DESENVOLVimento (device_preview)
+                                 Fica fora de lib/ de propósito: a dependência
+                                 é dev-only e não entra no build de produção.
 ```
 
 ### Onde cada responsabilidade mora
@@ -195,6 +200,37 @@ A API sobe na porta **8081** e a documentação fica em
 flutter pub get
 flutter run
 ```
+
+### 2.1 Device Preview (ver as telas em vários aparelhos)
+
+Para conferir o comportamento responsivo (RNF01) sem trocar de
+emulador, existe um entrypoint de desenvolvimento que envolve o app no
+`device_preview`:
+
+```bash
+flutter run -t dev/main_dev.dart
+```
+
+A barra lateral permite trocar de aparelho, girar a tela, alternar o
+dark mode, ajustar o tamanho do texto e ligar o teclado virtual.
+
+Aparelhos mais úteis para conferir o app:
+
+| Referência | Device |
+|------------|--------|
+| Tela pequena (checar overflow) | `Devices.ios.iPhoneSE` · `Devices.android.smallPhone` |
+| Base do design | `Devices.ios.iPhone13` |
+| Tela grande | `Devices.ios.iPhone16ProMax` · `Devices.android.bigPhone` |
+| Tablet | `Devices.ios.iPad` · `Devices.android.mediumTablet` |
+
+> O arquivo fica em `dev/` e **não** em `lib/` de propósito: o
+> `device_preview` é uma `dev_dependency` e não deve entrar no build de
+> produção. Comparando os dois builds fica evidente:
+
+> ```bash
+> flutter build bundle -t dev/main_dev.dart   # 73,5 MB (com preview)
+> flutter build bundle                        # 66,3 MB (produção)
+> ```
 
 ### Endereço da API
 
