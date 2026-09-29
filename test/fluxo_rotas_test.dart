@@ -1,44 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'package:reserva_mobile/app/bindings.dart';
 import 'package:reserva_mobile/app/rotas.dart';
 import 'package:reserva_mobile/app/tema.dart';
-import 'package:reserva_mobile/core/servicos/api_client.dart';
-import 'package:reserva_mobile/core/servicos/sessao_service.dart';
 import 'package:reserva_mobile/models/usuario_model.dart';
 import 'package:reserva_mobile/widgets/botao_primario.dart';
 import 'package:reserva_mobile/widgets/campo_texto.dart';
 
-/// Binding de teste: registra o mesmo grafo do `MainBinding`, mas com
-/// uma [SessaoService] já pronta (o armazenamento seguro não existe no
-/// ambiente de teste) e no estado que o cenário pede.
-class _TestBinding extends Bindings {
-  _TestBinding(this.sessao);
-
-  final SessaoService sessao;
-
-  @override
-  void dependencies() {
-    Get.put<SessaoService>(sessao, permanent: true);
-    Get.put(ApiClient(sessao), permanent: true);
-  }
-}
+import 'helpers/test_armazenamento.dart';
 
 /// Monta o app com as mesmas configurações do `main.dart`.
 ///
-/// Observação importante: dentro de `testWidgets` o tempo é *fake*, então
-/// qualquer chamada real de plataforma (o `flutter_secure_storage`, por
-/// exemplo) nunca completa e trava o teste. Por isso a sessão é montada
-/// direto nos campos reativos em memória, e não via `SessaoService.salvar`.
+/// Quando [usuarioLogado] é informado, a sessão é gravada no
+/// [ArmazenamentoFalso] **antes** do app subir. O [SplashController]
+/// então a restaura pelo mesmo caminho do app real, o que exercita a
+/// persistência de ponta a ponta.
 Future<void> _montarApp(
   WidgetTester tester, {
   UsuarioModel? usuarioLogado,
 }) async {
-  final sessao = SessaoService();
   if (usuarioLogado != null) {
-    sessao.token.value = 'token-de-teste';
-    sessao.refreshToken.value = 'refresh-de-teste';
-    sessao.usuario.value = usuarioLogado;
+    await gravarSessaoSalva(usuarioLogado);
   }
 
   await tester.pumpWidget(
@@ -46,7 +29,9 @@ Future<void> _montarApp(
       title: 'Patrimônio Escolar',
       debugShowCheckedModeBanner: false,
       theme: Tema.claro,
-      initialBinding: _TestBinding(sessao),
+      // Usa o MainBinding de verdade: é ele que o app usa, e testá-lo
+      // aqui protege contra regressões no grafo de dependências.
+      initialBinding: MainBinding(),
       initialRoute: Rotas.splash,
       getPages: AppRotas.paginas,
     ),
@@ -66,7 +51,16 @@ Future<void> _avancarAteLogin(WidgetTester tester) async {
 }
 
 void main() {
-  tearDown(Get.reset);
+  late ArmazenamentoFalso armazenamento;
+
+  setUp(() {
+    armazenamento = ArmazenamentoFalso()..instalar();
+  });
+
+  tearDown(() {
+    armazenamento.remover();
+    Get.reset();
+  });
 
   group('Fluxo de rotas (RF01)', () {
     testWidgets('sem sessão, a Splash leva para a tela de Login', (tester) async {

@@ -30,8 +30,19 @@ class SessaoService extends GetxService {
 
   bool get autenticado => token.value.isNotEmpty && usuario.value != null;
 
+  /// Garante que [init] rode uma única vez, mesmo que mais de um
+  /// chamador peça a restauração da sessão.
+  Future<SessaoService>? _iniciando;
+
   /// Lê a sessão salva e restaura o estado em memória.
-  Future<SessaoService> init() async {
+  ///
+  /// É seguro chamar quantas vezes quiser: nas chamadas seguintes a
+  /// mesma Future é devolvida, sem nova leitura ao disco.
+  Future<SessaoService> init() {
+    return _iniciando ??= _carregarDoDisco();
+  }
+
+  Future<SessaoService> _carregarDoDisco() async {
     try {
       token.value = await _storage.read(key: _kToken) ?? '';
       refreshToken.value = await _storage.read(key: _kRefreshToken) ?? '';
@@ -94,6 +105,9 @@ class SessaoService extends GetxService {
     token.value = '';
     refreshToken.value = '';
     usuario.value = null;
+    // Libera a trava de inicialização: um novo login precisa poder
+    // chamar `init()` de novo.
+    _iniciando = null;
     try {
       await _storage.delete(key: _kToken);
       await _storage.delete(key: _kRefreshToken);

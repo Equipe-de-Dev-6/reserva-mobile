@@ -23,6 +23,10 @@ class ApiClient extends GetxService {
 
   final SessaoService _sessao;
 
+  /// Acesso à sessão usada por este cliente.
+  /// Exposto para diagnóstico e para os testes de integração.
+  SessaoService get sessao => _sessao;
+
   /// Registrado pelo app para redirecionar à tela de login.
   static RedirecionarParaLogin? aoExpirarSessao;
 

@@ -16,10 +16,16 @@ import 'rotas.dart';
 class MainBinding extends Bindings {
   @override
   void dependencies() {
-    // `putAsync` aguarda a leitura do armazenamento seguro antes de
-    // qualquer tela ser desenhada — a Splash já sabe se há sessão.
-    Get.putAsync<SessaoService>(() => SessaoService().init(), permanent: true);
-    Get.put(ApiClient(Get.find<SessaoService>()), permanent: true);
+    // O registro é SÍNCRONO de propósito. Com `Get.putAsync` a instância
+    // só entra no contêiner do GetX depois que o Future resolve, o que
+    // deixaria o `Get.find` da linha seguinte sem resposta — e o
+    // `ApiClient`, que o login depende, nunca seria registrado.
+    //
+    // A leitura do armazenamento seguro é assíncrona, mas isso é feito
+    // explicitamente pelo SplashController (que é justamente a tela
+    // responsável por decidir o destino com base na sessão salva).
+    final sessao = Get.put(SessaoService(), permanent: true);
+    Get.put(ApiClient(sessao), permanent: true);
 
     // Ponte entre a camada de rede e a navegação: quando o token
     // expira e não pode ser renovado, voltamos para o Login.

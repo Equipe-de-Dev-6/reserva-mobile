@@ -180,6 +180,28 @@ Flutter lançaria `Duplicate GlobalKey`. Por isso cada View cria a sua
 própria key e passa o `FormState` ao Controller, que aplica as regras
 de validação.
 
+**7. Registro síncrono das dependências globais**
+
+`Get.putAsync` só registra a instância **depois** que o Future resolve.
+Usá-lo para a sessão e logo em seguida fazer `Get.find<SessaoService>()`
+faz o `ApiClient` nunca ser registrado — e o login, que depende dele,
+quebra em toda execução. O `MainBinding` por isso registra de forma
+síncrona, e a leitura do armazenamento (assíncrona) fica a cargo do
+`SplashController`, que é justamente a tela que decide o destino com
+base na sessão salva:
+
+```dart
+// app/bindings.dart
+final sessao = Get.put(SessaoService(), permanent: true);
+Get.put(ApiClient(sessao), permanent: true);
+```
+
+```dart
+// controllers/splash_controller.dart
+final sessao = Get.find<SessaoService>();
+await sessao.init();      // restaura token e perfil do armazenamento
+```
+
 ---
 
 ## 🚀 Como Executar
@@ -252,22 +274,24 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (30 testes)
+flutter test             # suíte completa (41 testes)
 ```
 
-A suíte é dividida em três arquivos:
+A suíte é dividida em quatro arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
 | `test/widget_test.dart` | Regras de RBAC, estado da sessão, widgets | Não |
-| `test/fluxo_rotas_test.dart` | Navegação, guards, validação de formulário | Não |
-| `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (os testes são ignorados se a API estiver fora) |
+| `test/bindings_test.dart` | Grafo de dependências do `MainBinding` e guardas de rota | Não |
+| `test/fluxo_rotas_test.dart` | Navegação, guards, validação e restauração de sessão | Não |
+| `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
 
 > **Detalhe importante:** dentro de `testWidgets` o tempo é *fake*, então
 > chamadas reais de plataforma (o `flutter_secure_storage`) nunca
-> completam e travam o teste. Por isso os testes de widget montam a
-> sessão direto nos campos reativos em memória, e não via
-> `SessaoService.salvar()`.
+> completam e travam o teste. Por isso existe um dublê do armazenamento
+> seguro em `test/helpers/test_armazenamento.dart`. Com ele, o ciclo
+> "gravar sessão → reabrir o app → restaurar sessão" é testado de ponta
+> a ponta, pelo mesmo caminho usado pelo app real.
 
 ---
 
