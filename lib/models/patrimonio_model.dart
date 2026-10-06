@@ -125,7 +125,7 @@ class PatrimonioModel {
 
   /// `Em uso · Prof. Carlos Drummond`, usado como subtítulo do card.
   String get resumoResponsavel => temProfessor
-      ? '${rotuloStatus} · $professorNomeFormatado'
+      ? '$rotuloStatus · $professorNomeFormatado'
       : rotuloStatus;
 
   // --- Serialização -----------------------------------------------------
@@ -163,6 +163,15 @@ class PatrimonioModel {
   /// a tela de cadastro fosse reaproveitada.
   Map<String, dynamic> toJson() => {
         'codigo': codigo.trim(),
+        ..._camposEditaveis(),
+      };
+
+  /// Campos que os dois corpos compartilham.
+  ///
+  /// Isolar isso evita a diferença entre cadastro e edição ficar
+  /// espalhada por dois mapas — foi exatamente aí que o `codigo` do
+  /// cadastro vazou para o `PUT`, que a API não aceita.
+  Map<String, dynamic> _camposEditaveis() => {
         'nome': nome.trim(),
         'descricao': descricao.trim(),
         'categoria': categoria.trim(),
@@ -181,7 +190,7 @@ class PatrimonioModel {
   /// **não** é editável: identificador de tombamento muda com processo
   /// patrimonial, não por um campo de formulário.
   Map<String, dynamic> toJsonAtualizacao() => {
-        ...toJson(),
+        ..._camposEditaveis(),
         'status': status.api,
       };
 

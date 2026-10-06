@@ -8,7 +8,6 @@ import '../../core/servicos/patrimonio_service.dart';
 import '../../widgets/botao_primario.dart';
 import '../../widgets/campo_texto.dart';
 import '../../widgets/mensagem_erro.dart';
-import 'rotas_patrimonio.dart';
 
 /// **RF07a — Formulário de cadastro e de edição de um bem.**
 ///
@@ -109,7 +108,7 @@ class _PatrimonioFormViewState extends State<PatrimonioFormView> {
               CampoTexto(
                 rotulo: 'Marca',
                 dica: 'Dell',
-                icone: Icons.branding_outlined,
+                icone: Icons.label_outline,
                 controlador: _controller.marcaCtrl,
               ),
               const SizedBox(height: 14),

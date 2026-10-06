@@ -6,12 +6,12 @@ import '../../controllers/patrimonio_controller.dart';
 import '../../core/servicos/patrimonio_service.dart';
 import '../../core/servicos/sessao_service.dart';
 import '../../models/patrimonio_model.dart';
+import '../../models/status_patrimonio.dart';
 import '../../widgets/badge_status.dart';
 import '../../widgets/card_patrimonio.dart';
 import '../../widgets/estado_vazio.dart';
 import '../../widgets/mensagem_erro.dart';
-import 'patrimonio_detalhe_view.dart';
-import 'patrimonio_form_view.dart';
+import 'rotas_patrimonio.dart';
 
 /// **RF07a — Listagem de patrimônios com busca e filtros.**
 ///
@@ -35,26 +35,30 @@ class PatrimonioListaView extends GetView<PatrimonioController> {
       appBar: AppBar(
         title: const Text('Patrimônios'),
         actions: [
-          Obx(() => controller.carregando.value
-              ? const Padding(
-                  padding: EdgeInsets.only(right: 16),
-                  child: Center(
-                    child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        valueColor:
-                            AlwaysStoppedAnimation(Colors.white),
-                      ),
+          Obx(() {
+            // Spinner no lugar do botão enquanto recarrega: sem ele, o
+            // Coordinator poderia disparar requisições empilhadas.
+            if (controller.carregando.value) {
+              return const Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
                     ),
                   ),
-                )
-              : IconButton(
-                  tooltip: 'Atualizar',
-                  icon: const Icon(Icons.refresh_rounded),
-                  onPressed: controller.carregar,
-                )),
+                ),
+              );
+            }
+            return IconButton(
+              tooltip: 'Atualizar',
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: controller.carregar,
+            );
+          }),
         ],
       ),
 
@@ -112,8 +116,11 @@ class _BarraFiltros extends StatelessWidget {
               isDense: true,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              // `suffixIcon` aceita `Widget?`, mas um `Obx` que devolve
+              // `IconButton?` não tipa. O `SizedBox.shrink()` no lugar do
+              // `null` é visualmente idêntico e mantém o tipo.
               suffixIcon: Obx(() => controller.busca.value.isEmpty
-                  ? null
+                  ? const SizedBox.shrink()
                   : IconButton(
                       tooltip: 'Limpar busca',
                       icon: const Icon(Icons.close, size: 18),
@@ -248,26 +255,31 @@ class _ChipCategoria extends StatelessWidget {
         border: Border.all(color: const Color(0xFFDDE3EE)),
       ),
       child: DropdownButtonHideUnderline(
-        child: Obx(() => DropdownButton<String?>(
-              value: categoriasPatrimonio
-                      .contains(controller.categoriaSelecionada.value)
-                  ? controller.categoriaSelecionada.value
-                  : null,
-              hint: const Text('Categoria',
-                  style: TextStyle(fontSize: 12.5)),
-              isDense: true,
-              icon: const Icon(Icons.arrow_drop_down, size: 20),
-              borderRadius: BorderRadius.circular(12),
-              items: [
-                for (final categoria in categoriasPatrimonio)
-                  DropdownMenuItem(
-                    value: categoria,
-                    child: Text(categoria,
-                        style: const TextStyle(fontSize: 13)),
-                  ),
-              ],
-              onChanged: controller.escolherCategoria,
-            )),
+        child: Obx(() {
+          final selecionada = controller.categoriaSelecionada.value;
+
+          return DropdownButton<String?>(
+            // Só aceita o valor se ele ainda estiver na lista: um item
+            // vindo do servidor que não está no catálogo não pode virar
+            // um `value` inválido (o Flutter lançaria "There should be
+            // exactly one item with the dropdown's value").
+            value: categoriasPatrimonio.contains(selecionada)
+                ? selecionada
+                : null,
+            hint: const Text('Categoria', style: TextStyle(fontSize: 12.5)),
+            isDense: true,
+            icon: const Icon(Icons.arrow_drop_down, size: 20),
+            borderRadius: BorderRadius.circular(12),
+            items: [
+              for (final categoria in categoriasPatrimonio)
+                DropdownMenuItem(
+                  value: categoria,
+                  child: Text(categoria, style: const TextStyle(fontSize: 13)),
+                ),
+            ],
+            onChanged: controller.escolherCategoria,
+          );
+        }),
       ),
     );
   }
@@ -308,7 +320,7 @@ class _CorpoLista extends StatelessWidget {
         child: ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 90),
           itemCount: controller.patrimonios.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (context, indice) => const SizedBox(height: 10),
           itemBuilder: (context, indice) {
             final patrimonio = controller.patrimonios[indice];
             return CardPatrimonio(
