@@ -22,6 +22,11 @@ class PatrimonioFormController extends GetxController {
   final PatrimonioService _service;
 
   /// Bem em edição. `null` = cadastro.
+  ///
+  /// Vem de `Get.arguments` e é lido em [onInit]. Deixar a leitura para
+  /// cá (e não para a View) evita o problema clássico do Controller
+  /// nasce-antes-de-a-View-configurar: aqui a View só navega, e o
+  /// Controller se resolve sozinho, como os demais do projeto.
   PatrimonioModel? patrimonio;
 
   final RxBool salvando = false.obs;
@@ -55,6 +60,18 @@ class PatrimonioFormController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // A View só navega; quem descobre o modo é o Controller.
+    if (patrimonio == null) {
+      final argumentos = Get.arguments;
+      if (argumentos is PatrimonioModel) {
+        patrimonio = argumentos;
+      } else if (argumentos is Map) {
+        final candidato = argumentos['patrimonio'];
+        if (candidato is PatrimonioModel) patrimonio = candidato;
+      }
+    }
+
     _preencherCampos();
   }
 

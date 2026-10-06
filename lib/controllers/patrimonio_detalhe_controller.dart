@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../core/servicos/patrimonio_service.dart';
@@ -7,22 +6,18 @@ import '../core/utils/app_exception.dart';
 import '../models/patrimonio_model.dart';
 import '../models/status_patrimonio.dart';
 
-/// Estado e regras da **tela de detalhe** de um bem (RF07a) e da
-/// **exclusão** dele.
+/// Estado e regras da **tela de detalhe** de um bem (RF07a).
 ///
-/// A tela recebe o `id` do bem por `Get.arguments`. O bem é carregado
-/// em [onInit] para que a rota funcione sem a View precisar montar
-/// qualquer requisição.
+/// A tela recebe o `id` do bem por `Get.arguments`, então a rota
+/// funciona sem a View precisar montar requisição nenhuma. O bem é
+/// carregado em [onInit].
 class PatrimonioDetalheController extends GetxController {
   PatrimonioDetalheController(this._service);
 
   final PatrimonioService _service;
 
-  /// `true` enquanto o formulário está aberto (RF07a).
-  final RxBool editando = false.obs;
-
-  /// `true` durante a confirmação de exclusão — evita que dois toques
-  /// seguidos abram duas diálogos.
+  /// `true` durante a exclusão — evita que dois toques seguidos abram
+  /// duas diálogos de confirmação.
   final RxBool excluindo = false.obs;
 
   final Rx<PatrimonioModel?> patrimonio = Rx<PatrimonioModel?>(null);
@@ -52,8 +47,9 @@ class PatrimonioDetalheController extends GetxController {
     carregar();
   }
 
-  /// Busca o bem. Também cobre o botão "Tentar novamente" do estado de
-  /// erro.
+  /// Busca o bem. Cobre também o botão "Tentar novamente" do estado de
+  /// erro e o retorno do formulário de edição, que altera dados que só
+  /// o servidor tem.
   Future<void> carregar() async {
     if (id <= 0) {
       erro.value = 'Patrimônio não informado.';
@@ -75,22 +71,11 @@ class PatrimonioDetalheController extends GetxController {
     }
   }
 
-  void abrirEdicao() => editando.value = true;
-  void fecharEdicao() => editando.value = false;
-
-  /// Chamado pelo formulário depois de salvar, com o bem já atualizado.
+  /// Exclui o bem.
   ///
-  /// Substitui o objeto em memória em vez de refazer o GET: a resposta
-  /// do `PUT` não traz o bem completo, e a tela não deve piscar.
-  void aplicarAtualizacao(PatrimonioModel atualizado) {
-    patrimonio.value = atualizado;
-    editando.value = false;
-  }
-
-  /// Exclui o bem e volta para a listagem.
-  ///
-  /// Devolve `true` quando a exclusão aconteceu, para a View decidir se
-  /// navega para trás.
+  /// Devolve `true` quando a exclusão aconteceu, para a View navegar
+  /// para trás. A confirmação é responsabilidade da tela — este método
+  /// executa, não pergunta.
   Future<bool> excluir() async {
     if (excluindo.value) return false;
     excluindo.value = true;
@@ -106,13 +91,14 @@ class PatrimonioDetalheController extends GetxController {
     }
   }
 
-  /// Status exibido no badge do detalhe, com o texto explicativo
-  /// embaixo. Se o `PUT` mudou o status, o detalhe reflete sem recarregar.
+  /// Texto explicativo do status, exibido abaixo do `BadgeStatus`.
   String get descricaoStatus => patrimonio.value?.status.descricao ?? '';
 
-  /// `true` quando o bem está disponível para recebimento — usado para
-  /// explicar, no detalhe, por que a atribuição está ou não disponível
-  /// (o fluxo em si é do ciclo de vida, RF07b).
+  /// `true` quando o bem pode ser entregue a um docente.
+  ///
+  /// Não é o botão de atribuição (esse é o fluxo do ciclo de vida,
+  /// RF07b): serve para o detalhe explicar por que o bem está ou não
+  /// pronto para recebimento.
   bool get statusPermiteAtribuicao =>
       (patrimonio.value?.status ?? StatusPatrimonio.indefinido)
           .aceitaAtribuicao;

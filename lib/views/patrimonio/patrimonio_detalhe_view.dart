@@ -303,66 +303,6 @@ class _Cabecalho extends StatelessWidget {
   }
 }
 
-/// Modo de edição, dentro da própria tela de detalhe.
-class _Formulario extends StatelessWidget {
-  const _Formulario({required this.controller, required this.patrimonio});
-
-  final PatrimonioDetalheController controller;
-  final PatrimonioModel patrimonio;
-
-  @override
-  Widget build(BuildContext context) {
-    final formCtrl = Get.find<PatrimonioFormController>();
-    final formKey = GlobalKey<FormState>();
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Form(
-        key: formKey,
-        child: ListView(
-          children: [
-            Obx(() => formCtrl.erro.value.isEmpty
-                ? const SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: MensagemErro.erro(formCtrl.erro.value),
-                  )),
-            _Linha(rotulo: 'Tombamento', valor: patrimonio.codigo),
-            const SizedBox(height: 6),
-            Text(
-              'O tombamento não pode ser alterado após o cadastro.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black.withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Obx(() => BotaoPrimario(
-                  texto: formCtrl.textoBotao,
-                  icone: Icons.save_outlined,
-                  carregando: formCtrl.salvando.value,
-                  aoTocar: () => _salvar(formCtrl, formKey),
-                )),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: controller.fecharEdicao,
-              child: const Text('Cancelar'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _salvar(
-    PatrimonioFormController formCtrl,
-    GlobalKey<FormState> formKey,
-  ) async {
-    final atualizado = await formCtrl.salvar(formKey.currentState!);
-    if (atualizado != null) controller.aplicarAtualizacao(atualizado);
-  }
-}
-
 /// Cartão de seção com título.
 class _Secao extends StatelessWidget {
   const _Secao({required this.titulo, required this.filhos});
