@@ -67,9 +67,9 @@ class PatrimonioController extends GetxController {
 
   /// Carrega a listagem aplicando os filtros atuais.
   ///
-  /// [silencioso] suprime o spinnerfull: usado quando só os filtros
-  /// mudam e a lista anterior continua válida na tela, evitando o
-  /// "piscar" da lista a cada clique num chip de filtro.
+  /// [silencioso] suprime o spinner: usado quando só os filtros mudam e
+  /// a lista anterior continua válida na tela, evitando o "piscar" da
+  /// lista a cada clique num chip de filtro.
   Future<void> carregar({bool silencioso = false}) async {
     if (!silencioso) carregando.value = true;
     erro.value = '';
