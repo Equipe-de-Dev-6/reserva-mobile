@@ -12,6 +12,7 @@ import 'package:reserva_mobile/models/patrimonio_model.dart';
 import 'package:reserva_mobile/models/status_patrimonio.dart';
 import 'package:reserva_mobile/models/usuario_model.dart';
 import 'package:reserva_mobile/views/patrimonio/patrimonio_lista_view.dart';
+import 'package:reserva_mobile/widgets/card_patrimonio.dart';
 
 /// Acervo de mentira: três bens, um de cada situação relevante.
 List<PatrimonioModel> acervoFake() => const [
@@ -145,12 +146,31 @@ Future<void> pumpTela(
   await tester.pumpAndSettle();
 }
 
+/// Espera a busca disparar depois do intervalo de silêncio.
+///
+/// `pumpAndSettle` sozinho **não** serve: ele só avança enquanto há
+/// frames agendados, e um `Timer` de 350 ms não agenda nenhum. Sem esta
+/// espera explícita, o teste leria a lista **antes** do filtro ser
+/// aplicado e passaria por engano.
+Future<void> aguardarBusca(WidgetTester tester) async {
+  await tester.pump(PatrimonioController.debounceBusca);
+  await tester.pumpAndSettle();
+}
+
 /// Localiza um chip pelo rótulo.
 ///
 /// Existe porque `ChoiceChip` tem subtipos (o Flutter cria um
 /// `RawChip` por baixo) e `findsOneWidget` no texto puro acabaria
 /// contando também o badge do card com o mesmo rótulo.
 Finder chip(String rotulo) => find.widgetWithText(ChoiceChip, rotulo);
+
+/// Procura um texto **dentro de um card** da lista.
+///
+/// Necessário porque o mesmo texto pode aparecer em dois lugares: no
+/// card e no campo de busca (com o que o usuário digitou). Sem esta
+/// restrição, "PAT-2024-003" seria encontrado duas vezes.
+Finder cards(String texto) =>
+    find.descendant(of: find.byType(CardPatrimonio), matching: find.text(texto));
 
 void main() {
   late ServicoDeAcervoFake service;
@@ -227,10 +247,12 @@ void main() {
         find.widgetWithIcon(TextField, Icons.search),
         'PAT-2024-003',
       );
-      await tester.pumpAndSettle();
+      await aguardarBusca(tester);
 
-      expect(find.text('PAT-2024-003'), findsOneWidget);
-      expect(find.text('PAT-2024-001'), findsNothing);
+      // O texto digitado também existe no campo de busca, então a
+      // verificação é feita nos cards.
+      expect(cards('PAT-2024-003'), findsOneWidget);
+      expect(cards('PAT-2024-001'), findsNothing);
     });
 
     testWidgets('"Limpar" volta a mostrar o acervo inteiro', (tester) async {
@@ -240,14 +262,17 @@ void main() {
         find.widgetWithIcon(TextField, Icons.search),
         'zzz',
       );
-      await tester.pumpAndSettle();
+      await aguardarBusca(tester);
       expect(find.text('Nenhum bem encontrado'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(TextButton, 'Limpar'));
+      // Toca pelo texto: `TextButton.icon` cria um `_TextButtonWithIcon`,
+      // que não casa com `find.byType(TextButton)` (o matcher exige o
+      // tipo exato).
+      await tester.tap(find.text('Limpar'));
       await tester.pumpAndSettle();
 
-      expect(find.text('PAT-2024-001'), findsOneWidget);
-      expect(find.text('PAT-2024-003'), findsOneWidget);
+      expect(cards('PAT-2024-001'), findsOneWidget);
+      expect(cards('PAT-2024-003'), findsOneWidget);
     });
 
     testWidgets('o FAB de novo bem aparece para o Coordenador',
@@ -311,7 +336,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nenhum bem cadastrado'), findsOneWidget);
-      expect(find.text('Cadastre o primeiro bem'), findsOneWidget);
+      expect(
+        find.textContaining('Cadastre o primeiro bem'),
+        findsOneWidget,
+        reason: 'o estado vazio precisa sugerir o cadastro',
+      );
     });
 
     testWidgets('busca sem resultado muda a mensagem do estado vazio',
@@ -322,7 +351,7 @@ void main() {
         find.widgetWithIcon(TextField, Icons.search),
         'zzz',
       );
-      await tester.pumpAndSettle();
+      await aguardarBusca(tester);
 
       expect(find.text('Nenhum bem encontrado'), findsOneWidget);
       expect(find.text('Nenhum bem cadastrado'), findsNothing);
