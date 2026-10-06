@@ -19,6 +19,7 @@ class CampoTexto extends StatefulWidget {
     this.formatters,
     this.maxLength,
     this.desabilitado = false,
+    this.aoAlterar,
     this.validator,
   });
 
@@ -32,6 +33,11 @@ class CampoTexto extends StatefulWidget {
   final List<TextInputFormatter>? formatters;
   final int? maxLength;
   final bool desabilitado;
+
+  /// Disparado a cada tecla digitada. Usado pelos campos de busca,
+  /// onde não existe `TextEditingController`: o Controller da tela
+  /// filtra a lista a partir daqui.
+  final ValueChanged<String>? aoAlterar;
 
   /// Função de validação fornecida pelo Controller da tela.
   /// Devolve `null` quando o valor é válido, ou a mensagem de erro.
@@ -54,6 +60,7 @@ class _CampoTextoState extends State<CampoTexto> {
       inputFormatters: widget.formatters,
       maxLength: widget.maxLength,
       validator: widget.validator,
+      onChanged: widget.aoAlterar,
       style: const TextStyle(fontSize: 15),
       decoration: InputDecoration(
         labelText: widget.rotulo,

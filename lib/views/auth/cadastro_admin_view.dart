@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../app/tema.dart';
@@ -160,18 +159,10 @@ class _FormularioState extends State<_Formulario> {
             controlador: controller.telefoneCtrl,
             teclado: TextInputType.phone,
             validator: controller.validarTelefone,
-            formatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d()\-\s]')),
-              // Máscara progressiva aplicada enquanto o usuário digita.
-              TextInputFormatter.withFunction((old, novo) {
-                final texto = novo.text.length > 16 ? old.text : novo.text;
-                final mascarado = Validadores.mascaraTelefone(texto);
-                return TextEditingValue(
-                  text: mascarado,
-                  selection: TextSelection.collapsed(offset: mascarado.length),
-                );
-              }),
-            ],
+            // Máscara progressiva compartilhada (RNF04): a mesma regra
+            // vale para o telefone do Coordenador, do Professor e do
+            // Perfil.
+            formatters: Validadores.formatadoresTelefone(),
             desabilitado: controller.carregando.value,
           ),
           const SizedBox(height: 16),
@@ -182,17 +173,7 @@ class _FormularioState extends State<_Formulario> {
             controlador: controller.cpfCtrl,
             teclado: TextInputType.number,
             validator: controller.validarCpf,
-            formatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              TextInputFormatter.withFunction((old, novo) {
-                final texto = novo.text.length > 14 ? old.text : novo.text;
-                final mascarado = Validadores.mascaraCpf(texto);
-                return TextEditingValue(
-                  text: mascarado,
-                  selection: TextSelection.collapsed(offset: mascarado.length),
-                );
-              }),
-            ],
+            formatters: Validadores.formatadoresCpf(),
             desabilitado: controller.carregando.value,
           ),
           const SizedBox(height: 24),
