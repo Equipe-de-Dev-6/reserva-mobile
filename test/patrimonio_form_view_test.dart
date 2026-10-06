@@ -109,29 +109,63 @@ Future<void> pumpForm(
   await tester.pumpAndSettle();
 }
 
-/// Lê o texto atual de um campo do formulário.
-String campoTexto(WidgetTester tester, String rotulo) {
-  final campo = tester.widget<TextFormField>(
-    find.widgetWithText(TextFormField, rotulo),
-  );
-  return campo.controller?.text ?? '';
-}
+// ---------------------------------------------------------------------------
+// Navegação dentro do formulário
+//
+// O formulário é uma `ListView` longa, e o Flutter só constrói o que está
+// perto da viewport. Sem rolar antes de interagir, um campo do fim da
+// ficha nem existe na árvore: o `enterText` estoura com "No element" e
+// um `expect` de texto falha sem motivo aparente. Todos os helpers
+// abaixo rolam primeiro — é também o caminho que o usuário percorre.
+// ---------------------------------------------------------------------------
 
-/// Rola o formulário até o botão de envio e clica.
-///
-/// O botão fica no fim de uma `ListView` longa: em iPhone SE ele está
-/// fora da tela, e tocar direto falharia. Rolar antes também é o que o
-/// usuário precisa fazer — o teste acompanha o caminho real.
-Future<void> tocarEnvio(WidgetTester tester, String rotuloBotao) async {
-  final botao = find.text(rotuloBotao);
+Finder campo(String rotulo) => find.widgetWithText(TextFormField, rotulo);
+
+/// Rola o formulário até um elemento ficar visível.
+Future<void> rolarAte(WidgetTester tester, Finder alvo) async {
   await tester.scrollUntilVisible(
-    botao,
+    alvo,
     120,
     scrollable: find.byType(Scrollable).first,
   );
   await tester.pumpAndSettle();
+}
+
+/// Digita em um campo, rolando até ele antes.
+Future<void> digitar(WidgetTester tester, String rotulo, String texto) async {
+  final alvo = campo(rotulo);
+  await rolarAte(tester, alvo);
+  await tester.enterText(alvo, texto);
+  await tester.pumpAndSettle();
+}
+
+/// Rola até o texto existir e confirma que ele está na tela.
+Future<bool> textoVisivel(WidgetTester tester, String texto) async {
+  final alvo = find.text(texto);
+  await rolarAte(tester, alvo);
+  return alvo.evaluate().isNotEmpty;
+}
+
+/// Rola até o botão de envio e clica.
+Future<void> tocarEnvio(WidgetTester tester, String rotuloBotao) async {
+  final botao = find.text(rotuloBotao);
+  await rolarAte(tester, botao);
   await tester.tap(botao);
   await tester.pumpAndSettle();
+}
+
+/// Lê o texto atual de um campo, rolando até ele antes.
+Future<String?> valorDoCampo(WidgetTester tester, String rotulo) async {
+  final alvo = campo(rotulo);
+  await rolarAte(tester, alvo);
+  return tester.widget<TextFormField>(alvo).controller?.text;
+}
+
+/// `true` se o campo está habilitado.
+Future<bool> campoHabilitado(WidgetTester tester, String rotulo) async {
+  final alvo = campo(rotulo);
+  await rolarAte(tester, alvo);
+  return tester.widget<TextFormField>(alvo).enabled;
 }
 
 void main() {
@@ -145,20 +179,20 @@ void main() {
       await pumpForm(tester, service);
 
       expect(find.text('Novo patrimônio'), findsOneWidget);
+      expect(campo('Código de tombamento'), findsOneWidget);
+
+      // O botão fica no fim da ficha: precisa existir, mesmo fora da tela.
+      await rolarAte(tester, find.text('Cadastrar bem'));
       expect(find.text('Cadastrar bem'), findsOneWidget);
-      expect(find.text('Código de tombamento'), findsOneWidget);
     });
 
     testWidgets('o tombamento é gravado em maiúsculas', (tester) async {
       await pumpForm(tester, service);
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Código de tombamento'),
-        'pat-2024-009',
-      );
-      await tester.pumpAndSettle();
+      await digitar(tester, 'Código de tombamento', 'pat-2024-009');
 
-      expect(campoTexto(tester, 'Código de tombamento'), 'PAT-2024-009');
+      expect(await valorDoCampo(tester, 'Código de tombamento'),
+          'PAT-2024-009');
     });
 
     testWidgets('sem tombamento e sem nome, o envio é bloqueado',
@@ -168,26 +202,17 @@ void main() {
       await tocarEnvio(tester, 'Cadastrar bem');
 
       expect(service.corpoEnviado, isNull);
-      expect(find.text('Informe o código de tombamento.'), findsOneWidget);
-      expect(find.text('Informe o nome do bem.'), findsOneWidget);
+      expect(await textoVisivel(tester, 'Informe o código de tombamento.'),
+          isTrue);
+      expect(await textoVisivel(tester, 'Informe o nome do bem.'), isTrue);
     });
 
     testWidgets('cadastra com o corpo enviado ao backend', (tester) async {
       await pumpForm(tester, service);
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Código de tombamento'),
-        'PAT-2024-009',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nome do bem'),
-        'Projetor Laser',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Marca'),
-        'BenQ',
-      );
-      await tester.pumpAndSettle();
+      await digitar(tester, 'Código de tombamento', 'PAT-2024-009');
+      await digitar(tester, 'Nome do bem', 'Projetor Laser');
+      await digitar(tester, 'Marca', 'BenQ');
 
       await tocarEnvio(tester, 'Cadastrar bem');
 
@@ -202,23 +227,16 @@ void main() {
     });
 
     testWidgets('erro do backend aparece no formulário', (tester) async {
-      service.erro = const AppException('Este registro já existe.', statusCode: 409);
+      service.erro =
+          const AppException('Este registro já existe.', statusCode: 409);
 
       await pumpForm(tester, service);
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Código de tombamento'),
-        'PAT-2024-001',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nome do bem'),
-        'Repetido',
-      );
-      await tester.pumpAndSettle();
-
+      await digitar(tester, 'Código de tombamento', 'PAT-2024-001');
+      await digitar(tester, 'Nome do bem', 'Repetido');
       await tocarEnvio(tester, 'Cadastrar bem');
 
-      expect(find.text('Este registro já existe.'), findsOneWidget);
+      expect(await textoVisivel(tester, 'Este registro já existe.'), isTrue);
     });
 
     testWidgets('não gera overflow em iPhone SE (375x667)', (tester) async {
@@ -239,40 +257,38 @@ void main() {
       await pumpForm(tester, service, emEdicao: bemDeTeste());
 
       expect(find.text('Editar patrimônio'), findsOneWidget);
-      expect(find.text('Salvar alterações'), findsOneWidget);
 
-      expect(campoTexto(tester, 'Código de tombamento'), 'PAT-2024-001');
-      expect(campoTexto(tester, 'Nome do bem'), 'Notebook Dell Latitude 3420');
-      expect(campoTexto(tester, 'Marca'), 'Dell');
-      expect(campoTexto(tester, 'Número de série'), 'DL-992831');
-      expect(campoTexto(tester, 'Onde está'),
+      expect(await valorDoCampo(tester, 'Código de tombamento'),
+          'PAT-2024-001');
+      expect(await valorDoCampo(tester, 'Nome do bem'),
+          'Notebook Dell Latitude 3420');
+      expect(await valorDoCampo(tester, 'Marca'), 'Dell');
+      expect(await valorDoCampo(tester, 'Número de série'), 'DL-992831');
+      expect(await valorDoCampo(tester, 'Onde está'),
           'Gabinete dos Professores - Mesa 04');
+
+      await rolarAte(tester, find.text('Salvar alterações'));
+      expect(find.text('Salvar alterações'), findsOneWidget);
     });
 
     testWidgets('o tombamento fica bloqueado na edição', (tester) async {
       await pumpForm(tester, service, emEdicao: bemDeTeste());
 
-      final campo = tester.widget<TextFormField>(
-        find.widgetWithText(TextFormField, 'Código de tombamento'),
-      );
       // Tombamento muda por processo patrimonial, não por formulário.
-      expect(campo.enabled, isFalse);
-      expect(find.textContaining('não pode ser alterado'), findsOneWidget);
+      expect(await campoHabilitado(tester, 'Código de tombamento'), isFalse);
+      expect(await textoVisivel(tester, 'O tombamento não pode ser alterado após o cadastro.'),
+          isTrue);
     });
 
     testWidgets('salvar envia PUT sem o tombamento e sem desvincular o docente',
         (tester) async {
       await pumpForm(tester, service, emEdicao: bemDeTeste());
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Onde está'),
-        'Sala 202',
-      );
-      await tester.pumpAndSettle();
-
+      await digitar(tester, 'Onde está', 'Sala 202');
       await tocarEnvio(tester, 'Salvar alterações');
 
       expect(service.caminhoRecebido, '/patrimonios/1');
+      expect(service.idAtualizado, 1);
       expect(service.corpoEnviado!['localizacao'], 'Sala 202');
       expect(service.corpoEnviado!.containsKey('codigo'), isFalse);
       expect(service.corpoEnviado!.containsKey('professorId'), isFalse);
@@ -286,11 +302,7 @@ void main() {
         (tester) async {
       await pumpForm(tester, service, emEdicao: bemDeTeste());
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Marca'),
-        'Dell Inc.',
-      );
-      await tester.pumpAndSettle();
+      await digitar(tester, 'Marca', 'Dell Inc.');
       await tocarEnvio(tester, 'Salvar alterações');
 
       // Mudar status por aqui burlaria o ciclo de vida do bem (RF07b),
@@ -301,17 +313,12 @@ void main() {
     testWidgets('número de série com espaço é recusado', (tester) async {
       await pumpForm(tester, service, emEdicao: bemDeTeste());
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Número de série'),
-        'DL 992831',
-      );
-      await tester.pumpAndSettle();
-
+      await digitar(tester, 'Número de série', 'DL 992831');
       await tocarEnvio(tester, 'Salvar alterações');
 
       expect(
-        find.text('O número de série não pode conter espaços.'),
-        findsOneWidget,
+        await textoVisivel(tester, 'O número de série não pode conter espaços.'),
+        isTrue,
       );
       expect(service.corpoEnviado, isNull);
     });
