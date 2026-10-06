@@ -1,4 +1,5 @@
 import '../models/historico_model.dart';
+import '../models/patrimonio_criacao_model.dart';
 import '../models/patrimonio_model.dart';
 import '../models/status_patrimonio.dart';
 import 'api_client.dart';
@@ -107,7 +108,7 @@ class PatrimonioService {
     return query;
   }
 
-  /// Lê `items` de `PatrimoniosListResponse` tolerandoausência da lista.
+  /// Lê `items` de `PatrimoniosListResponse`, tolerando lista ausente.
   static List<PatrimonioModel> _itens(Map<String, dynamic> json) {
     final lista = json['items'];
     if (lista is! List) return const <PatrimonioModel>[];
@@ -135,31 +136,18 @@ class PatrimonioService {
   // POST /patrimonios — RF07a (cadastro de bem)
   // -------------------------------------------------------------------------
 
-  /// Cadastra um bem e devolve o `id` gerado pelo servidor.
+  /// Cadastra um bem.
   ///
-  /// A resposta do backend é enxuta (`message`, `patrimonioId`,
-  /// `codigo`, `status`) e **não** traz o bem completo — por isso o
-  /// retorno é o id, e quem chama decide se recarrega a lista ou abre o
-  /// detalhe.
+  /// A resposta do backend é enxuta — `message`, `patrimonioId`,
+  /// `codigo`, `status` — e **não** traz o bem completo. Por isso o
+  /// retorno é um [PatrimonioCriacaoModel], e quem chama decide se
+  /// recarrega a lista ou já abre o detalhe pelo `id`.
   ///
-  /// Throws [AppException] com 409 quando o tombamento já existe, e
-  /// com 400 quando `codigo`/`nome` faltarem.
-  Future<int> criar(PatrimonioModel patrimonio) async {
+  /// Falha com 409 quando o tombamento já existe e com 400 quando
+  /// `codigo`/`nome` faltarem.
+  Future<PatrimonioCriacaoModel> criar(PatrimonioModel patrimonio) async {
     final json = await _api.post('/patrimonios', body: patrimonio.toJson());
-
-    final id = _int(json['patrimonioId'] ?? json['id']);
-    if (id != null) return id;
-
-    // Sem id na resposta: o cadastro funcionou, mas não dá para navegar
-    // para o detalhe. A Controller recarrega a lista e exibe o aviso
-    // devolvido pelo backend.
-    return 0;
-  }
-
-  /// Mensagem de sucesso devolvida no cadastro, quando houver.
-  String? mensagemCriacao(Map<String, dynamic> resposta) {
-    final texto = resposta['message']?.toString().trim() ?? '';
-    return texto.isEmpty ? null : texto;
+    return PatrimonioCriacaoModel.fromJson(json);
   }
 
   // -------------------------------------------------------------------------
@@ -203,12 +191,5 @@ class PatrimonioService {
   Future<HistoricoPatrimonioModel> historico(int id) async {
     final json = await _api.get('/admin/patrimonios/$id/historico');
     return HistoricoPatrimonioModel.fromJson(json);
-  }
-
-  static int? _int(dynamic valor) {
-    if (valor == null) return null;
-    if (valor is int) return valor;
-    if (valor is num) return valor.toInt();
-    return int.tryParse(valor.toString());
   }
 }
