@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 /// Input padronizado do aplicativo (RNF04).
 ///
@@ -15,6 +16,7 @@ class CampoTexto extends StatefulWidget {
     this.controlador,
     this.senha = false,
     this.aoAlternarVisibilidade,
+    this.obscureText, // RxBool ou bool externo (ex.: controller.senhaOculta)
     this.teclado,
     this.formatters,
     this.maxLength,
@@ -29,6 +31,7 @@ class CampoTexto extends StatefulWidget {
   final TextEditingController? controlador;
   final bool senha;
   final VoidCallback? aoAlternarVisibilidade;
+  final RxBool? obscureText; // Estado externo reativo (GetX)
   final TextInputType? teclado;
   final List<TextInputFormatter>? formatters;
   final int? maxLength;
@@ -50,8 +53,56 @@ class CampoTexto extends StatefulWidget {
 class _CampoTextoState extends State<CampoTexto> {
   late bool _oculto = widget.senha;
 
+  bool get _obscureText {
+    if (widget.obscureText != null) return widget.obscureText!.value;
+    return _oculto;
+  }
+
+  void _alternar() {
+    if (widget.obscureText != null) {
+      widget.obscureText!.toggle();
+    } else {
+      setState(() => _oculto = !_oculto);
+    }
+    widget.aoAlternarVisibilidade?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Se há estado externo reativo, usa Obx para reconstruir quando mudar
+    if (widget.obscureText != null) {
+      return Obx(
+        () => TextFormField(
+          controller: widget.controlador,
+          obscureText: _obscureText,
+          enabled: !widget.desabilitado,
+          keyboardType: widget.teclado,
+          inputFormatters: widget.formatters,
+          maxLength: widget.maxLength,
+          validator: widget.validator,
+          onChanged: widget.aoAlterar,
+          style: const TextStyle(fontSize: 15),
+          decoration: InputDecoration(
+            labelText: widget.rotulo,
+            hintText: widget.dica,
+            counterText: '',
+            prefixIcon: widget.icone == null ? null : Icon(widget.icone, size: 20),
+            suffixIcon: widget.senha
+                ? IconButton(
+                    onPressed: _alternar,
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      size: 20,
+                    ),
+                    tooltip: _obscureText ? 'Mostrar senha' : 'Ocultar senha',
+                  )
+                : null,
+          ),
+        ),
+      );
+    }
+
+    // Sem estado externo: usa estado interno
     return TextFormField(
       controller: widget.controlador,
       obscureText: _oculto,
@@ -69,8 +120,7 @@ class _CampoTextoState extends State<CampoTexto> {
         prefixIcon: widget.icone == null ? null : Icon(widget.icone, size: 20),
         suffixIcon: widget.senha
             ? IconButton(
-                onPressed: widget.aoAlternarVisibilidade ??
-                    () => setState(() => _oculto = !_oculto),
+                onPressed: _alternar,
                 icon: Icon(
                   _oculto ? Icons.visibility_off : Icons.visibility,
                   size: 20,
