@@ -53,126 +53,145 @@ class _PatrimonioFormViewState extends State<PatrimonioFormView> {
       body: SafeArea(
         child: Form(
           key: _formKey,
-          child: ListView(
+          // `SingleChildScrollView` e **não** `ListView` — de propósito.
+          //
+          // A `ListView` só mantém montados os filhos perto da viewport:
+          // ao rolar até o botão de envio, os campos do topo saem da
+          // árvore e `Form.validate()` deixa de enxergá-los. O
+          // formulário então "validava" com tombamento e nome vazios e o
+          // backend recebia um corpo inválido (400). Com todas as
+          // crianças montadas, a validação cobre a ficha inteira.
+          //
+          // O custo é construir os ~10 campos de uma vez — irrelevante
+          // para um formulário deste tamanho, e é o preço de validar
+          // corretamente.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            children: [
-              Obx(() => _controller.erro.value.isEmpty
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: MensagemErro.erro(_controller.erro.value),
-                    )),
-
-              // --- Identificação ----------------------------------------
-              const _TituloSecao('Identificação'),
-              CampoTexto(
-                rotulo: 'Código de tombamento',
-                dica: 'PAT-2024-009',
-                icone: Icons.qr_code_2_rounded,
-                controlador: _controller.codigoCtrl,
-                // Identificador de tombamento muda por processo
-                // patrimonial, não por edição de formulário.
-                desabilitado: editando,
-                // O tombamento é sempre em maiúsculas ("PAT-2024-001").
-                // Forçar aqui evita que o usuário digite "pat-2024-001" e
-                // o backend trate como um bem diferente.
-                formatters: const [_TombamentoMaiusculo()],
-                validator: _controller.validarCodigo,
-              ),
-              if (editando) ...[
-                const SizedBox(height: 6),
-                const Text(
-                  'O tombamento não pode ser alterado após o cadastro.',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Obx(
+                  () => _controller.erro.value.isEmpty
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: MensagemErro.erro(_controller.erro.value),
+                        ),
                 ),
-              ],
-              const SizedBox(height: 14),
 
-              CampoTexto(
-                rotulo: 'Nome do bem',
-                dica: 'Notebook Dell Latitude 3420',
-                icone: Icons.devices_other_outlined,
-                controlador: _controller.nomeCtrl,
-                validator: _controller.validarNome,
-              ),
-              const SizedBox(height: 14),
+                // --- Identificação ----------------------------------------
+                const _TituloSecao('Identificação'),
+                CampoTexto(
+                  rotulo: 'Código de tombamento',
+                  dica: 'PAT-2024-009',
+                  icone: Icons.qr_code_2_rounded,
+                  controlador: _controller.codigoCtrl,
+                  // Identificador de tombamento muda por processo
+                  // patrimonial, não por edição de formulário.
+                  desabilitado: editando,
+                  // O tombamento é sempre em maiúsculas ("PAT-2024-001").
+                  // Forçar aqui evita que o usuário digite "pat-2024-001" e
+                  // o backend trate como um bem diferente.
+                  formatters: const [_TombamentoMaiusculo()],
+                  validator: _controller.validarCodigo,
+                ),
+                if (editando) ...[
+                  const SizedBox(height: 6),
+                  const Text(
+                    'O tombamento não pode ser alterado após o cadastro.',
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+                const SizedBox(height: 14),
 
-              _CampoObrigatorio(
-                rotulo: 'Categoria',
-                child: _SeletorCategoria(controller: _controller),
-              ),
-              const SizedBox(height: 14),
+                CampoTexto(
+                  rotulo: 'Nome do bem',
+                  dica: 'Notebook Dell Latitude 3420',
+                  icone: Icons.devices_other_outlined,
+                  controlador: _controller.nomeCtrl,
+                  validator: _controller.validarNome,
+                ),
+                const SizedBox(height: 14),
 
-              // --- Especificações ---------------------------------------
-              const _TituloSecao('Especificações'),
-              CampoTexto(
-                rotulo: 'Marca',
-                dica: 'Dell',
-                icone: Icons.label_outline,
-                controlador: _controller.marcaCtrl,
-              ),
-              const SizedBox(height: 14),
-              CampoTexto(
-                rotulo: 'Modelo',
-                dica: 'Latitude 3420',
-                icone: Icons.memory_outlined,
-                controlador: _controller.modeloCtrl,
-              ),
-              const SizedBox(height: 14),
-              CampoTexto(
-                rotulo: 'Número de série',
-                dica: 'DL-992831',
-                icone: Icons.pin_outlined,
-                controlador: _controller.numeroSerieCtrl,
-                validator: _controller.validarNumeroSerie,
-              ),
-              const SizedBox(height: 14),
-              _CampoLongo(
-                rotulo: 'Descrição / especificações',
-                dica: 'Intel Core i5, 16GB RAM, SSD 512GB',
-                icone: Icons.notes_rounded,
-                controlador: _controller.descricaoCtrl,
-              ),
-              const SizedBox(height: 14),
+                _CampoObrigatorio(
+                  rotulo: 'Categoria',
+                  child: _SeletorCategoria(controller: _controller),
+                ),
+                const SizedBox(height: 14),
 
-              _CampoObrigatorio(
-                rotulo: 'Estado de conservação',
-                child: _SeletorConservacao(controller: _controller),
-              ),
-              const SizedBox(height: 14),
+                // --- Especificações ---------------------------------------
+                const _TituloSecao('Especificações'),
+                CampoTexto(
+                  rotulo: 'Marca',
+                  dica: 'Dell',
+                  icone: Icons.label_outline,
+                  controlador: _controller.marcaCtrl,
+                ),
+                const SizedBox(height: 14),
+                CampoTexto(
+                  rotulo: 'Modelo',
+                  dica: 'Latitude 3420',
+                  icone: Icons.memory_outlined,
+                  controlador: _controller.modeloCtrl,
+                ),
+                const SizedBox(height: 14),
+                CampoTexto(
+                  rotulo: 'Número de série',
+                  dica: 'DL-992831',
+                  icone: Icons.pin_outlined,
+                  controlador: _controller.numeroSerieCtrl,
+                  validator: _controller.validarNumeroSerie,
+                ),
+                const SizedBox(height: 14),
+                _CampoLongo(
+                  rotulo: 'Descrição / especificações',
+                  dica: 'Intel Core i5, 16GB RAM, SSD 512GB',
+                  icone: Icons.notes_rounded,
+                  controlador: _controller.descricaoCtrl,
+                ),
+                const SizedBox(height: 14),
 
-              // --- Localização ------------------------------------------
-              const _TituloSecao('Localização e observações'),
-              CampoTexto(
-                rotulo: 'Onde está',
-                dica: 'Sala 204 · Bloco B',
-                icone: Icons.place_outlined,
-                controlador: _controller.localizacaoCtrl,
-              ),
-              const SizedBox(height: 14),
-              _CampoLongo(
-                rotulo: 'Observações',
-                dica: 'Entregue com bolsa e carregador original',
-                icone: Icons.sticky_note_2_outlined,
-                controlador: _controller.observacoesCtrl,
-              ),
+                _CampoObrigatorio(
+                  rotulo: 'Estado de conservação',
+                  child: _SeletorConservacao(controller: _controller),
+                ),
+                const SizedBox(height: 14),
 
-              // --- Envio -------------------------------------------------
-              const SizedBox(height: 24),
-              Obx(() => BotaoPrimario(
+                // --- Localização ------------------------------------------
+                const _TituloSecao('Localização e observações'),
+                CampoTexto(
+                  rotulo: 'Onde está',
+                  dica: 'Sala 204 · Bloco B',
+                  icone: Icons.place_outlined,
+                  controlador: _controller.localizacaoCtrl,
+                ),
+                const SizedBox(height: 14),
+                _CampoLongo(
+                  rotulo: 'Observações',
+                  dica: 'Entregue com bolsa e carregador original',
+                  icone: Icons.sticky_note_2_outlined,
+                  controlador: _controller.observacoesCtrl,
+                ),
+
+                // --- Envio -------------------------------------------------
+                const SizedBox(height: 24),
+                Obx(
+                  () => BotaoPrimario(
                     texto: _controller.textoBotao,
                     icone: editando
                         ? Icons.save_outlined
                         : Icons.add_box_outlined,
                     carregando: _controller.salvando.value,
                     aoTocar: () => _salvar(),
-                  )),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () => Get.back<dynamic>(),
-                child: const Text('Cancelar'),
-              ),
-            ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Get.back<dynamic>(),
+                  child: const Text('Cancelar'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -180,28 +199,34 @@ class _PatrimonioFormViewState extends State<PatrimonioFormView> {
   }
 
   Future<void> _salvar() async {
-    final salvo = await _controller.salvar(_formKey.currentState!);
+    final salvou = await _controller.salvar(_formKey.currentState!);
     if (!mounted) return;
 
-    if (salvo != null) {
-      // Edição: a tela anterior recarrega o detalhe ao voltar.
-      Get.back<dynamic>(result: salvo);
-      return;
-    }
+    // Nada foi gravado (validação barrou ou a API falhou): a tela fica
+    // aberta e o motivo já está visível — nos campos ou em [erro].
+    // Sem esta guarda, um formulário inválido fechava a tela ainda
+    // exibindo "Patrimônio cadastrado".
+    if (!salvou) return;
 
-    if (_controller.erro.value.isEmpty) {
-      // Cadastro: não há Model devolvido pela API, só a confirmação.
-      Get.back<dynamic>();
-      Get.snackbar(
-        'Patrimônio cadastrado',
-        'O bem foi registrado no acervo.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        backgroundColor: Tema.sucesso,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 4),
-      );
-    }
+    final editando = _controller.editando;
+
+    // Em edição, o Model volta para a tela anterior recarregar o
+    // detalhe; em cadastro, o backend só devolveu o id.
+    Get.back<dynamic>(result: _controller.gravado.value);
+
+    if (editando) return;
+
+    Get.snackbar(
+      'Patrimônio cadastrado',
+      _controller.mensagemSucesso.value.isEmpty
+          ? 'O bem foi registrado no acervo.'
+          : _controller.mensagemSucesso.value,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      backgroundColor: Tema.sucesso,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 4),
+    );
   }
 }
 
@@ -331,22 +356,24 @@ class _SeletorCategoria extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFDDE3EE)),
       ),
-      child: Obx(() => DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: controller.categoria.value.isEmpty
-                  ? null
-                  : controller.categoria.value,
-              hint: const Text('Selecione a categoria'),
-              isExpanded: true,
-              icon: const Icon(Icons.arrow_drop_down),
-              borderRadius: BorderRadius.circular(12),
-              items: [
-                for (final categoria in categoriasPatrimonio)
-                  DropdownMenuItem(value: categoria, child: Text(categoria)),
-              ],
-              onChanged: (valor) => controller.categoria.value = valor ?? '',
-            ),
-          )),
+      child: Obx(
+        () => DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: controller.categoria.value.isEmpty
+                ? null
+                : controller.categoria.value,
+            hint: const Text('Selecione a categoria'),
+            isExpanded: true,
+            icon: const Icon(Icons.arrow_drop_down),
+            borderRadius: BorderRadius.circular(12),
+            items: [
+              for (final categoria in categoriasPatrimonio)
+                DropdownMenuItem(value: categoria, child: Text(categoria)),
+            ],
+            onChanged: (valor) => controller.categoria.value = valor ?? '',
+          ),
+        ),
+      ),
     );
   }
 }
@@ -365,23 +392,25 @@ class _SeletorConservacao extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFDDE3EE)),
       ),
-      child: Obx(() => DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: controller.estadoConservacao.value.isEmpty
-                  ? null
-                  : controller.estadoConservacao.value,
-              hint: const Text('Selecione o estado'),
-              isExpanded: true,
-              icon: const Icon(Icons.arrow_drop_down),
-              borderRadius: BorderRadius.circular(12),
-              items: [
-                for (final estado in estadosConservacao)
-                  DropdownMenuItem(value: estado, child: Text(estado)),
-              ],
-              onChanged: (valor) =>
-                  controller.estadoConservacao.value = valor ?? '',
-            ),
-          )),
+      child: Obx(
+        () => DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: controller.estadoConservacao.value.isEmpty
+                ? null
+                : controller.estadoConservacao.value,
+            hint: const Text('Selecione o estado'),
+            isExpanded: true,
+            icon: const Icon(Icons.arrow_drop_down),
+            borderRadius: BorderRadius.circular(12),
+            items: [
+              for (final estado in estadosConservacao)
+                DropdownMenuItem(value: estado, child: Text(estado)),
+            ],
+            onChanged: (valor) =>
+                controller.estadoConservacao.value = valor ?? '',
+          ),
+        ),
+      ),
     );
   }
 }
