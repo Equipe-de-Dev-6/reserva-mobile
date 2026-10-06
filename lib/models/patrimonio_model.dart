@@ -66,7 +66,8 @@ class PatrimonioModel {
   /// É por este campo que a busca da RF07a acontece.
   final String codigo;
 
-  /// Nome do bem, como oigiCadastro do Coating. Ex.: "Notebook Dell Latitude 3420".
+  /// Nome do bem, como foi cadastrado pelo Coordenador.
+  /// Ex.: "Notebook Dell Latitude 3420".
   final String nome;
 
   /// Especificações / observação técnica do bem.
