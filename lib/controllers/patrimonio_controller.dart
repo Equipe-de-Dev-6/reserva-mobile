@@ -43,8 +43,14 @@ class PatrimonioController extends GetxController {
   final RxString busca = ''.obs;
 
   /// Filtros de status e categoria. `null` significa "todos".
+  ///
+  /// Ambos são `Rx` de tipo anulável (`Rx<String?>`), e não `RxString`:
+  /// o GetX só oferece `RxString` para valores não-nulos, e "sem filtro"
+  /// precisa ser um estado observável de verdade — se fosse um `String`
+  /// vazio, a View não conseguiria distinguir "sem filtro" de "filtro em
+  /// branco" sem um segundo campo.
   final Rx<StatusPatrimonio?> statusSelecionado = Rx<StatusPatrimonio?>(null);
-  final RxString? categoriaSelecionada = RxString(null);
+  final Rx<String?> categoriaSelecionada = Rx<String?>(null);
 
   /// `true` quando algum filtro está ativo — usado para decidir entre
   /// "nenhum bem cadastrado" e "nenhum bem encontrado" no estado vazio.
@@ -59,7 +65,8 @@ class PatrimonioController extends GetxController {
   /// É o que habilita o botão de cadastrar bem. O botão é escondido, e
   /// não apenas desabilitado: um docente não deve enxergar a ação
   /// (RN03).
-  bool get podeCadastrar => Get.find<SessaoService>().usuario.value?.isAdmin ?? false;
+  bool get podeCadastrar =>
+      Get.find<SessaoService>().usuario.value?.isAdmin ?? false;
 
   // -------------------------------------------------------------------------
   // Carga de dados

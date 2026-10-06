@@ -75,7 +75,7 @@ enum StatusPatrimonio {
   ///
   /// [indefinido] fica de fora de propósito: ele não é um estado
   /// selecionável, é apenas o fallback de leitura.
-  static const List<StatusPatrimonio> filtráveis = [
+  static const List<StatusPatrimonio> filtraveis = [
     disponivel,
     emUso,
     emManutencao,

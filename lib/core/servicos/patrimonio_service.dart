@@ -1,7 +1,7 @@
-import '../models/historico_model.dart';
-import '../models/patrimonio_criacao_model.dart';
-import '../models/patrimonio_model.dart';
-import '../models/status_patrimonio.dart';
+import '../../models/historico_model.dart';
+import '../../models/patrimonio_criacao_model.dart';
+import '../../models/patrimonio_model.dart';
+import '../../models/status_patrimonio.dart';
 import 'api_client.dart';
 
 /// Categorias usadas no filtro da listagem (RF07a).

@@ -142,7 +142,7 @@ class _BarraFiltros extends StatelessWidget {
                       selecionado: controller.statusSelecionado.value == null,
                       aoTocar: () => controller.alternarStatus(null),
                     )),
-                ...StatusPatrimonio.filtráveis.map(
+                ...StatusPatrimonio.filtraveis.map(
                   (status) => Obx(() => _ChipStatus(
                         rotulo: status.rotulo,
                         status: status,

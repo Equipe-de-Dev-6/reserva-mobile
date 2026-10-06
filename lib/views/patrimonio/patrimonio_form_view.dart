@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show TextInputFormatter;
 import 'package:get/get.dart';
 
 import '../../app/tema.dart';
 import '../../controllers/patrimonio_form_controller.dart';
 import '../../core/servicos/patrimonio_service.dart';
-import '../../models/patrimonio_model.dart';
 import '../../widgets/botao_primario.dart';
 import '../../widgets/campo_texto.dart';
 import '../../widgets/mensagem_erro.dart';
@@ -151,12 +151,11 @@ class _PatrimonioFormViewState extends State<PatrimonioFormView> {
                 controlador: _controller.localizacaoCtrl,
               ),
               const SizedBox(height: 14),
-              CampoTexto(
+              _CampoLongo(
                 rotulo: 'Observações',
                 dica: 'Entregue com bolsa e carregador original',
                 icone: Icons.sticky_note_2_outlined,
                 controlador: _controller.observacoesCtrl,
-                maxLines: 3,
               ),
 
               // --- Envio -------------------------------------------------
@@ -204,6 +203,67 @@ class _PatrimonioFormViewState extends State<PatrimonioFormView> {
         duration: const Duration(seconds: 4),
       );
     }
+  }
+}
+
+/// Versão multilinha do [CampoTexto].
+///
+/// Vive aqui, e não em `widgets/`, porque o `CampoTexto` do time ainda
+/// não tem `maxLines`. Se ele ganhar esse parâmetro, este widget pode
+/// ser apagado e as chamadas trocadas por `CampoTexto(maxLines: 3)`.
+class _CampoLongo extends StatelessWidget {
+  const _CampoLongo({
+    required this.rotulo,
+    required this.controlador,
+    this.dica,
+    this.icone,
+  });
+
+  final String rotulo;
+  final String? dica;
+  final IconData? icone;
+  final TextEditingController controlador;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controlador,
+      maxLines: 3,
+      minLines: 2,
+      style: const TextStyle(fontSize: 15),
+      decoration: InputDecoration(
+        labelText: rotulo,
+        hintText: dica,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 34),
+          child: Icon(icone ?? Icons.notes, size: 20),
+        ),
+      ),
+    );
+  }
+}
+
+/// Força o tombamento para maiúsculas enquanto o usuário digita.
+///
+/// Fica como `InputFormatter` (e não como `textCapitalization`) porque
+/// o `CampoTexto` atual não expõe esse parâmetro — e capitalização de
+/// teclado é só aparência, enquanto o formatter grava o valor já
+/// convertido no controller.
+class _TombamentoMaiusculo extends TextInputFormatter {
+  const _TombamentoMaiusculo();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue anterior,
+    TextEditingValue novo,
+  ) {
+    final maiusculo = novo.text.toUpperCase();
+    if (maiusculo == novo.text) return novo;
+
+    return novo.copyWith(
+      text: maiusculo,
+      selection: TextSelection.collapsed(offset: maiusculo.length),
+    );
   }
 }
 
