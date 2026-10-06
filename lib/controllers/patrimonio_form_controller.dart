@@ -32,6 +32,17 @@ class PatrimonioFormController extends GetxController {
   final RxBool salvando = false.obs;
   final RxString erro = ''.obs;
 
+  /// Bem gravado com sucesso, disponível depois do [salvar].
+  ///
+  /// Fica separado do retorno porque cadastro e edição têm resultados
+  /// diferentes: o `PUT` devolve o bem inteiro, enquanto o `POST` devolve
+  /// só o id. A View precisa responder a duas perguntas — "foi salvo?" e
+  /// "com o quê?" — e um único `null` não dá conta das duas sem ambiguidade.
+  final Rxn<PatrimonioModel> gravado = Rxn<PatrimonioModel>();
+
+  /// Confirmação do cadastro devolvida pelo backend.
+  final RxString mensagemSucesso = ''.obs;
+
   final TextEditingController codigoCtrl = TextEditingController();
   final TextEditingController nomeCtrl = TextEditingController();
   final TextEditingController descricaoCtrl = TextEditingController();
@@ -131,28 +142,42 @@ class PatrimonioFormController extends GetxController {
   // Envio
   // -------------------------------------------------------------------------
 
-  /// Valida e envia.
+  /// Valida, envia e informa se a gravação aconteceu.
   ///
-  /// Devolve o bem salvo (em edição) ou `null` quando é um cadastro — no
-  /// cadastro o backend devolve só o id, e quem navega é a View. Os
-  /// erros ficam em [erro] para a tela exibir via `MensagemErro`.
-  Future<PatrimonioModel?> salvar(FormState formulario) async {
+  /// Devolve `false` quando a validação local barrou o envio **ou** quando
+  /// a API falhou — nos dois casos o motivo fica em [erro] (ou nos campos,
+  /// no caso da validação) e a tela **não** deve navegar.
+  ///
+  /// Esse retorno é o que impede o erro clássico de fechar a tela com a
+  /// mensagem "cadastrado" quando, na verdade, nada foi gravado.
+  Future<bool> salvar(FormState formulario) async {
     erro.value = '';
-    if (!formulario.validate()) return null;
+    gravado.value = null;
+    mensagemSucesso.value = '';
+
+    // Validação local barrou: nada foi enviado e a tela permanece aberta
+    // para o usuário corrigir.
+    if (!formulario.validate()) return false;
 
     salvando.value = true;
     try {
       if (editando) {
         final atualizado = _modeloAtualizado();
         await _service.atualizar(patrimonio!.id, atualizado);
-        return atualizado;
+        gravado.value = atualizado;
+        return true;
       }
 
-      await _service.criar(_modeloNovo());
-      return null;
+      final novo = _modeloNovo();
+      final criacao = await _service.criar(novo);
+      // O `POST` não devolve o bem completo (só o id), mas o Model que foi
+      // enviado serve de retorno para a tela querer reabrir o detalhe.
+      gravado.value = novo;
+      mensagemSucesso.value = criacao.mensagem;
+      return true;
     } on AppException catch (e) {
       erro.value = e.mensagem;
-      return null;
+      return false;
     } finally {
       salvando.value = false;
     }

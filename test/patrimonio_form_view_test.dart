@@ -91,6 +91,12 @@ PatrimonioFormController registrar(
 }
 
 /// Monta o formulário e espera o primeiro build.
+///
+/// A tela é aberta por `Get.toNamed` a partir de uma rota raiz, e não
+/// como `home`. Isso importa: o `Get.back()` do formulário só faz sentido
+/// (e só é seguro) quando existe uma tela anterior para voltar. Com o
+/// formulário na raiz, o GetX tentaria fechar a snackbar do Navigator em
+/// vez de uma rota.
 Future<void> pumpForm(
   WidgetTester tester,
   ServicoDeEscritaFake service, {
@@ -104,8 +110,21 @@ Future<void> pumpForm(
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(
-    GetMaterialApp(theme: Tema.claro, home: const PatrimonioFormView()),
+    GetMaterialApp(
+      theme: Tema.claro,
+      initialRoute: '/',
+      getPages: [
+        GetPage(
+          name: '/',
+          page: () => const Scaffold(body: Text('Tela anterior')),
+        ),
+        GetPage(name: '/form', page: () => const PatrimonioFormView()),
+      ],
+    ),
   );
+  await tester.pumpAndSettle();
+
+  Get.toNamed('/form');
   await tester.pumpAndSettle();
 }
 
@@ -146,12 +165,33 @@ Future<bool> textoVisivel(WidgetTester tester, String texto) async {
   return alvo.evaluate().isNotEmpty;
 }
 
+/// Avança o tempo em passos curtos.
+///
+/// `pumpAndSettle` não serve depois de salvar: o GetX anima a saída da
+/// rota e a entrada da snackbar **ao mesmo tempo**, e o "settle" estouraria
+/// o tempo da animação ("elapsedInSeconds >= 0"). Passos de 120 ms
+/// deixam tudo assentar sem esse conflito — é a mesma técnica usada em
+/// `test/fluxo_rotas_test.dart`.
+Future<void> avancar(WidgetTester tester, int passos) async {
+  for (var i = 0; i < passos; i++) {
+    await tester.pump(const Duration(milliseconds: 120));
+  }
+}
+
+/// Deixa a confirmação (snackbar) terminar.
+///
+/// O `Get.snackbar` agenda um timer de 4 s, e o `flutter test` falha com
+/// "!timersPending" se ele continuar vivo ao fim do teste. Além disso, um
+/// snackbar aberto vaza para o teste seguinte.
+Future<void> esperarConfirmacao(WidgetTester tester) =>
+    avancar(tester, 45);
+
 /// Rola até o botão de envio e clica.
 Future<void> tocarEnvio(WidgetTester tester, String rotuloBotao) async {
   final botao = find.text(rotuloBotao);
   await rolarAte(tester, botao);
   await tester.tap(botao);
-  await tester.pumpAndSettle();
+  await avancar(tester, 6);
 }
 
 /// Lê o texto atual de um campo, rolando até ele antes.
@@ -215,6 +255,9 @@ void main() {
       await digitar(tester, 'Marca', 'BenQ');
 
       await tocarEnvio(tester, 'Cadastrar bem');
+      // O cadastro bem-sucedido abre uma snackbar de 4 s; deixar o timer
+      // expirar evita o "!timersPending" no fim do teste.
+      await esperarConfirmacao(tester);
 
       expect(service.caminhoRecebido, '/patrimonios');
       expect(service.corpoEnviado!['codigo'], 'PAT-2024-009');
