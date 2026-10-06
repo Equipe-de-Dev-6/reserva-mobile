@@ -62,7 +62,7 @@ class ProfessorDetalheView extends GetView<ProfessorDetalheController> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
-                color: Tema.azulPrimario,
+                color: Tema.vermelhoPrimario,
               ),
             ),
           ],
@@ -107,7 +107,7 @@ class _CabecalhoProfessor extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Tema.azulPrimario, Tema.azulEscuro],
+          colors: [Tema.vermelhoPrimario, Tema.vermelhoEscuro],
         ),
         borderRadius: BorderRadius.circular(18),
       ),

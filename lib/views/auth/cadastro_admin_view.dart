@@ -48,15 +48,15 @@ class _AvisoRegra extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Tema.azulPrimario.withValues(alpha: 0.07),
+        color: Tema.vermelhoPrimario.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Tema.azulPrimario.withValues(alpha: 0.25)),
+        border: Border.all(color: Tema.vermelhoPrimario.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.admin_panel_settings_outlined,
-              size: 20, color: Tema.azulPrimario),
+              size: 20, color: Tema.vermelhoPrimario),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

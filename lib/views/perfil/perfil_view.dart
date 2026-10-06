@@ -95,7 +95,7 @@ class _Cabecalho extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Tema.azulPrimario, Tema.azulEscuro],
+          colors: [Tema.vermelhoPrimario, Tema.vermelhoEscuro],
         ),
         borderRadius: BorderRadius.circular(18),
       ),
@@ -386,7 +386,7 @@ class _CartaoSenha extends StatelessWidget {
                     child: Row(
                       children: [
                         const Icon(Icons.lock_outline_rounded,
-                            color: Tema.azulPrimario),
+                            color: Tema.vermelhoPrimario),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Column(

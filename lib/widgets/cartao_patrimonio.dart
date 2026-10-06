@@ -37,12 +37,12 @@ class CartaoPatrimonio extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Tema.azulPrimario.withValues(alpha: 0.09),
+              color: Tema.vermelhoPrimario.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               _iconeDaCategoria(patrimonio.categoria),
-              color: Tema.azulPrimario,
+              color: Tema.vermelhoPrimario,
               size: 24,
             ),
           ),

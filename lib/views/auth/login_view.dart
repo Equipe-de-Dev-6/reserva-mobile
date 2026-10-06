@@ -24,7 +24,7 @@ class LoginView extends GetView<AuthController> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Tema.azulPrimario, Tema.azulEscuro],
+            colors: [Tema.vermelhoPrimario, Tema.vermelhoEscuro],
           ),
         ),
         child: SafeArea(
@@ -64,7 +64,7 @@ class _Cabecalho extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
           ),
           child: const Icon(Icons.school_rounded,
-              size: 46, color: Tema.azulPrimario),
+              size: 46, color: Tema.vermelhoPrimario),
         ),
         const SizedBox(height: 20),
         const Text(

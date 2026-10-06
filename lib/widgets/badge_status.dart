@@ -58,7 +58,7 @@ class _EstiloDoStatus {
   final Color cor;
 
   static _EstiloDoStatus para(String status) => switch (status) {
-        'em_uso' => const _EstiloDoStatus('Em uso', Tema.azulPrimario),
+        'em_uso' => const _EstiloDoStatus('Em uso', Tema.vermelhoPrimario),
         'disponivel' => const _EstiloDoStatus('Disponível', Tema.sucesso),
         'em_manutencao' => const _EstiloDoStatus('Manutenção', Tema.alerta),
         'baixado' => const _EstiloDoStatus('Baixado', Tema.perigo),

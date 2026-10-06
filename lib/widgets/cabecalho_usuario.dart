@@ -25,7 +25,7 @@ class CabecalhoUsuario extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Tema.azulPrimario, Tema.azulEscuro],
+            colors: [Tema.vermelhoPrimario, Tema.vermelhoEscuro],
           ),
         ),
         child: Row(

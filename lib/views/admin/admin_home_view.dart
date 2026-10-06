@@ -115,10 +115,10 @@ class _AtalhoPainel extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Tema.azulPrimario.withValues(alpha: 0.10),
+                  color: Tema.vermelhoPrimario.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icone, color: Tema.azulPrimario, size: 24),
+                child: Icon(icone, color: Tema.vermelhoPrimario, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(

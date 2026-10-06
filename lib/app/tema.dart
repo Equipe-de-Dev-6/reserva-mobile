@@ -7,17 +7,17 @@ import 'package:flutter/material.dart';
 class Tema {
   Tema._();
 
-  static const Color azulPrimario = Color(0xFF1B4DB1);
-  static const Color azulEscuro = Color(0xFF0F2E6B);
-  static const Color fundo = Color(0xFFF4F6FB);
+  static const Color vermelhoPrimario = Color(0xFFC0392B);
+  static const Color vermelhoEscuro = Color(0xFF962D1E);
+  static const Color fundo = Color(0xFFFEF5F5);
   static const Color sucesso = Color(0xFF1B8A5A);
   static const Color alerta = Color(0xFFD9822B);
   static const Color perigo = Color(0xFFC0392B);
 
   static ThemeData get claro {
     final esquema = ColorScheme.fromSeed(
-      seedColor: azulPrimario,
-      primary: azulPrimario,
+      seedColor: vermelhoPrimario,
+      primary: vermelhoPrimario,
     );
 
     return ThemeData(
@@ -25,7 +25,7 @@ class Tema {
       colorScheme: esquema,
       scaffoldBackgroundColor: fundo,
       appBarTheme: const AppBarTheme(
-        backgroundColor: azulPrimario,
+        backgroundColor: vermelhoPrimario,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -42,15 +42,15 @@ class Tema {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDDE3EE)),
+          borderSide: const BorderSide(color: Color(0xFFE8D5D5)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDDE3EE)),
+          borderSide: const BorderSide(color: Color(0xFFE8D5D5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: azulPrimario, width: 1.6),
+          borderSide: const BorderSide(color: vermelhoPrimario, width: 1.6),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -68,7 +68,7 @@ class Tema {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFE8EDF6)),
+          side: const BorderSide(color: Color(0xFFE8D5D5)),
         ),
       ),
       textTheme: const TextTheme(

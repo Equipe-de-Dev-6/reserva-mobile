@@ -21,7 +21,7 @@ class SplashView extends GetView<SplashController> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Tema.azulPrimario, Tema.azulEscuro],
+            colors: [Tema.vermelhoPrimario, Tema.vermelhoEscuro],
           ),
         ),
         child: const Center(
@@ -88,7 +88,7 @@ class _Logo extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
       ),
       child: const Icon(Icons.school_rounded,
-          size: 54, color: Tema.azulPrimario),
+          size: 54, color: Tema.vermelhoPrimario),
     );
   }
 }

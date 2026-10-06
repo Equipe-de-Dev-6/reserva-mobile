@@ -97,12 +97,12 @@ class _IndicadorEtapas extends StatelessWidget {
                   height: 32,
                   decoration: BoxDecoration(
                     color: concluida
-                        ? Tema.azulPrimario
+                        ? Tema.vermelhoPrimario
                         : Colors.white.withValues(alpha: 0.9),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: concluida
-                          ? Tema.azulPrimario
+                          ? Tema.vermelhoPrimario
                           : const Color(0xFFDDE3EE),
                       width: 2,
                     ),

@@ -20,7 +20,7 @@ class CartaoProfessor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final corContador = professor.possuiBens ? Tema.azulPrimario : Tema.sucesso;
+    final corContador = professor.possuiBens ? Tema.vermelhoPrimario : Tema.sucesso;
 
     return Card(
       // Feedback tátil imediato ao tocar (RNF01).
@@ -98,11 +98,11 @@ class _Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 24,
-      backgroundColor: Tema.azulPrimario.withValues(alpha: 0.12),
+      backgroundColor: Tema.vermelhoPrimario.withValues(alpha: 0.12),
       child: Text(
         professor.iniciais,
         style: const TextStyle(
-          color: Tema.azulPrimario,
+          color: Tema.vermelhoPrimario,
           fontWeight: FontWeight.w700,
           fontSize: 16,
         ),

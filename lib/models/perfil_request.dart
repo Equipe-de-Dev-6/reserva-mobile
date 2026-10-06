@@ -1,18 +1,17 @@
-/// Corpos das requisições de `PUT /api/profile` (RF09 / RN06).
-///
-/// Duas regras do backend orientam o desenho destes Models:
-///
-///  1. `PUT /profile` **não** é um "salvar tudo": ele aplica apenas os
-///     campos presentes no corpo e responde `400` quando nenhum campo
-///     chega (`{"error": "Nenhum campo fornecido para atualização"}`).
-///     Por isso [AtualizarPerfilRequestModel.toJson] descarta valores
-///     `null` — o Controller envia só o que de fato mudou.
-///  2. A troca de senha viaja no **mesmo** endpoint, na chave
-///     `newPassword`, e exige no mínimo 6 caracteres.
-///
-/// Os Models só montam JSON. Quem decide o que mudou — e quem compara a
-/// confirmação da senha — é o Controller.
-library;
+// Corpos das requisições de `PUT /api/profile` (RF09 / RN06).
+//
+// Duas regras do backend orientam o desenho destes Models:
+//
+//  1. `PUT /profile` **não** é um "salvar tudo": ele aplica apenas os
+//     campos presentes no corpo e responde `400` quando nenhum campo
+//     chega (`{"error": "Nenhum campo fornecido para atualização"}`).
+//     Por isso [AtualizarPerfilRequestModel.toJson] descarta valores
+//     `null` — o Controller envia só o que de fato mudou.
+//  2. A troca de senha viaja no **mesmo** endpoint, na chave
+//     `newPassword`, e exige no mínimo 6 caracteres.
+//
+// Os Models só montam JSON. Quem decide o que mudou — e quem compara a
+// confirmação da senha — é o Controller.
 
 // ---------------------------------------------------------------------------
 // PUT /api/profile — dados cadastrais e de contato
