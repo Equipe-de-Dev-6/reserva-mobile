@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'package:reserva_mobile/app/rotas.dart';
 import 'package:reserva_mobile/controllers/auth_controller.dart';
 import 'package:reserva_mobile/core/servicos/api_client.dart';
 import 'package:reserva_mobile/core/servicos/auth_service.dart';
@@ -280,11 +281,28 @@ void main() {
       );
     }
 
+    /// Deixa a snackbar do GetX terminar.
+    ///
+    /// O `Get.snackbar` anima uma `Overlay`; se a árvore for descartada
+    /// com a animação no meio, o Flutter acusa um ticker vazado. Pumpar
+    /// mais que a duracao do snackbar (4 s) deixa a animacao fechar
+    /// sozinha.
+    Future<void> fecharSnackbar(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+    }
+
     /// Formulário de verdade, para o `FormState` que o Controller exige.
+    ///
+    /// O app usa as rotas reais de [AppRotas.paginas]: o Controller
+    /// navega (`Get.offAllNamed`) depois do login, e sem as rotas
+    /// registradas a navegação estouraria.
     Future<FormState> formState(WidgetTester tester) async {
       final chave = GlobalKey<FormState>();
       await tester.pumpWidget(
         GetMaterialApp(
+          initialRoute: Rotas.login,
+          getPages: AppRotas.paginas,
           home: Scaffold(
             body: Form(key: chave, child: const SizedBox.shrink()),
           ),
@@ -368,6 +386,7 @@ void main() {
       controller.confirmarSenhaCtrl.text = 'abc123';
 
       await controller.cadastrarCoordenador(formulario);
+      await fecharSnackbar(tester);
 
       expect(api.chamadas.first, 'POST /auth/register');
       expect(controller.erro.value, isEmpty);
@@ -383,6 +402,7 @@ void main() {
       controller.confirmarSenhaCtrl.text = 'abcdef';
 
       await controller.cadastrarCoordenador(formulario);
+      await fecharSnackbar(tester);
 
       expect(api.chamadas, isEmpty);
       expect(controller.erro.value, 'As senhas não conferem.');
@@ -412,6 +432,7 @@ void main() {
       controller.novaSenhaCtrl.text = 'nova123';
       controller.novaSenhaConfirmarCtrl.text = 'nova123';
       await controller.redefinirSenha(formulario);
+      await fecharSnackbar(tester);
 
       expect(api.chamadas[2], 'POST /auth/reset-password');
       // Depois de redefinir, o formulário volta ao começo.
@@ -454,6 +475,17 @@ void main() {
       controller =
           Get.put<AuthController>(AuthController(AuthService(apiQueFalha, sessao)));
 
+      // O logout navega para o Login: precisa de um app com rota — e as
+      // guardas de rota exigem a sessão registrada, por isso o app só é
+      // montado **depois** do `Get.put`.
+      await tester.pumpWidget(
+        GetMaterialApp(
+          initialRoute: Rotas.login,
+          getPages: AppRotas.paginas,
+        ),
+      );
+      await tester.pump();
+
       // Sessão ativa antes do logout.
       await sessao.salvar(
         token: 'jwt',
@@ -488,7 +520,7 @@ void main() {
     });
 
     test('e-mail', () {
-      expect(controller.validarEmailLogin(null), 'Informe um e-mail.');
+      expect(controller.validarEmailLogin(null), 'Informe o e-mail.');
       expect(controller.validarEmailLogin('abc'), 'Informe um e-mail válido.');
       expect(controller.validarEmailLogin('a@b.com'), isNull);
     });

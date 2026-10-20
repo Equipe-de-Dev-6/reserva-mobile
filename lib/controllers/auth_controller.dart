@@ -113,6 +113,21 @@ class AuthController extends GetxController {
     _limparMensagens();
     if (!formulario.validate()) return;
 
+    // A validação vive **também** no Controller: se a tela esquecer de
+    // ligar o `validator` em algum campo, o dado inválido não chega na
+    // API (e o login não gasta uma requisição à toa).
+    final erroEmail = validarEmailLogin(emailCtrl.text);
+    if (erroEmail != null) {
+      erro.value = erroEmail;
+      return;
+    }
+
+    final erroSenha = validarSenhaLogin(senhaCtrl.text);
+    if (erroSenha != null) {
+      erro.value = erroSenha;
+      return;
+    }
+
     carregando.value = true;
     try {
       final resposta = await _authService.login(
@@ -144,6 +159,32 @@ class AuthController extends GetxController {
   Future<void> cadastrarCoordenador(FormState formulario) async {
     _limparMensagens();
     if (!formulario.validate()) return;
+
+    // Mesma política: nome, e-mail, senha e a confirmação são
+    // validados aqui também.
+    final erroNome = validarNome(nomeCtrl.text);
+    if (erroNome != null) {
+      erro.value = erroNome;
+      return;
+    }
+
+    final erroEmail = validarEmailCadastro(cadastroEmailCtrl.text);
+    if (erroEmail != null) {
+      erro.value = erroEmail;
+      return;
+    }
+
+    final erroSenha = validarSenhaCadastro(cadastroSenhaCtrl.text);
+    if (erroSenha != null) {
+      erro.value = erroSenha;
+      return;
+    }
+
+    final erroConfirmacao = validarConfirmacao(confirmarSenhaCtrl.text);
+    if (erroConfirmacao != null) {
+      erro.value = erroConfirmacao;
+      return;
+    }
 
     carregando.value = true;
     try {
@@ -187,6 +228,16 @@ class AuthController extends GetxController {
     _limparMensagens();
     if (!formulario.validate()) return;
 
+    // Mesma política do resto do projeto: a regra mora **também** no
+    // Controller, e não só no `Form` da View. Se a tela esquecer de
+    // ligar o `validator` em algum campo, o dado inválido não chega na
+    // API.
+    final erroEmail = validarEmailLogin(recuperacaoEmailCtrl.text);
+    if (erroEmail != null) {
+      erro.value = erroEmail;
+      return;
+    }
+
     carregando.value = true;
     try {
       _emailRecuperacao = recuperacaoEmailCtrl.text.trim();
@@ -205,6 +256,14 @@ class AuthController extends GetxController {
     _limparMensagens();
     if (!formulario.validate()) return;
 
+    // O código tem exatamente 6 dígitos — validado aqui também, e não
+    // só pelo `Form`.
+    final erroCodigo = validarCodigo(codigoCtrl.text);
+    if (erroCodigo != null) {
+      erro.value = erroCodigo;
+      return;
+    }
+
     carregando.value = true;
     try {
       await _authService.verificarCodigo(_emailRecuperacao, codigoCtrl.text);
@@ -221,6 +280,20 @@ class AuthController extends GetxController {
   Future<void> redefinirSenha(FormState formulario) async {
     _limparMensagens();
     if (!formulario.validate()) return;
+
+    // A senha nova é validada aqui também (mínimo de 6 caracteres e
+    // confirmação igual à digitada).
+    final erroSenha = validarNovaSenha(novaSenhaCtrl.text);
+    if (erroSenha != null) {
+      erro.value = erroSenha;
+      return;
+    }
+
+    final erroConfirmacao = validarConfirmacaoNovaSenha(novaSenhaConfirmarCtrl.text);
+    if (erroConfirmacao != null) {
+      erro.value = erroConfirmacao;
+      return;
+    }
 
     carregando.value = true;
     try {
