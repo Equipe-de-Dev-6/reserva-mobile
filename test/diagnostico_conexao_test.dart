@@ -15,6 +15,7 @@ import 'package:reserva_mobile/core/servicos/api_client.dart';
 import 'package:reserva_mobile/core/servicos/auth_service.dart';
 import 'package:reserva_mobile/core/servicos/sessao_service.dart';
 import 'package:reserva_mobile/core/utils/api_erros.dart';
+import 'package:reserva_mobile/core/utils/app_exception.dart';
 import 'package:reserva_mobile/models/resultado_diagnostico.dart';
 import 'package:reserva_mobile/views/auth/login_view.dart';
 
@@ -104,6 +105,45 @@ void main() {
       expect(find.text('API conectada'), findsOneWidget);
       // O endereço em uso aparece na tela.
       expect(find.textContaining('8081'), findsWidgets);
+    });
+
+    testWidgets('com a API fora do ar, mostra o endereço e a sugestão',
+        (tester) async {
+      // Este é o caso que o timetodo板上: o backend não está rodando
+      // na máquina de quem está testando.
+      final sessao = Get.put<SessaoService>(SessaoService(), permanent: true);
+      final api = Get.put<ApiClient>(
+        ApiClientFalso((_, caminho, _) async {
+          if (caminho == '/health') {
+            throw const AppException(
+              'Não foi possível conectar ao servidor '
+              '(http://localhost:8081/api).',
+            );
+          }
+          return <String, dynamic>{};
+        }),
+        permanent: true,
+      );
+      Get.put<AuthService>(AuthService(api, sessao), permanent: true);
+      final controller =
+          Get.put<AuthController>(AuthController(Get.find<AuthService>()));
+
+      await tester.pumpWidget(
+        GetMaterialApp(theme: Tema.claro, home: const LoginView()),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Verificar conexão com a API'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(controller.diagnostico.value, isNotNull);
+      expect(controller.diagnostico.value!.conseguiuConectar, isFalse);
+      expect(find.text('API não respondeu'), findsOneWidget);
+      // O endereço em uso aparece, para o usuário ver onde o app tentou.
+      expect(find.textContaining('8081'), findsWidgets);
+      // E a sugestão diz o que fazer.
+      expect(find.textContaining('api.exe'), findsWidgets);
     });
   });
 }
