@@ -6,6 +6,11 @@ de ensino, operando sobre a API REST em Go fornecida pela equipe.
 
 **Repositório:** <https://github.com/Equipe-de-Dev-6/reserva-mobile>
 
+> 📖 **Primeira vez no projeto?** Comece pelo **[guia do projeto](docs/GUIA.md)**:
+> como o app funciona por dentro (caminho de uma requisição, camadas do
+> MVC, guardas de rota, mapa "quero mudar X → vá em Y") e como rodar
+> tudo (backend, app, testes, prints, protótipo).
+
 ---
 
 ## 📸 Telas do aplicativo
@@ -480,6 +485,7 @@ citados.
 | **Matheus Lima Catarucci** | **Autenticação e Sessão (RF01–RF04)**: login, cadastro de Coordenador, recuperação de senha em 3 etapas, armazenamento seguro do JWT, interceptors de token, Device Preview e CI | 2 | PR #2 — `parte-2-autenticacao` |
 | **joaovacosta** | **Gestão de Professores (RF06)** e **Perfil (RF09)**: telas de listagem, cadastro e detalhe do docente, tela de perfil, `AdminMiddleware` e widgets de professor/dado | 4 e 5 | PRs de `Profs-e-Perfil` |
 | **Gabriel** | **Gestão de Patrimônios (RF07)**: Models, `PatrimonioService`, listagem com busca e filtros, detalhe, formulário, badges e cards. E a **consolidação final**: dashboard de indicadores (RF05), ciclo de vida do bem — atribuição, devolução e linha do tempo (RF07b/RN05) —, "Meus Patrimônios" (RF08), correção de rotas, plataforma (INTERNET/ATS) e documentação | 3, 4 e 5 | PRs #3–#9 e `feature/modulos-2-e-3` |
+| **MoisesTafarello** | **Administração Geral (Parte 6)**: tela de usuários do sistema, alteração de papel (`admin` ↔ `professor`) e métricas de sessão. Em andamento na branch `feature/administracao-geral`. | 6 | PR #12 |
 
 ### Divisão dos módulos por tela e controller
 
@@ -490,6 +496,10 @@ citados.
 | 3 — Dados e widgets | — (Services e Models) | `api_client` · `sessao_service` · `auth_service` |
 | 4 — Coordenador | `admin_home` · `dashboard` · `professores/*` · `patrimonio/*` | `dashboard_controller` · `professor_*_controller` · `patrimonio_controller` · `patrimonio_detalhe_controller` · `patrimonio_form_controller` · `patrimonio_ciclo_vida_controller` · `patrimonio_historico_controller` |
 | 5 — Professor | `professor_home` · `meus_patrimonios` · `perfil` | `meus_patrimonios_controller` · `perfil_controller` |
+| 6 — Administração Geral | `usuarios/*` (em andamento) | `admin_usuarios_controller` |
+
+O plano de cada parte, com o passo a passo e os critérios de
+aceitação, fica em [`docs/partes/`](docs/partes/).
 
 > **Antes da arguição:** o §9 do enunciado exige que **todos** os
 > integrantes tenham domínio do código entregue. Cada linha desta
