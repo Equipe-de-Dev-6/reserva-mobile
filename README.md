@@ -293,6 +293,16 @@ A API sobe na porta **8081** e a documentação fica em
 > Go. O banco (`data.db`) **não** é versionado: ele é criado e
 > alterado pelo servidor a cada execução.
 
+#### Sobre o banco de dados e os custos
+
+| Pergunta | Resposta |
+|----------|----------|
+| Precisa de servidor de banco de dados? | **Não.** O backend usa **SQLite**, um banco embutido em arquivo: sem servidor, sem instalação, sem senha, sem custo. |
+| O app acessa o banco diretamente? | **Não.** O app fala HTTP com a API; só o backend toca o `data.db`. |
+| O que o app guarda no celular? | Apenas o **JWT**, em `flutter_secure_storage` (criptografado), para não logar toda hora. Todo o domínio (bens, docentes, histórico) vive no backend. |
+| Se o `data.db` for apagado? | Ele é recriado e populado automaticamente na próxima vez que `api.exe` rodar. Não há migração nem script de setup. |
+| Custa alguma coisa? | **R$ 0.** Nenhum serviço pago, nenhuma chave de API, nenhuma conta em nuvem. O app funciona com a API rodando na mesma máquina (ou na rede local da escola). |
+
 ### 2. App
 
 ```bash
@@ -460,19 +470,32 @@ inventário de telas, os tokens de design e o passo a passo.
 
 ## 👥 Equipe
 
-| Membro | Responsabilidade | Parte |
-|--------|------------------|-------|
-| _a preencher_ | Estrutura base, tema, rotas e DI | 1 |
-| _a preencher_ | Autenticação, sessão e comunicação com a API | 2 |
-| _a preencher_ | Modelos, Services e biblioteca de widgets | 3 |
-| _a preencher_ | Painel do Coordenador: dashboard, professores e patrimônio | 4 |
-| _a preencher_ | Painel do Professor, perfil e ciclo de vida do bem | 5 |
+A tabela abaixo reflete o histórico real do repositório: cada linha
+pode ser conferida em `git log --author="<nome>"` e nos Pull Requests
+citados.
 
-> **Preencher antes da entrega:** o §8 do enunciado exige que a
-> participação de cada integrante fique **evidenciada no histórico de
-> commits e Pull Requests** do GitHub, e que o README identifique cada
-> membro com as respectivas responsabilidades. A tabela acima e os
-> commits já estão prontos para receber essa informação.
+| Membro | Responsabilidade | Parte | Evidência no histórico |
+|--------|------------------|-------|--------------------------|
+| **Guilherme Ballestrim Sobreira** | Estrutura base do projeto e camada de dados: Models (`auth_resposta`, `patrimonio_model`, `professor_request`), bring-up do `api.exe` e convenção de branches | 1 | PR #1 — `model` |
+| **Matheus Lima Catarucci** | **Autenticação e Sessão (RF01–RF04)**: login, cadastro de Coordenador, recuperação de senha em 3 etapas, armazenamento seguro do JWT, interceptors de token, Device Preview e CI | 2 | PR #2 — `parte-2-autenticacao` |
+| **joaovacosta** | **Gestão de Professores (RF06)** e **Perfil (RF09)**: telas de listagem, cadastro e detalhe do docente, tela de perfil, `AdminMiddleware` e widgets de professor/dado | 4 e 5 | PRs de `Profs-e-Perfil` |
+| **Gabriel** | **Gestão de Patrimônios (RF07)**: Models, `PatrimonioService`, listagem com busca e filtros, detalhe, formulário, badges e cards. E a **consolidação final**: dashboard de indicadores (RF05), ciclo de vida do bem — atribuição, devolução e linha do tempo (RF07b/RN05) —, "Meus Patrimônios" (RF08), correção de rotas, plataforma (INTERNET/ATS) e documentação | 3, 4 e 5 | PRs #3–#9 e `feature/modulos-2-e-3` |
+
+### Divisão dos módulos por tela e controller
+
+| Parte | Telas | Controllers |
+|-------|-------|-------------|
+| 1 — Base | `splash` | `splash_controller` |
+| 2 — Autenticação | `login` · `cadastro_admin` · `recuperar_senha` | `auth_controller` |
+| 3 — Dados e widgets | — (Services e Models) | `api_client` · `sessao_service` · `auth_service` |
+| 4 — Coordenador | `admin_home` · `dashboard` · `professores/*` · `patrimonio/*` | `dashboard_controller` · `professor_*_controller` · `patrimonio_controller` · `patrimonio_detalhe_controller` · `patrimonio_form_controller` · `patrimonio_ciclo_vida_controller` · `patrimonio_historico_controller` |
+| 5 — Professor | `professor_home` · `meus_patrimonios` · `perfil` | `meus_patrimonios_controller` · `perfil_controller` |
+
+> **Antes da arguição:** o §9 do enunciado exige que **todos** os
+> integrantes tenham domínio do código entregue. Cada linha desta
+> tabela corresponde a commits reais — use
+> `git log --author="<nome>" --stat` para revisar o que cada um
+> escreveu, e `git show <commit>` para revisar o código em si.
 
 ---
 
