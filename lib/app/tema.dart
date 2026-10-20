@@ -23,13 +23,21 @@ class Tema {
     return ThemeData(
       useMaterial3: true,
       colorScheme: esquema,
+      // A Roboto vem empacotada em `assets/fonts/` (ver `pubspec.yaml`).
+      // Declarar a família aqui garante a mesma tipografia em todas as
+      // plataformas — e faz o app bater com os prints do README.
+      fontFamily: 'Roboto',
       scaffoldBackgroundColor: fundo,
       appBarTheme: const AppBarTheme(
         backgroundColor: azulPrimario,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        // O `fontFamily` precisa ser declarado aqui tambem: um
+        // `TextStyle` montado a mao **nao** herda a familia do tema, e
+        // o titulo da AppBar sairia com a fonte padrao do sistema.
         titleTextStyle: TextStyle(
+          fontFamily: 'Roboto',
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: Colors.white,

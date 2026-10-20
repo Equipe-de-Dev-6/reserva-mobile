@@ -241,15 +241,20 @@ class _Linha extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Expanded(
+          // `Flexible` + ellipsis: o rótulo é longo ("Com equipamentos
+          // sob responsabilidade") e precisa ceder espaço ao número.
+          Flexible(
             child: Text(
               rotulo,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13.5,
                 color: Colors.black.withValues(alpha: 0.6),
               ),
             ),
           ),
+          const SizedBox(width: 10),
           Text(
             valor,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),

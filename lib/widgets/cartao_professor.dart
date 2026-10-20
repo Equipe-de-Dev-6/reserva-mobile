@@ -69,12 +69,17 @@ class CartaoProfessor extends StatelessWidget {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  _ContadorBens(
-                    rotulo: professor.rotuloBens,
-                    total: professor.totalPatrimonios,
-                    cor: corContador,
+                  // `Expanded` no contador: o rótulo ("3 bens sob
+                  // responsabilidade") cede espaço à chevron em vez de
+                  // estourar a linha em telas estreitas.
+                  Expanded(
+                    child: _ContadorBens(
+                      rotulo: professor.rotuloBens,
+                      total: professor.totalPatrimonios,
+                      cor: corContador,
+                    ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Icon(
                     Icons.chevron_right_rounded,
                     color: Colors.black.withValues(alpha: 0.3),
@@ -136,12 +141,18 @@ class _ContadorBens extends StatelessWidget {
         children: [
           Icon(Icons.inventory_2_outlined, size: 15, color: cor),
           const SizedBox(width: 6),
-          Text(
-            rotulo,
-            style: TextStyle(
-              color: cor,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
+          // `Flexible` + ellipsis: o texto do contador é o que mais
+          // cresce ("12 bens sob responsabilidade") e precisa caber.
+          Flexible(
+            child: Text(
+              rotulo,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: cor,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

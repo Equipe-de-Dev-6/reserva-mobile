@@ -61,6 +61,25 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # -------------------------------------------------------------------------
+  # Fontes
+  # -------------------------------------------------------------------------
+  # A Roboto é empacotada explicitamente (e não só herdada do Material)
+  # por dois motivos:
+  #   1. a tipografia fica idêntica em Android, iOS, web e desktop;
+  #   2. o gerador de prints (`tool/gerar_prints_test.dart`) consegue
+  #      carregar a fonte de verdade, e o PNG do README sai com o texto
+  #      legível em vez das caixas da fonte de teste.
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto-regular.ttf
+          weight: 400
+        - asset: assets/fonts/roboto-medium.ttf
+          weight: 500
+        - asset: assets/fonts/roboto-bold.ttf
+          weight: 700
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

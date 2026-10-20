@@ -1,0 +1,13 @@
+# Configuração do runner de testes.
+#
+# `concurrency: 1` porque dois arquivos de teste de integração batem na
+# API real ao mesmo tempo (`integracao_auth_test.dart` e
+# `integracao_patrimonio_test.dart`), e o backend em Go tem uma corrida
+# na tabela de refresh token: com os arquivos rodando em paralelo, o
+# `POST /auth/refresh` responde "Erro ao salvar sessão de refresh token"
+# e o teste falha por um motivo que não é do app.
+#
+# Rodando um arquivo por vez, a suíte inteira passa. Se um dia o
+# backend for corrigido, este arquivo pode ser removido — mas ele
+# continua sendo a opção mais segura para a CI.
+concurrency: 1
