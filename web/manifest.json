@@ -1,11 +1,11 @@
 {
-    "name": "reserva_mobile",
-    "short_name": "reserva_mobile",
+    "name": "Patrimônio Escolar",
+    "short_name": "Patrimônio",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F4F6FB",
+    "theme_color": "#1B4DB1",
+    "description": "Sistema Integrado de Gestão de Patrimônio Escolar.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
