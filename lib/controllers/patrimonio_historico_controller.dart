@@ -25,12 +25,16 @@ class PatrimonioHistoricoController extends GetxController {
       Rxn<HistoricoPatrimonioModel>();
 
   /// Id do bem, lido do `Get.arguments`.
+  ///
+  /// Público de propósito: o teste monta o Controller direto (o
+  /// `Get.arguments` não tem setter) e precisa informar o id sem
+  /// passar pelo roteador.
   int id = 0;
 
   @override
   void onInit() {
     super.onInit();
-    id = _lerId();
+    if (id == 0) id = _lerId();
     carregar();
   }
 

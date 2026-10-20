@@ -59,12 +59,20 @@ class PatrimonioCicloVidaController extends GetxController {
   // --- Modo da tela -------------------------------------------------------
 
   /// `true` no fluxo de devolução; `false` no de atribuição.
-  bool get devolvendo => _modo == _Modo.devolver;
+  ///
+  /// É público de propósito: o teste monta o Controller direto (o
+  /// `Get.arguments` não tem setter) e precisa escolher o fluxo sem
+  /// passar pelo roteador. Na aplicação, quem define é a rota.
+  bool devolvendo = false;
 
   /// `true` no fluxo de atribuição.
-  bool get atribuindo => _modo == _Modo.atribuir;
+  bool get atribuindo => !devolvendo;
 
-  _Modo _modo = _Modo.atribuir;
+  /// Id do bem em movimento.
+  ///
+  /// Vem dos argumentos da rota; fica público pelo mesmo motivo do
+  /// [devolvendo].
+  int id = 0;
 
   @override
   void onInit() {
@@ -83,17 +91,21 @@ class PatrimonioCicloVidaController extends GetxController {
   }
 
   /// Lê o `id` do bem, o bem em si e o modo do fluxo vindos da rota.
+  ///
+  /// Só preenche o que ainda estiver vazio: quem chamou o Controller
+  /// com o id ou o modo já definidos tem prioridade sobre a rota.
   void _lerArgumentos() {
     final argumentos = Get.arguments;
     final Map<Object?, Object?> mapa =
         argumentos is Map ? argumentos : const <Object?, Object?>{};
 
-    final id = mapa['id'];
-    if (id is int) {
-      _id = id;
-    } else {
-      final texto = id?.toString();
-      _id = int.tryParse(texto ?? '') ?? 0;
+    final idDosArgumentos = mapa['id'];
+    if (id == 0) {
+      if (idDosArgumentos is int) {
+        id = idDosArgumentos;
+      } else {
+        id = int.tryParse(idDosArgumentos?.toString() ?? '') ?? 0;
+      }
     }
 
     // O bem em si vem junto quando a tela é aberta a partir do detalhe.
@@ -102,16 +114,11 @@ class PatrimonioCicloVidaController extends GetxController {
     final bem = mapa['patrimonio'];
     if (bem is PatrimonioModel) {
       patrimonio.value = bem;
-      if (_id == 0) _id = bem.id;
+      if (id == 0) id = bem.id;
     }
 
-    _modo = mapa['modo'] == 'devolver' ? _Modo.devolver : _Modo.atribuir;
+    if (mapa['modo'] == 'devolver') devolvendo = true;
   }
-
-  int _id = 0;
-
-  /// Id do bem em movimento.
-  int get id => _id;
 
   // -------------------------------------------------------------------------
   // DOCENTES (só no fluxo de atribuição)
@@ -177,20 +184,31 @@ class PatrimonioCicloVidaController extends GetxController {
   Future<bool> confirmar(FormState formulario) async {
     erro.value = '';
 
-    if (formulario.validate()) {
-      // A validação do formulário (quando houver) já barrou.
+    // `validate()` devolve `true` quando o formulário está **válido**.
+    // Se for `false`, o próprio Form já exibiu a mensagem no campo e a
+    // operação não pode seguir.
+    if (!formulario.validate()) return false;
+
+    if (id <= 0) {
+      erro.value = 'Bem não informado.';
       return false;
     }
 
-    if (_id <= 0) {
-      erro.value = 'Bem não informado.';
-      return false;
+    // O motivo da devolução é validado aqui também, e não só no `Form`
+    // da View: a regra mora no Controller (como em todo o resto do
+    // projeto) e a tela não é o único guardião dela.
+    if (devolvendo) {
+      final erroMotivo = validarMotivo(motivoCtrl.text);
+      if (erroMotivo != null) {
+        erro.value = erroMotivo;
+        return false;
+      }
     }
 
     salvando.value = true;
     try {
       if (devolvendo) {
-        await _patrimonio.desatribuir(_id, motivo: motivoCtrl.text);
+        await _patrimonio.desatribuir(id, motivo: motivoCtrl.text);
       } else {
         final professorId = professorSelecionado.value;
         if (professorId == null) {
@@ -198,7 +216,7 @@ class PatrimonioCicloVidaController extends GetxController {
           return false;
         }
         await _patrimonio.atribuir(
-          _id,
+          id,
           professorId,
           observacoes: observacoesCtrl.text,
         );
@@ -226,5 +244,3 @@ class PatrimonioCicloVidaController extends GetxController {
     return null;
   }
 }
-
-enum _Modo { atribuir, devolver }
