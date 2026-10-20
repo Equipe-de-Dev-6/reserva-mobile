@@ -13,6 +13,12 @@ de ensino, operando sobre a API REST em Go fornecida pela equipe.
 > como o app funciona por dentro (caminho de uma requisição, camadas do
 > MVC, guardas de rota, mapa "quero mudar X → vá em Y") e como rodar
 > tudo (backend, app, testes, prints, protótipo).
+>
+> 🎤 **Na hora da arguição?** O **[roteiro de arguição](docs/ARGUICAO.md)** tem
+> as 10 perguntas mais prováveis do professor, com a resposta, o arquivo
+> exato onde a resposta está e o porquê de cada decisão — mais os
+> números do projeto, as armadilhas conhecidas e um roteiro de
+> demonstração de 5 minutos.
 
 ---
 
