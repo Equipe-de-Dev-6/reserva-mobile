@@ -589,7 +589,7 @@ citados.
 | **Matheus Lima Catarucci** | **Autenticação e Sessão (RF01–RF04)**: login, cadastro de Coordenador, recuperação de senha em 3 etapas, armazenamento seguro do JWT, interceptors de token, Device Preview e CI | 2 | PR #2 — `parte-2-autenticacao` |
 | **joaovacosta** | **Gestão de Professores (RF06)** e **Perfil (RF09)**: telas de listagem, cadastro e detalhe do docente, tela de perfil, `AdminMiddleware` e widgets de professor/dado | 4 e 5 | PRs de `Profs-e-Perfil` |
 | **Gabriel** | **Gestão de Patrimônios (RF07)**: Models, `PatrimonioService`, listagem com busca e filtros, detalhe, formulário, badges e cards. E a **consolidação final**: dashboard de indicadores (RF05), ciclo de vida do bem — atribuição, devolução e linha do tempo (RF07b/RN05) —, "Meus Patrimônios" (RF08), correção de rotas, plataforma (INTERNET/ATS) e documentação | 3, 4 e 5 | PRs #3–#9 e `feature/modulos-2-e-3` |
-| **MoisesTafarello** | **Administração Geral (Parte 6)**: tela de usuários do sistema, alteração de papel (`admin` ↔ `professor`) e métricas de sessão. Em andamento na branch `feature/administracao-geral`. | 6 | PR #12 |
+| **MoisesTafarello** | **Administração Geral (Parte 6)**: tela de usuários do sistema, alteração de papel (`admin` ↔ `professor`) e métricas de sessão. Em andamento na branch `feature/administracao-geral`. | 6 | Branch `feature/administracao-geral` (plano em [`docs/partes/`](docs/partes/)) |
 
 ### Divisão dos módulos por tela e controller
 

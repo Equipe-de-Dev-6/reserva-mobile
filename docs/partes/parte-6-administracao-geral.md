@@ -250,22 +250,25 @@ adicione o badge no README:
 
 ## 7. Como abrir o Pull Request
 
+A branch `feature/administracao-geral` **já existe** e está alinhada com
+a `main`. O Pull Request é aberto **por você**, com os seus commits — é
+isso que evidencia a sua participação no §8 do enunciado.
+
 ```bash
-git checkout main
-git pull origin main
-git checkout -b feature/administracao-geral
+git checkout feature/administracao-geral
+git pull origin feature/administracao-geral
 # ... implementa ...
 git add -A
 git commit -m "feat(admin): tela de usuarios e alteracao de papel (Administração Geral)"
-git push -u origin feature/administracao-geral
+git push origin feature/administracao-geral
 ```
 
 Depois, no GitHub: **Compare & pull request** → `main`. No corpo do
 PR, descreva o que foi feito e cole a saída de `flutter test`.
 
-> O commit e o PR com o **seu** nome no histórico é o que evidencia a
-> sua participação (item do §8 do enunciado). Não commite com a
-> identidade de outra pessoa.
+> Confirme que o `git config user.name` / `user.email` da sua máquina
+> estão com **a sua identidade**: é o commit com o seu nome no
+> histórico que o professor vai ver.
 
 ---
 
