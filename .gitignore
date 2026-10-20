@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Banco do backend (Go): criado e alterado pelo pi.exe a cada execucao.
+/data.db
+/data.db-shm
+/data.db-wal
