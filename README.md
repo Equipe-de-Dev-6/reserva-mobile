@@ -6,6 +6,9 @@ de ensino, operando sobre a API REST em Go fornecida pela equipe.
 
 **Repositório:** <https://github.com/Equipe-de-Dev-6/reserva-mobile>
 
+![CI](https://github.com/Equipe-de-Dev-6/reserva-mobile/actions/workflows/ci.yml/badge.svg)
+![Cobertura](https://github.com/Equipe-de-Dev-6/reserva-mobile/actions/workflows/ci.yml/badge.svg?job=Testes)
+
 > 📖 **Primeira vez no projeto?** Comece pelo **[guia do projeto](docs/GUIA.md)**:
 > como o app funciona por dentro (caminho de uma requisição, camadas do
 > MVC, guardas de rota, mapa "quero mudar X → vá em Y") e como rodar

@@ -143,6 +143,19 @@ Espaçamento base: **16** (padding de tela), **12** (entre itens),
 | Erro com "Tentar novamente" | qualquer falha de rede em qualquer listagem |
 | Toast de sucesso | atribuição, devolução, cadastro, exclusão, logout |
 
+### Diagnóstico de conexão (troubleshooting)
+
+A tela de Login tem o botão **"Verificar conexão com a API"**. Ele testa
+`GET /health` e mostra o endereço em uso, se a API respondeu e o que
+fazer — cada pessoa precisa do `api.exe` rodando na própria máquina, e o
+endereço muda conforme o dispositivo.
+
+| Onde o app roda | Endereço |
+|------------------|----------|
+| Emulador Android | `http://10.0.2.2:8081/api` |
+| Simulador iOS / desktop / web | `http://localhost:8081/api` |
+| Celular físico (Wi-Fi) | `http://192.168.x.x:8081/api` |
+
 ---
 
 ## 4. Princípios de UX aplicados

@@ -128,6 +128,16 @@ void main() {
     late String emailProfessor;
 
     setUp(() async {
+      // Sem a API no ar, o grupo inteiro é ignorado — **aqui**, e não
+      // dentro de cada `test`. Sem esta guarda, o `setUp` tentaria
+      // criar o docente contra um servidor inexistente e o teste
+      // **falharia** em vez de ser pulado — que é o que acontecia com
+      // quem rodava a suíte sem o `api.exe` no ar.
+      if (!online) {
+        markTestSkipped('API offline');
+        return;
+      }
+
       // 1) O admin cria o docente (RN02: cadastro centralizado).
       final sessaoAdmin = SessaoService();
       final apiAdmin = ApiClient(sessaoAdmin);
@@ -140,17 +150,26 @@ void main() {
         usuario: loginAdmin.usuario,
       );
 
-      emailProfessor =
-          'prof.teste.${DateTime.now().millisecondsSinceEpoch}@escola.com';
-      await apiAdmin.post(
-        '/admin/professores',
-        body: ProfessorRequestModel(
-          nome: 'Prof. Teste RN03',
-          email: emailProfessor,
-          senha: 'prof123',
-          matricula: 'PROF-TESTE',
-        ).toJson(),
-      );
+      // E-mail **fixo**, não com carimbo de tempo: a API não tem rota
+      // para apagar usuário, então um e-mail novo a cada execução
+      // deixaria dezenas de "Prof. Teste RN03" acumulados no banco de
+      // desenvolvimento. Com o e-mail fixo, o cadastro é reaproveitado
+      // (409 = já existe) e o banco continua limpo.
+      emailProfessor = 'prof.teste.rn03@escola.com';
+      try {
+        await apiAdmin.post(
+          '/admin/professores',
+          body: ProfessorRequestModel(
+            nome: 'Prof. Teste RN03',
+            email: emailProfessor,
+            senha: 'prof123',
+            matricula: 'PROF-TESTE',
+          ).toJson(),
+        );
+      } on AppException catch (e) {
+        // 409: o docente de teste já existe de uma execução anterior.
+        if (e.statusCode != 409) rethrow;
+      }
 
       // 2) Loga com a sessão do docente.
       final resposta = await auth.login(emailProfessor, 'prof123');
