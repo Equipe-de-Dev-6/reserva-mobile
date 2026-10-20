@@ -15,12 +15,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'package:reserva_mobile/core/servicos/api_client.dart';
+import 'package:reserva_mobile/core/servicos/auth_service.dart';
+import 'package:reserva_mobile/core/servicos/perfil_service.dart';
+import 'package:reserva_mobile/core/servicos/sessao_service.dart';
+import 'package:reserva_mobile/controllers/auth_controller.dart';
+import 'package:reserva_mobile/controllers/perfil_controller.dart';
+import 'package:reserva_mobile/views/auth/login_view.dart';
+import 'package:reserva_mobile/views/perfil/perfil_view.dart';
 import 'package:reserva_mobile/widgets/campo_texto.dart';
 
-/// O TextFormField nao expoe obscureText: ele repassa o valor para o
-/// EditableText interno, e e la que a mascara realmente e aplicada.
-bool _obscuro(WidgetTester tester) =>
-    tester.widget<EditableText>(find.byType(EditableText).first).obscureText;
+import 'helpers/api_client_falso.dart';
+
+/// O `TextFormField` não expõe `obscureText`: ele repassa o valor para o
+/// `EditableText` interno, e é lá que a máscara realmente é aplicada.
+///
+/// [indice] escolhe qual campo (0 = o primeiro da tela).
+bool _obscuro(WidgetTester tester, [int indice = 0]) {
+  final campos = tester.widgetList<EditableText>(find.byType(EditableText));
+  return campos.elementAt(indice).obscureText;
+}
 
 void main() {
   tearDown(Get.reset);
@@ -172,6 +186,83 @@ void main() {
 
       expect(find.byTooltip('Mostrar senha'), findsNothing);
       expect(find.byTooltip('Ocultar senha'), findsNothing);
+    });
+  });
+
+  // =========================================================================
+  group('Tela real — o botão funciona dentro do app', () {
+    testWidgets('Login: tocar no olho revela a senha', (tester) async {
+      // Monta a **tela real**, com o Controller real — não só o widget
+      // isolado. É aqui que o botão falhava.
+      final sessao = Get.put<SessaoService>(SessaoService(), permanent: true);
+      Get.put<ApiClient>(ApiClientFalso((_, _, _) async => <String, dynamic>{}),
+          permanent: true);
+      Get.put<AuthService>(
+        AuthService(Get.find<ApiClient>(), sessao),
+        permanent: true,
+      );
+      final controller =
+          Get.put<AuthController>(AuthController(Get.find<AuthService>()));
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          home: const LoginView(),
+        ),
+      );
+      await tester.pump();
+
+      // Na tela de Login o campo de senha é o **segundo**.
+      expect(_obscuro(tester, 1), isTrue);
+
+      await tester.tap(find.byTooltip('Mostrar senha'));
+      await tester.pump();
+
+      expect(controller.senhaOculta.value, isFalse);
+      expect(_obscuro(tester, 1), isFalse,
+          reason: 'a senha precisa ficar visível na tela real');
+    });
+
+    testWidgets('Perfil: tocar no olho revela as duas senhas',
+        (tester) async {
+      // Janela alta: o bloco de senha fica abaixo da dobra e, em um
+      // `ListView`, não seria nem construído.
+      tester.view.physicalSize = const Size(390, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final sessao = Get.put<SessaoService>(SessaoService(), permanent: true);
+      Get.put<ApiClient>(
+        ApiClientFalso((_, _, _) async => payloadPerfil()),
+        permanent: true,
+      );
+      Get.put<PerfilService>(
+        PerfilService(Get.find<ApiClient>(), sessao),
+        permanent: true,
+      );
+      final controller = Get.put<PerfilController>(
+        PerfilController(Get.find<PerfilService>(), sessao),
+      );
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          home: const PerfilView(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Abre o formulário de senha pelo Controller (o bloco fica abaixo da
+      // dobra) e confere o botão de olho.
+      controller.abrirSenha();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Há dois campos de senha ("Nova senha" e "Confirmar nova senha") e
+      // eles compartilham o mesmo `RxBool`.
+      expect(find.byTooltip('Mostrar senha'), findsNWidgets(2));
+
+      await tester.tap(find.byTooltip('Mostrar senha').first);
+      await tester.pump();
+
+      expect(controller.senhaOculta.value, isFalse);
     });
   });
 }
