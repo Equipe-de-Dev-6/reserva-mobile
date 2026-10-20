@@ -5,6 +5,7 @@ import '../../controllers/meus_patrimonios_controller.dart';
 import '../../widgets/card_patrimonio.dart';
 import '../../widgets/estado_vazio.dart';
 import '../../widgets/mensagem_erro.dart';
+import 'rotas_professor.dart';
 
 /// **RF08 — "Meus Patrimônios": a visão do docente.**
 ///
@@ -13,7 +14,8 @@ import '../../widgets/mensagem_erro.dart';
 ///
 /// É **estritamente informativa**: não há botão de criar, editar,
 /// excluir, atribuir ou devolver em nenhum lugar desta tela (RN03).
-/// O único recurso interativo é o "Atualizar" da barra superior.
+/// O card leva o docente à ficha completa do bem — também em modo
+/// leitura ([RotasProfessor.detalhePatrimonio]).
 class MeusPatrimoniosView extends GetView<MeusPatrimoniosController> {
   const MeusPatrimoniosView({super.key});
 
@@ -97,9 +99,17 @@ class MeusPatrimoniosView extends GetView<MeusPatrimoniosController> {
           final patrimonio = controller.patrimonios[indice];
           // `mostrarResponsavel: false` — no painel do docente o
           // responsável é sempre ele mesmo e poluiria o card.
+          //
+          // `aoTocar` abre a ficha completa do bem em modo leitura
+          // (RF08): o docente vê os detalhes, mas nenhuma ação de
+          // escrita existe na tela seguinte (RN03).
           return CardPatrimonio(
             patrimonio: patrimonio,
             mostrarResponsavel: false,
+            aoTocar: () => Get.toNamed(
+              RotasProfessor.detalhePatrimonio,
+              arguments: {'id': patrimonio.id},
+            ),
           );
         },
       ),

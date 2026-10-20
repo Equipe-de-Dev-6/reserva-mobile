@@ -15,6 +15,7 @@ import '../views/perfil/perfil_view.dart';
 import '../views/patrimonio/rotas_patrimonio.dart';
 import '../views/professor/meus_patrimonios_view.dart';
 import '../views/professor/professor_home_view.dart';
+import '../views/professor/rotas_professor.dart';
 
 /// Nomes das rotas. Nunca use strings soltas no `Get.toNamed`:
 /// um erro de digitação quebraria a navegação silenciosamente.
@@ -179,6 +180,11 @@ class AppRotas {
       transition: Transition.rightToLeftWithFade,
       transitionDuration: _transicao,
     ),
+
+    // Módulo 3 — ficha do bem em modo leitura (RF08).
+    // O card de "Meus Patrimônios" navega para cá; nenhuma ação de
+    // escrita existe na tela seguinte (RN03).
+    ...paginasProfessor,
 
     // Módulo 2 — Patrimônios (RF07a/RF07b).
     //
