@@ -94,7 +94,7 @@ class ServicoDeAcervoFake extends PatrimonioService {
 
 UsuarioModel admin() => UsuarioModel(
       nome: 'Coordenador Geral',
-      email: 'admin@escola.com',
+      email: 'admin@admin.com',
       role: 'admin',
     );
 

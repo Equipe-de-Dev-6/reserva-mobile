@@ -80,7 +80,7 @@ PatrimonioFormController registrar(
 
   Get.put<SessaoService>(SessaoService()).usuario.value = UsuarioModel(
     nome: 'Coordenador',
-    email: 'admin@escola.com',
+    email: 'admin@admin.com',
     role: 'admin',
   );
   Get.put<PatrimonioService>(service);

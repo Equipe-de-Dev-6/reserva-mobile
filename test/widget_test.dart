@@ -20,7 +20,7 @@ void main() {
       final admin = UsuarioModel(
         id: 1,
         nome: 'Coordenador Geral',
-        email: 'admin@escola.com',
+        email: 'admin@admin.com',
         role: 'admin',
       );
       expect(admin.isAdmin, isTrue);
@@ -81,7 +81,7 @@ void main() {
         usuario: UsuarioModel(
           id: 1,
           nome: 'Coordenador',
-          email: 'admin@escola.com',
+          email: 'admin@admin.com',
           role: 'admin',
         ),
       );

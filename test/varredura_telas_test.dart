@@ -64,7 +64,7 @@ import 'helpers/test_armazenamento.dart';
 final UsuarioModel admin = UsuarioModel(
   id: 1,
   nome: 'Coordenador Geral',
-  email: 'admin@escola.com',
+  email: 'admin@admin.com',
   role: 'admin',
 );
 

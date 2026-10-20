@@ -114,7 +114,7 @@ class ServicoQueFalha extends PatrimonioService {
 void sessaoDeAdmin() => trocarSessao(
       UsuarioModel(
         nome: 'Coordenador',
-        email: 'admin@escola.com',
+        email: 'admin@admin.com',
         role: 'admin',
       ),
     );

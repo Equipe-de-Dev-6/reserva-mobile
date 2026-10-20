@@ -52,10 +52,17 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
-implementados. **317 testes automatizados** passando, com **80% de cobertura**
+implementados. **319 testes automatizados** passando, com **80% de cobertura**
 de linhas — o `dart_test.yaml` garante que a suíte rode um arquivo por
 vez (o backend em Go tem uma corrida na tabela de refresh token que
 falharia os testes de integração em paralelo).
+
+Os testes cobrem quatro níveis: **Model** (o JSON que entra e sai),
+**Service** (a rota e o corpo), **Controller** (a regra da tela) e
+**Widget** (a tela desenhando). Além disso, o
+[`test/e2e_fluxo_test.dart`](test/e2e_fluxo_test.dart) faz o caminho
+inteiro do app — **login → painel → indicadores → lista → detalhe →
+histórico → logout** — com as telas reais contra a **API real**.
 
 | Requisito | Onde está |
 |----------|-----------|
@@ -482,7 +489,7 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (280 testes)
+flutter test             # suíte completa (319 testes)
 ```
 
 A suíte é dividida em quinze arquivos:
@@ -503,6 +510,7 @@ A suíte é dividida em quinze arquivos:
 | `test/perfil_test.dart` | RF09 / RN06 | Não |
 | `test/campo_texto_senha_test.dart` | Botão de mostrar/ocultar senha, no widget e nas telas reais | Não |
 | `test/diagnostico_conexao_test.dart` | Diagnóstico de conexão com a API (tela de Login) | Não |
+| `test/e2e_fluxo_test.dart` | **Caminho inteiro do app** — login → painel → indicadores → lista → detalhe → histórico → logout, com as telas reais | Sim (ignorado se a API estiver fora) |
 | `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
 | `test/integracao_patrimonio_test.dart` | Listagem, filtros e ciclo completo contra a API | Sim (ignorados se a API estiver fora) |
 | `test/integracao_diagnostico_test.dart` | Diagnóstico contra a API real (ligada e desligada) | Sim (ignorado se a API estiver fora) |

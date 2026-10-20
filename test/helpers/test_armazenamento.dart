@@ -86,7 +86,7 @@ void loginEmMemoria(SessaoService sessao, UsuarioModel usuario) {
 UsuarioModel adminDeTeste() => UsuarioModel(
       id: 1,
       nome: 'Coordenador Geral',
-      email: 'admin@escola.com',
+      email: 'admin@admin.com',
       role: 'admin',
     );
 

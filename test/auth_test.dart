@@ -32,7 +32,7 @@ import 'helpers/test_armazenamento.dart';
 /// Resposta de login no formato exato do backend.
 Map<String, dynamic> payloadDeLogin({
   String role = 'admin',
-  String email = 'admin@escola.com',
+  String email = 'admin@admin.com',
 }) => {
       'token': 'jwt-de-teste',
       'refreshToken': 'refresh-de-teste',
@@ -138,7 +138,7 @@ void main() {
       expect(resposta.expiresIn, 900);
       expect(resposta.tokenType, 'Bearer');
       expect(resposta.usuario.role, 'admin');
-      expect(resposta.usuario.email, 'admin@escola.com');
+      expect(resposta.usuario.email, 'admin@admin.com');
     });
 
     test('aceita "access_token" como alias de "token"', () {
@@ -186,17 +186,17 @@ void main() {
     });
 
     test('login() chama POST /auth/login', () async {
-      await service.login('admin@escola.com', 'admin123');
+      await service.login('admin@admin.com', 'admin123');
 
       expect(api.chamadas, ['POST /auth/login']);
       expect(api.corpos.last, {
-        'email': 'admin@escola.com',
+        'email': 'admin@admin.com',
         'password': 'admin123',
       });
     });
 
     test('login() devolve a resposta já convertida em Model', () async {
-      final resposta = await service.login('admin@escola.com', 'admin123');
+      final resposta = await service.login('admin@admin.com', 'admin123');
 
       expect(resposta.token, 'jwt-de-teste');
       expect(resposta.usuario.isAdmin, isTrue);
@@ -215,29 +215,29 @@ void main() {
     });
 
     test('solicitarCodigo() chama POST /auth/forgot-password', () async {
-      await service.solicitarCodigo('admin@escola.com');
+      await service.solicitarCodigo('admin@admin.com');
 
       expect(api.chamadas, ['POST /auth/forgot-password']);
-      expect(api.corpos.last, {'email': 'admin@escola.com'});
+      expect(api.corpos.last, {'email': 'admin@admin.com'});
     });
 
     test('verificarCodigo() chama POST /auth/verify-code', () async {
-      await service.verificarCodigo('admin@escola.com', '123456');
+      await service.verificarCodigo('admin@admin.com', '123456');
 
       expect(api.chamadas, ['POST /auth/verify-code']);
-      expect(api.corpos.last, {'email': 'admin@escola.com', 'code': '123456'});
+      expect(api.corpos.last, {'email': 'admin@admin.com', 'code': '123456'});
     });
 
     test('redefinirSenha() chama POST /auth/reset-password', () async {
       await service.redefinirSenha(
-        email: 'admin@escola.com',
+        email: 'admin@admin.com',
         codigo: '123456',
         novaSenha: 'nova123',
       );
 
       expect(api.chamadas, ['POST /auth/reset-password']);
       expect(api.corpos.last, {
-        'email': 'admin@escola.com',
+        'email': 'admin@admin.com',
         'code': '123456',
         'newPassword': 'nova123',
       });
@@ -316,7 +316,7 @@ void main() {
       montar();
       final formulario = await formState(tester);
 
-      controller.emailCtrl.text = 'admin@escola.com';
+      controller.emailCtrl.text = 'admin@admin.com';
       controller.senhaCtrl.text = 'admin123';
 
       await controller.login(formulario);
@@ -346,7 +346,7 @@ void main() {
       montar();
       final formulario = await formState(tester);
 
-      controller.emailCtrl.text = 'admin@escola.com';
+      controller.emailCtrl.text = 'admin@admin.com';
       controller.senhaCtrl.text = '123';
 
       await controller.login(formulario);
@@ -365,7 +365,7 @@ void main() {
           Get.put<AuthController>(AuthController(AuthService(apiQueFalha, sessao)));
       final formulario = await formState(tester);
 
-      controller.emailCtrl.text = 'admin@escola.com';
+      controller.emailCtrl.text = 'admin@admin.com';
       controller.senhaCtrl.text = 'admin123';
 
       await controller.login(formulario);
@@ -414,7 +414,7 @@ void main() {
       final formulario = await formState(tester);
 
       // Etapa 1 — pedir o código.
-      controller.recuperacaoEmailCtrl.text = 'admin@escola.com';
+      controller.recuperacaoEmailCtrl.text = 'admin@admin.com';
       await controller.solicitarCodigo(formulario);
 
       expect(api.chamadas.first, 'POST /auth/forgot-password');
@@ -455,14 +455,14 @@ void main() {
       montar();
       final formulario = await formState(tester);
 
-      controller.recuperacaoEmailCtrl.text = 'admin@escola.com';
+      controller.recuperacaoEmailCtrl.text = 'admin@admin.com';
       await controller.solicitarCodigo(formulario);
       expect(controller.etapaRecuperacao.value, 1);
 
       controller.etapaAnterior();
 
       expect(controller.etapaRecuperacao.value, 0);
-      expect(controller.recuperacaoEmailCtrl.text, 'admin@escola.com');
+      expect(controller.recuperacaoEmailCtrl.text, 'admin@admin.com');
     });
 
     testWidgets('logout limpa a sessão mesmo se a API falhar',
@@ -493,7 +493,7 @@ void main() {
         usuario: UsuarioModel(
           id: 1,
           nome: 'Coordenador',
-          email: 'admin@escola.com',
+          email: 'admin@admin.com',
           role: 'admin',
         ),
       );

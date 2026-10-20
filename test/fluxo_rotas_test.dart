@@ -107,7 +107,7 @@ void main() {
       await _avancarAteLogin(tester);
 
       await tester.enterText(
-          find.byType(CampoTexto).first, 'admin@escola.com');
+          find.byType(CampoTexto).first, 'admin@admin.com');
       await tester.enterText(find.byType(CampoTexto).last, '123');
       await tester.tap(find.byType(BotaoPrimario));
       await tester.pump();
@@ -126,7 +126,7 @@ void main() {
         usuarioLogado: UsuarioModel(
           id: 1,
           nome: 'Coordenador Geral',
-          email: 'admin@escola.com',
+          email: 'admin@admin.com',
           role: 'admin',
         ),
       );
@@ -176,7 +176,7 @@ void main() {
         tester,
         usuarioLogado: UsuarioModel(
           nome: 'Coordenador Geral',
-          email: 'admin@escola.com',
+          email: 'admin@admin.com',
           role: 'admin',
         ),
       );
