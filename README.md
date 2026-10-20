@@ -330,6 +330,35 @@ A API sobe na porta **8081** e a documentação fica em
 | Se o `data.db` for apagado? | Ele é recriado e populado automaticamente na próxima vez que `api.exe` rodar. Não há migração nem script de setup. |
 | Custa alguma coisa? | **R$ 0.** Nenhum serviço pago, nenhuma chave de API, nenhuma conta em nuvem. O app funciona com a API rodando na mesma máquina (ou na rede local da escola). |
 
+#### ⚠️ "Não foi possível conectar ao servidor"
+
+O erro mais comum de desenvolvimento com este projeto. Ele significa que
+o app **não conseguiu abrir conexão** com a API.
+
+> **Cada pessoa precisa do `api.exe` rodando na própria máquina.** O
+> backend é um servidor local — não está "na nuvem" e não é
+> compartilhado. Rode `./api.exe` **antes** de rodar o app.
+
+A tela de Login tem um botão **"Verificar conexão com a API"** que faz
+o diagnóstico na hora: mostra **qual endereço** o app está usando, se a
+API respondeu e o que fazer.
+
+| Onde o app roda | Endereço | Por quê |
+|------------------|----------|---------|
+| Emulador Android (oficial) | `http://10.0.2.2:8081/api` | `10.0.2.2` é o alias da máquina, visto de dentro do emulador |
+| Simulador iOS / desktop / Chrome | `http://localhost:8081/api` | app e backend na mesma máquina |
+| Celular físico (Wi-Fi) | `http://192.168.x.x:8081/api` | o IP da máquina na rede local |
+
+Checklist rápido (detalhes no [guia](docs/GUIA.md)):
+
+1. O `api.exe` está rodando? Se a janela do console **some na hora**,
+   o Windows bloqueou o executável: clique com o botão direito →
+   **Propriedades** → **Desbloquear**.
+2. A porta 8081 está livre? `netstat -ano | findstr :8081`.
+3. No celular físico: mesmo Wi-Fi e `api.exe` liberado no firewall.
+4. Emulador Android em máquina virtual (Genymotion/WSA): o `10.0.2.2`
+   pode não existir — use `--dart-define=API_BASE_URL=http://<ip>:8081/api`.
+
 #### CPF e telefone: podem ser qualquer valor
 
 O app **não** confere o dígito verificador do CPF e **não** consulta
