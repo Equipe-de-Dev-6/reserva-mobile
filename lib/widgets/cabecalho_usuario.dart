@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import '../app/tema.dart';
 import '../core/servicos/sessao_service.dart';
 
-/// Faixa de identificação exibida no topo dos dois painéis.
+/// Faixa de identificaÃ§Ã£o exibida no topo dos dois painÃ©is.
 ///
-/// Como o [SessaoService] é um serviço permanent, o `Obx` garante que
-/// a faixa reflita o usuário logado sem a tela precisar buscar em
+/// Como o [SessaoService] Ã© um serviÃ§o permanent, o `Obx` garante que
+/// a faixa reflita o usuÃ¡rio logado sem a tela precisar buscar em
 /// separado.
 class CabecalhoUsuario extends StatelessWidget {
   const CabecalhoUsuario({super.key});
@@ -48,7 +48,7 @@ class CabecalhoUsuario extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    usuario?.nome ?? 'Usuário',
+                    usuario?.nome ?? 'UsuÃ¡rio',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -74,10 +74,10 @@ class CabecalhoUsuario extends StatelessWidget {
     });
   }
 
-  /// Traduz o papel técnico para o rótulo exibido ao usuário.
+  /// Traduz o papel tÃ©cnico para o rÃ³tulo exibido ao usuÃ¡rio.
   static String _rotuloPerfil(String? role) => switch (role) {
         'admin' => 'Coordenador (admin)',
         'professor' => 'Professor (docente)',
-        _ => 'Perfil não reconhecido',
+        _ => 'Perfil nÃ£o reconhecido',
       };
 }

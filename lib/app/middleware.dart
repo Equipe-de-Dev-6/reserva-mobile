@@ -35,6 +35,31 @@ class AnonimoMiddleware extends GetMiddleware {
   }
 }
 
+/// Guarda de rota por papel (RBAC) do painel do Coordenador (RF06).
+///
+/// Complementa a [AutenticadoMiddleware] nas rotas `/admin/...`: só o
+/// `admin` entra. Um docente que tentar abrir a tela de gestão de
+/// professores é devolvido ao próprio painel, sem ver a tela.
+///
+/// Como as demais guardas, isto é **defesa de interface**. A barreira
+/// real é o backend: `GET /admin/professors` responde `403 Forbidden`
+/// para quem não é admin, e há teste de integração cobrindo isso.
+class AdminMiddleware extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    final sessao = Get.find<SessaoService>();
+    final usuario = sessao.usuario.value;
+
+    if (usuario != null && usuario.isAdmin) return null;
+
+    // Sem sessão nenhuma, o destino correto é o login — a guarda se
+    // sustenta sozinha, sem depender da ordem dos middlewares. Com
+    // sessão de docente, é o próprio painel (menor privilégio, RF01).
+    if (!sessao.autenticado) return const RouteSettings(name: Rotas.login);
+    return RouteSettings(name: rotaPorSessao(sessao));
+  }
+}
+
 /// Define a rota de destino conforme a role do usuário logado.
 /// Regra central do RBAC: `admin` → painel administrativo;
 /// qualquer outro papel → painel do docente (somente leitura).

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// Identidade visual do aplicativo.
 ///
-/// Centralizar as cores e os estilos aqui evita "números mágicos"
-/// espalhados pelas Views e garante consistência entre telas.
+/// Centralizar as cores e os estilos aqui evita "n├║meros m├ígicos"
+/// espalhados pelas Views e garante consist├¬ncia entre telas.
 class Tema {
   Tema._();
 

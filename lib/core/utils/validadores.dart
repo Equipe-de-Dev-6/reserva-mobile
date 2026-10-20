@@ -1,8 +1,15 @@
+import 'package:flutter/services.dart';
+
 /// Validadores de formulário reutilizáveis.
 ///
 /// Cada método devolve `null` quando o valor é válido, ou a mensagem de
 /// erro a ser exibida abaixo do campo. Esse é o contrato esperado pelo
 /// `TextFormField.validator` do Flutter.
+///
+/// Os `formatadores*` existem pelo mesmo motivo (RNF04): a máscara
+/// progressiva de telefone e CPF é a mesma em todos os formulários —
+/// cadastro do Coordenador, cadastro do Professor e Perfil — e viver
+/// aqui evita três cópias da mesma `TextInputFormatter`.
 class Validadores {
   Validadores._();
 
@@ -97,4 +104,34 @@ class Validadores {
     return '${d.substring(0, 3)}.${d.substring(3, 6)}.'
         '${d.substring(6, 9)}-${d.substring(9)}';
   }
+
+  /// Formatadores para o `CampoTexto` de telefone.
+  ///
+  /// Primeiro restringe o que pode ser digitado e depois aplica a máscara
+  /// a cada tecla. O `maxLength` impede que o comprimento estoure a
+  /// máscara e apague o texto (11 dígitos → 15 caracteres com máscara).
+  static List<TextInputFormatter> formatadoresTelefone() => [
+        FilteringTextInputFormatter.allow(RegExp(r'[\d()\-\s]')),
+        TextInputFormatter.withFunction((old, novo) {
+          final texto = novo.text.length > 16 ? old.text : novo.text;
+          final mascarado = mascaraTelefone(texto);
+          return TextEditingValue(
+            text: mascarado,
+            selection: TextSelection.collapsed(offset: mascarado.length),
+          );
+        }),
+      ];
+
+  /// Formatadores para o `CampoTexto` de CPF (14 caracteres com máscara).
+  static List<TextInputFormatter> formatadoresCpf() => [
+        FilteringTextInputFormatter.digitsOnly,
+        TextInputFormatter.withFunction((old, novo) {
+          final texto = novo.text.length > 14 ? old.text : novo.text;
+          final mascarado = mascaraCpf(texto);
+          return TextEditingValue(
+            text: mascarado,
+            selection: TextSelection.collapsed(offset: mascarado.length),
+          );
+        }),
+      ];
 }

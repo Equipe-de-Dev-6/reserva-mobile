@@ -7,6 +7,10 @@ import '../views/auth/login_view.dart';
 import '../views/auth/cadastro_admin_view.dart';
 import '../views/auth/recuperar_senha_view.dart';
 import '../views/admin/admin_home_view.dart';
+import '../views/admin/professores/professores_lista_view.dart';
+import '../views/admin/professores/professor_cadastro_view.dart';
+import '../views/admin/professores/professor_detalhe_view.dart';
+import '../views/perfil/perfil_view.dart';
 import '../views/professor/professor_home_view.dart';
 
 /// Nomes das rotas. Nunca use strings soltas no `Get.toNamed`:
@@ -20,6 +24,22 @@ class Rotas {
   static const recuperarSenha = '/recuperar-senha';
   static const homeAdmin = '/admin/home';
   static const homeProfessor = '/professor/home';
+
+  // --- Módulo 2: gestão de professores (RF06) --------------------------
+  static const professores = '/admin/professores';
+  static const professorNovo = '/admin/professores/novo';
+
+  /// Rota com parâmetro: use `'$professorDetalhe/$id'`. O `:id` é lido
+  /// pelo Controller via `Get.parameters`.
+  static const professorDetalhe = '/admin/professores/detalhe/:id';
+
+  /// Monta a rota do detalhe de um professor.
+  static String detalheDeProfessor(int id) => '/admin/professores/detalhe/$id';
+
+  // --- Módulo 3: perfil (RF09) -----------------------------------------
+  /// Liberada para admin e professor: o RN06 dá autonomia ao docente
+  /// sobre os próprios dados.
+  static const perfil = '/perfil';
 }
 
 /// Mapa de navegação nomeada da aplicação.
@@ -83,6 +103,44 @@ class AppRotas {
       binding: AuthBinding(),
       middlewares: [AutenticadoMiddleware()],
       transition: Transition.fadeIn,
+      transitionDuration: _transicao,
+    ),
+
+    // Módulo 2 — gestão de professores (RF06).
+    // Exclusivas do Coordenador: `AutenticadoMiddleware` garante a sessão
+    // e `AdminMiddleware` o papel (RN03 — o docente não gerencia nada).
+    GetPage(
+      name: Rotas.professores,
+      page: () => const ProfessoresListaView(),
+      binding: ProfessorBinding(),
+      middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+    GetPage(
+      name: Rotas.professorNovo,
+      page: () => const ProfessorCadastroView(),
+      binding: ProfessorBinding(),
+      middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+    GetPage(
+      name: Rotas.professorDetalhe,
+      page: () => const ProfessorDetalheView(),
+      binding: ProfessorBinding(),
+      middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+
+    // Módulo 3 — Perfil (RF09). Aberta para os dois papéis.
+    GetPage(
+      name: Rotas.perfil,
+      page: () => const PerfilView(),
+      binding: PerfilBinding(),
+      middlewares: [AutenticadoMiddleware()],
+      transition: Transition.rightToLeftWithFade,
       transitionDuration: _transicao,
     ),
   ];

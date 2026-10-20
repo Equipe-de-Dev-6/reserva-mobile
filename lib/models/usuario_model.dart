@@ -110,6 +110,7 @@ class UsuarioModel {
     String? matricula,
     String? departamento,
     String? cpf,
+    int? totalPatrimonios,
   }) {
     return UsuarioModel(
       id: id,
@@ -128,7 +129,7 @@ class UsuarioModel {
       contatoEmergencia: contatoEmergencia,
       tipoSanguineo: tipoSanguineo,
       alergias: alergias,
-      totalPatrimonios: totalPatrimonios,
+      totalPatrimonios: totalPatrimonios ?? this.totalPatrimonios,
       createdAt: createdAt,
     );
   }
