@@ -97,7 +97,6 @@ class ProfessorCadastroController extends GetxController {
     }
   }
 
-  void alternarVisibilidadeSenha() => senhaOculta.toggle();
 
   // =========================================================================
   // VALIDAÇÕES

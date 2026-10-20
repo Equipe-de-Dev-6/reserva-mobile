@@ -16,7 +16,7 @@ class CampoTexto extends StatefulWidget {
     this.controlador,
     this.senha = false,
     this.aoAlternarVisibilidade,
-    this.obscureText, // RxBool externo (ex.: controller.senhaOculta)
+    this.obscureText,
     this.teclado,
     this.formatters,
     this.maxLength,
@@ -29,9 +29,30 @@ class CampoTexto extends StatefulWidget {
   final String? dica;
   final IconData? icone;
   final TextEditingController? controlador;
+
+  /// Marca o campo como sendo de senha: habilita o botão de
+  /// mostrar/ocultar.
   final bool senha;
+
+  /// Controle **externo** da visibilidade — normalmente um `RxBool` do
+  /// Controller (`controller.senhaOculta`).
+  ///
+  /// Quando é informado, ele é a **única** fonte de verdade: o botão
+  /// alterna este valor e a tela se redesenha sozinha.
+  ///
+  /// ⚠️ **Não combine com [aoAlternarVisibilidade].** Os dois
+  /// alternando o mesmo valor fariam o toggle acontecer **duas vezes** —
+  /// e a senha nunca apareceria. Foi exatamente assim que o botão
+  /// "mostrar senha" ficou sem efeito em todas as telas.
+  final RxBool? obscureText;
+
+  /// Callback disparado quando a visibilidade muda no modo **interno**
+  /// (quando [obscureText] não é informado).
+  ///
+  /// No modo externo ele **não** é chamado: o próprio `RxBool` já é a
+  /// fonte de verdade.
   final VoidCallback? aoAlternarVisibilidade;
-  final RxBool? obscureText; // Estado externo reativo (GetX)
+
   final TextInputType? teclado;
   final List<TextInputFormatter>? formatters;
   final int? maxLength;
@@ -51,28 +72,35 @@ class CampoTexto extends StatefulWidget {
 }
 
 class _CampoTextoState extends State<CampoTexto> {
+  /// Visibilidade no modo **interno** (sem [CampoTexto.obscureText]).
   late bool _oculto = widget.senha;
-
-  bool get _obscureText {
-    if (widget.obscureText != null) return widget.obscureText!.value;
-    return _oculto;
-  }
 
   void _alternar() {
     if (widget.obscureText != null) {
+      // Uma única alternância: o `RxBool` é a fonte de verdade.
+      // Chamar também o callback aqui inverteria duas vezes, e a
+      // senha voltaria a ficar oculta.
       widget.obscureText!.toggle();
-    } else {
-      setState(() => _oculto = !_oculto);
+      return;
     }
+
+    setState(() => _oculto = !_oculto);
     widget.aoAlternarVisibilidade?.call();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lê o valor atual (reativo ou interno) sem usar Obx — evita rebuild
-    // desnecessário que quebra pumpAndSettle nos testes.
-    final obscure = _obscureText;
+    // Controle externo: é preciso **observar** o `RxBool`. Sem o
+    // `Obx`, o `toggle()` mudava o valor mas a tela não se redesunha —
+    // e o botão "mostrar senha" parecia não fazer nada.
+    if (widget.obscureText != null) {
+      return Obx(() => _campo(context, widget.obscureText!.value));
+    }
 
+    return _campo(context, _oculto);
+  }
+
+  Widget _campo(BuildContext context, bool obscure) {
     return TextFormField(
       controller: widget.controlador,
       obscureText: obscure,
