@@ -7,6 +7,7 @@ import '../../controllers/auth_controller.dart';
 import '../../widgets/botao_primario.dart';
 import '../../widgets/campo_texto.dart';
 import '../../widgets/mensagem_erro.dart';
+import 'bloco_diagnostico.dart';
 
 /// Tela de Login (RF01).
 ///
@@ -163,6 +164,13 @@ class _FormularioLoginState extends State<_FormularioLogin> {
                 child: MensagemErro.erro(mensagem),
               );
             }),
+            // Diagnóstico: mostra qual endereço o app está usando e se a
+            // API respondeu. É o que resolve na hora o "não foi possível
+            // conectar ao servidor" — cada pessoa precisa do `api.exe`
+            // rodando na própria máquina, e o endereço muda conforme o
+            // dispositivo.
+            const BlocoDiagnostico(),
+            const SizedBox(height: 8),
             Obx(
               () => BotaoPrimario(
                 texto: 'Entrar',

@@ -270,7 +270,6 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 > outro host.
 
 ### 2.4 Ver o app como um celular (sem emulador)
-
 ```bash
 flutter run -d chrome -t dev/main_dev.dart
 ```
@@ -281,7 +280,55 @@ aparelho na barra lateral, gira a tela, liga o teclado virtual e
 ajusta o tamanho da fonte. É a forma mais rápida de checar o
 comportamento responsivo (RNF01).
 
-### 2.5 Rodar os testes
+### 2.5 ⚠️ "Não foi possível conectar ao servidor"
+
+O erro mais comum de desenvolvimento com este projeto. Ele significa
+que o app **não conseguiu abrir conexão** com a API.
+
+> **Cada pessoa precisa do `api.exe` rodando na própria máquina.** O
+> backend é um servidor local: ele não está "na nuvem" e não é
+> compartilhado. Rode `./api.exe` **antes** de rodar o app.
+
+A tela de Login tem um botão **"Verificar conexão com a API"** que faz
+o diagnóstico na hora: mostra **qual endereço** o app está usando, se a
+API respondeu e o que fazer.
+
+### Por que o endereço muda
+
+| Onde o app roda | Endereço | Por quê |
+|------------------|----------|---------|
+| Emulador Android (oficial) | `http://10.0.2.2:8081/api` | `10.0.2.2` é o alias do host na máquina, visto de dentro do emulador |
+| Simulador iOS / desktop / Chrome | `http://localhost:8081/api` | o app roda na mesma máquina do backend |
+| Celular físico (Wi-Fi) | `http://192.168.x.x:8081/api` | o IP da máquina na rede local |
+
+No celular físico, descubra o IP com `ipconfig` e rode:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
+```
+
+### Checklist quando não conecta
+
+1. **O `api.exe` está rodando?** Ele abre uma janela de console com o
+   banner do servidor. Se a janela **someu na hora**, o Windows
+   bloqueou o executável (o `api.exe` vem baixado do GitHub e chega com
+   a marca "Mark of the Web"). Clique em **"Mais informações" → "Executar
+   assim"**, ou clique com o botão direito → **Propriedades** →
+   marque **"Desbloquear"**.
+2. **A porta 8081 está livre?** Outro programa pode estar usando:
+   `netstat -ano | findstr :8081`.
+3. **O endereço está certo para o seu dispositivo?** Use o botão
+   "Verificar conexão com a API" — ele mostra o endereço exato que o
+   app está usando.
+4. **Aparelho físico**: o celular e o computador precisam estar na
+   **mesma rede Wi-Fi**, e o firewall do Windows pode bloquear o
+   `api.exe`. Libere o `api.exe` no firewall (prompt do Windows na
+   primeira execução).
+5. **Emulador Android em máquina virtual (Genymotion, WSA, etc.)**:
+   o alias `10.0.2.2` pode não existir. Use o IP da máquina na rede
+   com `--dart-define`.
+
+### 2.6 Rodar os testes
 
 ```bash
 flutter analyze          # análise estática (0 problemas esperado)
@@ -296,7 +343,7 @@ flutter test test/patrimonio_test.dart
 flutter test --plain-name "Cadastro → detalhe → edição → exclusão"
 ```
 
-### 2.6 Gerar os prints
+### 2.7 Gerar os prints
 
 ```bash
 flutter test tool/gerar_prints_test.dart
@@ -306,7 +353,7 @@ Monta as 17 telas com as widgets reais e grava os PNGs em
 `docs/prints/`. Use depois de mexer numa tela para atualizar a imagem
 do README.
 
-### 2.7 Ver o protótipo
+### 2.8 Ver o protótipo
 
 ```bash
 cd design
@@ -317,7 +364,7 @@ python -m http.server 8080
 Para levar ao Figma: plugin gratuito **HTML to Design** apontando para
 esse endereço.
 
-### 2.8 ⚠️ Se o `flutter test` falhar com "objective_c"
+### 2.9 ⚠️ Se o `flutter test` falhar com "objective_c"
 
 ```
 Building native assets for package:objective_c failed
@@ -340,7 +387,7 @@ flutter test
 #    git clone <url> C:\dev\reserva-mobile
 ```
 
-### 2.9 Por que os testes de integração falham em paralelo
+### 2.10 Por que os testes de integração falham em paralelo
 
 Dois arquivos de teste batem na API real ao mesmo tempo e o backend em
 Go tem uma corrida na tabela de refresh token
