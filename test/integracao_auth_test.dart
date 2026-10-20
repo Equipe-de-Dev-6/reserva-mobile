@@ -128,6 +128,16 @@ void main() {
     late String emailProfessor;
 
     setUp(() async {
+      // Sem a API no ar, o grupo inteiro é ignorado — **aqui**, e não
+      // dentro de cada `test`. Sem esta guarda, o `setUp` tentaria
+      // criar o docente contra um servidor inexistente e o teste
+      // **falharia** em vez de ser pulado — que é o que acontecia com
+      // quem rodava a suíte sem o `api.exe` no ar.
+      if (!online) {
+        markTestSkipped('API offline');
+        return;
+      }
+
       // 1) O admin cria o docente (RN02: cadastro centralizado).
       final sessaoAdmin = SessaoService();
       final apiAdmin = ApiClient(sessaoAdmin);
