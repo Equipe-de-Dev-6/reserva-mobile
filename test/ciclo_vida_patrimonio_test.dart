@@ -17,11 +17,8 @@ import 'package:reserva_mobile/controllers/patrimonio_ciclo_vida_controller.dart
 import 'package:reserva_mobile/controllers/patrimonio_historico_controller.dart';
 import 'package:reserva_mobile/core/servicos/patrimonio_service.dart';
 import 'package:reserva_mobile/core/servicos/professor_service.dart';
-import 'package:reserva_mobile/core/servicos/sessao_service.dart';
 import 'package:reserva_mobile/core/utils/app_exception.dart';
-import 'package:reserva_mobile/models/patrimonio_model.dart';
 import 'package:reserva_mobile/models/patrimonio_stats_model.dart';
-import 'package:reserva_mobile/models/professor_model.dart';
 import 'package:reserva_mobile/models/status_patrimonio.dart';
 
 import 'helpers/api_client_falso.dart';

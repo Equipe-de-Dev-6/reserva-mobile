@@ -16,7 +16,6 @@
 // para que mostrem o app de verdade, com os widgets, as fontes e os
 // espacamentos reais.
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
