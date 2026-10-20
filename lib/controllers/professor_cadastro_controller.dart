@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../core/servicos/professor_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../core/utils/validadores.dart';
 import '../models/professor_request.dart';
 
@@ -36,14 +37,17 @@ class ProfessorCadastroController extends GetxController {
 
   @override
   void onClose() {
-    nomeCtrl.dispose();
-    emailCtrl.dispose();
-    senhaCtrl.dispose();
-    confirmarSenhaCtrl.dispose();
-    matriculaCtrl.dispose();
-    departamentoCtrl.dispose();
-    telefoneCtrl.dispose();
-    cpfCtrl.dispose();
+    // Limpa, em vez de descartar (ver `core/utils/text_controllers.dart`).
+    limparCampos([
+      nomeCtrl,
+      emailCtrl,
+      senhaCtrl,
+      confirmarSenhaCtrl,
+      matriculaCtrl,
+      departamentoCtrl,
+      telefoneCtrl,
+      cpfCtrl,
+    ]);
     super.onClose();
   }
 

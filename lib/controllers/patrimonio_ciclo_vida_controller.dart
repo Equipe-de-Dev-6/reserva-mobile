@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../core/servicos/patrimonio_service.dart';
 import '../core/servicos/professor_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../models/patrimonio_model.dart';
 import '../models/professor_model.dart';
 
@@ -85,8 +86,8 @@ class PatrimonioCicloVidaController extends GetxController {
 
   @override
   void onClose() {
-    observacoesCtrl.dispose();
-    motivoCtrl.dispose();
+    // Limpa, em vez de descartar (ver `core/utils/text_controllers.dart`).
+    limparCampos([observacoesCtrl, motivoCtrl]);
     super.onClose();
   }
 

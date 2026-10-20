@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../app/rotas.dart';
 import '../../app/tema.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/botao_primario.dart';
@@ -170,9 +171,13 @@ class _Mensagens extends StatelessWidget {
   }
 
   String _descricao(int etapa) => switch (etapa) {
-        0 => 'Informe o e-mail cadastrado. Enviaremos um código de '
-            'validação de 6 dígitos.',
-        1 => 'Digite o código de 6 dígitos enviado para o e-mail informado.',
+        0 => 'Informe o e-mail cadastrado. Geraremos um código de validação '
+            'de 6 dígitos.',
+        // Atenção: o backend **não** envia e-mail — ele imprime o código
+        // no console do servidor. Dizer "enviado para o e-mail" faria o
+        // usuário procurar uma mensagem que nunca chega.
+        1 => 'Digite o código de 6 dígitos. Ele foi gerado pelo servidor '
+            '— confira o console do `api.exe`.',
         _ => 'Crie uma nova senha com no mínimo 6 caracteres.',
       };
 }
@@ -282,9 +287,25 @@ class _EtapaEmail extends _EtapaBase {
 
   @override
   Widget? rodape() => TextButton(
-        onPressed: controller.carregando.value ? null : () => Get.back(),
+        // `Get.back()` volta para a tela anterior. Se o app foi aberto
+        // direto nesta rota (deep link), não há tela anterior — nesse
+        // caso, ir para o Login é o destino correto.
+        onPressed: controller.carregando.value
+            ? null
+            : () => _voltar(),
         child: const Text('Voltar para o login'),
       );
+
+  /// Volta para a tela anterior quando existe uma; senão, vai para o
+  /// Login — que é de onde esta tela sempre chega.
+  void _voltar() {
+    final podeVoltar = Get.key.currentState?.canPop() ?? false;
+    if (podeVoltar) {
+      Get.back<Rotas>();
+    } else {
+      Get.offAllNamed(Rotas.login);
+    }
+  }
 }
 
 class _EtapaCodigo extends _EtapaBase {

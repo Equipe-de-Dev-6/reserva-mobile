@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../core/servicos/patrimonio_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../core/utils/validadores.dart';
 import '../models/patrimonio_model.dart';
 import '../models/status_patrimonio.dart';
@@ -104,14 +105,17 @@ class PatrimonioFormController extends GetxController {
 
   @override
   void onClose() {
-    codigoCtrl.dispose();
-    nomeCtrl.dispose();
-    descricaoCtrl.dispose();
-    marcaCtrl.dispose();
-    modeloCtrl.dispose();
-    numeroSerieCtrl.dispose();
-    localizacaoCtrl.dispose();
-    observacoesCtrl.dispose();
+    // Limpa, em vez de descartar (ver `core/utils/text_controllers.dart`).
+    limparCampos([
+      codigoCtrl,
+      nomeCtrl,
+      descricaoCtrl,
+      marcaCtrl,
+      modeloCtrl,
+      numeroSerieCtrl,
+      localizacaoCtrl,
+      observacoesCtrl,
+    ]);
     super.onClose();
   }
 

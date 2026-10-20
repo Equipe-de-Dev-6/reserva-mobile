@@ -26,16 +26,7 @@ class ProfessoresListaView extends GetView<ProfessorListaController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Professores'),
-        actions: [
-          IconButton(
-            tooltip: 'Cadastrar professor',
-            onPressed: _abrirCadastro,
-            icon: const Icon(Icons.person_add_alt_1_rounded),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Professores')),
       body: SafeArea(
         child: Column(
           children: [
@@ -45,11 +36,21 @@ class ProfessoresListaView extends GetView<ProfessorListaController> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirCadastro,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Novo professor'),
-      ),
+      // O FAB some quando não há nenhum docente na lista: nesse caso o
+      // próprio estado vazio já oferece o botão "Cadastrar professor".
+      // Com os dois na tela, o FAB caía por cima do botão — e o usuário
+      // via o botão cortado embaixo dele.
+      floatingActionButton: Obx(() {
+        final vazio = controller.professores.isEmpty &&
+            controller.busca.value.trim().isEmpty;
+        if (vazio) return const SizedBox.shrink();
+
+        return FloatingActionButton.extended(
+          onPressed: _abrirCadastro,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Novo professor'),
+        );
+      }),
     );
   }
 
