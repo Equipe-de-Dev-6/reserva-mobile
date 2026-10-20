@@ -161,6 +161,38 @@ class _Ficha extends StatelessWidget {
         // --- Ações de escrita: só Coordinator (RN03) -------------------
         if (controller.podeEditar) ...[
           const SizedBox(height: 24),
+          _BotaoAcao(
+            icone: Icons.history_toggle_off_rounded,
+            texto: 'Ver histórico do bem',
+            aoTocar: () => Get.toNamed(
+              RotasPatrimonio.historico,
+              arguments: {'id': patrimonio.id},
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Entregar só faz sentido para um bem sem responsável (RN05).
+          if (controller.statusPermiteAtribuicao)
+            _BotaoAcao(
+              icone: Icons.handshake_outlined,
+              texto: 'Entregar a um professor',
+              aoTocar: () => Get.toNamed(
+                RotasPatrimonio.atribuicao,
+                arguments: {'id': patrimonio.id, 'patrimonio': patrimonio},
+              ),
+            ),
+          // Devolver só faz sentido para um bem com responsável.
+          if (patrimonio.temProfessor) ...[
+            const SizedBox(height: 10),
+            _BotaoAcao(
+              icone: Icons.assignment_return_outlined,
+              texto: 'Registrar devolução',
+              aoTocar: () => Get.toNamed(
+                RotasPatrimonio.devolucao,
+                arguments: {'id': patrimonio.id, 'patrimonio': patrimonio},
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () => Get.toNamed(
               RotasPatrimonio.form,
@@ -237,6 +269,38 @@ class _Ficha extends StatelessWidget {
         margin: const EdgeInsets.all(16),
       );
     }
+  }
+}
+
+/// Botão de ação do detalhe (histórico, entrega, devolução).
+///
+/// Todos os botões de escrita têm a mesma aparência e o mesmo alvo
+/// de toque de 48 px — é por isso que viram um widget só em vez de
+/// três `OutlinedButton.icon` repetidos (RNF04).
+class _BotaoAcao extends StatelessWidget {
+  const _BotaoAcao({
+    required this.icone,
+    required this.texto,
+    required this.aoTocar,
+  });
+
+  final IconData icone;
+  final String texto;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: aoTocar,
+      icon: Icon(icone, size: 18),
+      label: Text(texto),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 }
 

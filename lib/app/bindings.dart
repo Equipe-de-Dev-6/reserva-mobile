@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
 import '../controllers/auth_controller.dart';
+import '../controllers/dashboard_controller.dart';
+import '../controllers/meus_patrimonios_controller.dart';
 import '../controllers/perfil_controller.dart';
 import '../controllers/professor_cadastro_controller.dart';
 import '../controllers/professor_detalhe_controller.dart';
@@ -8,6 +10,7 @@ import '../controllers/professor_lista_controller.dart';
 import '../controllers/splash_controller.dart';
 import '../core/servicos/api_client.dart';
 import '../core/servicos/auth_service.dart';
+import '../core/servicos/patrimonio_service.dart';
 import '../core/servicos/perfil_service.dart';
 import '../core/servicos/professor_service.dart';
 import '../core/servicos/sessao_service.dart';
@@ -106,6 +109,34 @@ class PerfilBinding extends Bindings {
         Get.find<PerfilService>(),
         Get.find<SessaoService>(),
       ),
+    );
+  }
+}
+
+/// Binding do dashboard de indicadores (RF05).
+class DashboardBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put<PatrimonioService>(
+      PatrimonioService(Get.find<ApiClient>()),
+      permanent: true,
+    );
+    Get.lazyPut<DashboardController>(
+      () => DashboardController(Get.find<PatrimonioService>()),
+    );
+  }
+}
+
+/// Binding da tela "Meus Patrimônios" do docente (RF08).
+class MeusPatrimoniosBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put<PatrimonioService>(
+      PatrimonioService(Get.find<ApiClient>()),
+      permanent: true,
+    );
+    Get.lazyPut<MeusPatrimoniosController>(
+      () => MeusPatrimoniosController(Get.find<PatrimonioService>()),
     );
   }
 }

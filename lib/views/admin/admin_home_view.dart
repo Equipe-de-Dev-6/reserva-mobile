@@ -5,17 +5,19 @@ import '../../app/rotas.dart';
 import '../../app/tema.dart';
 import '../../controllers/auth_controller.dart';
 import '../../core/servicos/sessao_service.dart';
+import '../../views/patrimonio/rotas_patrimonio.dart';
 import '../../widgets/botao_primario.dart';
 import '../../widgets/cabecalho_usuario.dart';
 import '../../widgets/dialogo_logout.dart';
-import '../../widgets/estado_vazio.dart';
 
-/// Tela provisória do Painel do Coordenador.
+/// **Painel do Coordenador (RF05–RF07).**
 ///
-/// Ela já valida o roteamento por role e o logout (RF04), e expõe o
-/// atalho para a gestão de professores (RF06). O restante do módulo 2
-/// — dashboard de indicadores (RF05) e gestão de patrimônios (RF07) —
-/// entra na Parte 4.
+/// É o menu do gestor da escola: de onde saem o dashboard de
+/// indicadores, o acervo de patrimônios e o corpo docente.
+///
+/// Os atalhos são condicionados ao papel: o|Coordenador vê os três
+/// módulos de gestão, mas nunca uma ação de escrita de bens — quem
+/// escreve é quem tem a custódia do acervo.
 class AdminHomeView extends GetView<AuthController> {
   const AdminHomeView({super.key});
 
@@ -47,23 +49,49 @@ class AdminHomeView extends GetView<AuthController> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 children: [
-                  // Atalhos entregues até agora. O dashboard (RF05) e os
-                  // patrimônios (RF07) chegam na Parte 4.
+                  _AtalhoPainel(
+                    icone: Icons.dashboard_customize_outlined,
+                    titulo: 'Indicadores',
+                    descricao:
+                        'Total de bens, itens em uso, disponíveis, em '
+                        'manutenção e a distribuição por categoria.',
+                    aoTocar: () => Get.toNamed(Rotas.dashboard),
+                  ),
+                  const SizedBox(height: 14),
+                  _AtalhoPainel(
+                    icone: Icons.inventory_2_outlined,
+                    titulo: 'Patrimônios',
+                    descricao:
+                        'Consulte, cadastre, entregue e devolva os '
+                        'equipamentos da escola.',
+                    aoTocar: () => Get.toNamed(RotasPatrimonio.lista),
+                  ),
+                  const SizedBox(height: 14),
                   _AtalhoPainel(
                     icone: Icons.school_outlined,
                     titulo: 'Professores',
                     descricao:
-                        'Cadastrar docentes e ver quantos bens cada um tem '
+                        'Cadastre docentes e veja quantos bens cada um tem '
                         'sob responsabilidade.',
                     aoTocar: () => Get.toNamed(Rotas.professores),
                   ),
                   const SizedBox(height: 14),
-                  EstadoVazio(
-                    icone: Icons.dashboard_customize_outlined,
-                    titulo: 'Módulo 2 em construção',
-                    descricao: 'Dashboard de indicadores e gestão de '
-                        'patrimônios serão implementados na Parte 4. '
-                        'Sessão ativa como $email.',
+                  _AtalhoPainel(
+                    icone: Icons.account_circle_outlined,
+                    titulo: 'Meu perfil',
+                    descricao:
+                        'Atualize seu telefone e contato, e altere sua '
+                        'senha de acesso.',
+                    aoTocar: () => Get.toNamed(Rotas.perfil),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Sessão ativa como $email.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.black.withValues(alpha: 0.5),
+                    ),
                   ),
                 ],
               ),

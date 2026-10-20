@@ -7,10 +7,13 @@ import '../views/auth/login_view.dart';
 import '../views/auth/cadastro_admin_view.dart';
 import '../views/auth/recuperar_senha_view.dart';
 import '../views/admin/admin_home_view.dart';
+import '../views/admin/dashboard_view.dart';
 import '../views/admin/professores/professores_lista_view.dart';
 import '../views/admin/professores/professor_cadastro_view.dart';
 import '../views/admin/professores/professor_detalhe_view.dart';
 import '../views/perfil/perfil_view.dart';
+import '../views/patrimonio/rotas_patrimonio.dart';
+import '../views/professor/meus_patrimonios_view.dart';
 import '../views/professor/professor_home_view.dart';
 
 /// Nomes das rotas. Nunca use strings soltas no `Get.toNamed`:
@@ -25,6 +28,11 @@ class Rotas {
   static const homeAdmin = '/admin/home';
   static const homeProfessor = '/professor/home';
 
+  // --- Módulo 2: dashboard de indicadores (RF05) -------------------------
+  /// Exclusivo do Coordenador: `GET /admin/patrimonios/stats` responde
+  /// `403` para qualquer outro papel.
+  static const dashboard = '/admin/dashboard';
+
   // --- Módulo 2: gestão de professores (RF06) --------------------------
   static const professores = '/admin/professores';
   static const professorNovo = '/admin/professores/novo';
@@ -35,6 +43,10 @@ class Rotas {
 
   /// Monta a rota do detalhe de um professor.
   static String detalheDeProfessor(int id) => '/admin/professores/detalhe/$id';
+
+  // --- Módulo 3: meus patrimônios (RF08) --------------------------------
+  /// Tela de leitura do docente.
+  static const meusPatrimonios = '/professor/meus-patrimonios';
 
   // --- Módulo 3: perfil (RF09) -----------------------------------------
   /// Liberada para admin e professor: o RN06 dá autonomia ao docente
@@ -106,6 +118,17 @@ class AppRotas {
       transitionDuration: _transicao,
     ),
 
+    // Módulo 2 — dashboard de indicadores (RF05).
+    // Exclusivo do Coordenador: o backend exige papel de admin.
+    GetPage(
+      name: Rotas.dashboard,
+      page: () => const DashboardView(),
+      binding: DashboardBinding(),
+      middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+
     // Módulo 2 — gestão de professores (RF06).
     // Exclusivas do Coordenador: `AutenticadoMiddleware` garante a sessão
     // e `AdminMiddleware` o papel (RN03 — o docente não gerencia nada).
@@ -143,5 +166,25 @@ class AppRotas {
       transition: Transition.rightToLeftWithFade,
       transitionDuration: _transicao,
     ),
+
+    // Módulo 3 — "Meus Patrimônios" (RF08).
+    // Aberta para os dois papéis: o|Coordenador não tem bens
+    // vinculados, então a tela mostra o estado vazio — mas a rota fica
+    // disponível para o docente (RN03, leitura estrita).
+    GetPage(
+      name: Rotas.meusPatrimonios,
+      page: () => const MeusPatrimoniosView(),
+      binding: MeusPatrimoniosBinding(),
+      middlewares: [AutenticadoMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+
+    // Módulo 2 — Patrimônios (RF07a/RF07b).
+    //
+    // As páginas do módulo vêm prontas do seu próprio arquivo
+    // (`views/patrimonio/rotas_patrimonio.dart`), para que o módulo
+    // entre no app sem mexer em código de terceiros.
+    ...paginasPatrimonio,
   ];
 }

@@ -8,14 +8,14 @@ import '../../core/servicos/sessao_service.dart';
 import '../../widgets/botao_primario.dart';
 import '../../widgets/cabecalho_usuario.dart';
 import '../../widgets/dialogo_logout.dart';
-import '../../widgets/estado_vazio.dart';
 
-/// Tela provisória do Painel do Professor.
+/// **Painel do Professor (RF08 / RF09).**
 ///
-/// A visão do docente é estritamente de leitura (RN03): aqui não haverá
-/// botão de criar, editar ou excluir. A lista dos bens vinculados
-/// (RF08) entra na Parte 5. O que já está entregue é o acesso ao
-/// próprio Perfil (RF09 / RN06), liberado para os dois papéis.
+/// A visão do docente é estritamente de leitura (RN03): aqui não há
+/// botão de criar, editar, excluir, atribuir ou devolver. O que existe
+/// é o acesso aos **seus** equipamentos e ao **seu** perfil — este
+/// último liberado pelo RN06, que dá ao docente autonomia sobre o
+/// próprio telefone e a própria senha.
 class ProfessorHomeView extends GetView<AuthController> {
   const ProfessorHomeView({super.key});
 
@@ -25,7 +25,7 @@ class ProfessorHomeView extends GetView<AuthController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meus Patrimônios'),
+        title: const Text('Painel do Professor'),
         actions: [
           IconButton(
             tooltip: 'Meu perfil',
@@ -48,6 +48,15 @@ class ProfessorHomeView extends GetView<AuthController> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 children: [
                   _AtalhoPainel(
+                    icone: Icons.devices_other_outlined,
+                    titulo: 'Meus equipamentos',
+                    descricao:
+                        'Veja os bens sob sua responsabilidade, com '
+                        'tombamento, data de atribuição e localização.',
+                    aoTocar: () => Get.toNamed(Rotas.meusPatrimonios),
+                  ),
+                  const SizedBox(height: 14),
+                  _AtalhoPainel(
                     icone: Icons.account_circle_outlined,
                     titulo: 'Meu perfil',
                     descricao:
@@ -55,13 +64,14 @@ class ProfessorHomeView extends GetView<AuthController> {
                         'de acesso.',
                     aoTocar: () => Get.toNamed(Rotas.perfil),
                   ),
-                  const SizedBox(height: 14),
-                  EstadoVazio(
-                    icone: Icons.devices_other_outlined,
-                    titulo: 'Módulo 3 em construção',
-                    descricao: 'A consulta dos seus patrimônios será '
-                        'implementada na Parte 5. '
-                        'Sessão ativa como $email.',
+                  const SizedBox(height: 20),
+                  Text(
+                    'Sessão ativa como $email.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.black.withValues(alpha: 0.5),
+                    ),
                   ),
                 ],
               ),
@@ -83,6 +93,9 @@ class ProfessorHomeView extends GetView<AuthController> {
 }
 
 /// Cartão de atalho do painel do docente (RNF04).
+///
+/// Mesma anatomia do atalho do painel administrativo: um widget só,
+/// usado nas duas telas.
 class _AtalhoPainel extends StatelessWidget {
   const _AtalhoPainel({
     required this.icone,

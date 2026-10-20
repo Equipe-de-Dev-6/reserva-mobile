@@ -133,7 +133,11 @@ void main() {
       await _avancarAteLogin(tester);
 
       expect(find.text('Painel do Coordenador'), findsOneWidget);
-      expect(find.text('Módulo 2 em construção'), findsOneWidget);
+      // O painel do Coordenador é um menu: dashboard (RF05),
+      // patrimônios (RF07) e professores (RF06).
+      expect(find.text('Indicadores'), findsOneWidget);
+      expect(find.text('Patrimônios'), findsOneWidget);
+      expect(find.text('Professores'), findsOneWidget);
       expect(find.text('Coordenador Geral'), findsOneWidget);
       expect(find.text('Coordenador (admin)'), findsOneWidget);
     });
@@ -151,10 +155,18 @@ void main() {
       );
       await _avancarAteLogin(tester);
 
-      expect(find.text('Meus Patrimônios'), findsOneWidget);
-      expect(find.text('Módulo 3 em construção'), findsOneWidget);
+      expect(find.text('Painel do Professor'), findsOneWidget);
+      // O painel do docente oferece apenas leitura dos bens e o
+      // próprio perfil (RN03 / RF09).
+      expect(find.text('Meus equipamentos'), findsOneWidget);
+      expect(find.text('Meu perfil'), findsWidgets);
       expect(find.text('Prof. Carlos Drummond'), findsOneWidget);
       expect(find.text('Professor (docente)'), findsOneWidget);
+
+      // Nenhum atalho de gestão de bens pode aparecer para o docente.
+      expect(find.text('Indicadores'), findsNothing);
+      expect(find.text('Patrimônios'), findsNothing);
+      expect(find.text('Professores'), findsNothing);
     });
   });
 
