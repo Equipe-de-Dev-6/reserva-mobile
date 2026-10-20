@@ -457,12 +457,25 @@ void main() {
     });
 
     test('CPF e telefone são opcionais, mas validados quando informados', () {
+      // CPF e telefone são dados de identificação, não dados fiscais: o
+      // app só checa o **formato**, nunca o conteúdo — o backend também
+      // não checa (ele grava qualquer valor sem reclamar).
       expect(controller.validarCpf('   '), isNull);
       expect(controller.validarCpf('123'), 'CPF deve ter 11 dígitos.');
-      expect(controller.validarCpf('111.222.333-44'), 'CPF inválido.');
+      expect(controller.validarCpf('111.222.333-44'), isNull);
       expect(controller.validarCpf('529.982.247-25'), isNull);
+      // Qualquer sequência de 11 dígitos vale, mesmo sem dígito
+      // verificador válido.
+      expect(controller.validarCpf('000.000.000-00'), isNull);
+      expect(controller.validarCpf('123.456.789-45'), isNull);
+
       expect(controller.validarTelefone(''), isNull);
-      expect(controller.validarTelefone('123456'), 'Telefone inválido.');
+      expect(
+        controller.validarTelefone('1234567'),
+        'Telefone deve ter de 8 a 15 dígitos.',
+      );
+      expect(controller.validarTelefone('11987654321'), isNull);
+      expect(controller.validarTelefone('+5511987654321'), isNull);
     });
 
     testWidgets('campos válidos disparam POST e montam o corpo', (tester) async {

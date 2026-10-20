@@ -51,38 +51,46 @@ class Validadores {
     return null;
   }
 
+  /// Formato do CPF: **11 dígitos**, e nada mais.
+  ///
+  /// A decisão é do domínio: o CPF aqui é **dado de identificação**,
+  /// não dado fiscal. O backend não confere o dígito verificador (testado:
+  /// ele grava `123.456.789-45` sem reclamar) e a escola precisa
+  /// cadastrar também pessoas cujo registro não foi emitido — professor
+  /// convidado, servidor terceirizado, docente de outra instituição.
+  ///
+  /// Barrar o cadastro por causa de dígito verificador criaria atrito
+  /// sem nenhuma proteção real: quem digita o CPF errado não consegue
+  /// acessar o patrimônio de outra pessoa — o que protege é o token.
+  ///
+  /// A máscara (`111.222.333-44`) continua sendo aplicada no campo.
   static String? cpf(String? valor) {
     final v = somenteNumeros(valor ?? '');
     if (v.isEmpty) return null; // CPF é opcional no cadastro.
     if (v.length != 11) return 'CPF deve ter 11 dígitos.';
-    if (_cpfInvalido(v)) return 'CPF inválido.';
     return null;
   }
 
+  /// Formato do telefone: de 8 a 15 dígitos.
+  ///
+  /// Cobre telefone fixo (10–11), celular (11) e o formato
+  /// internacional E.164 (até 15). Como o CPF, o telefone é só dado de
+  /// contato: o app não consulta nenhuma base para saber se o número
+  /// existe.
   static String? telefone(String? valor) {
     final v = somenteNumeros(valor ?? '');
     if (v.isEmpty) return null; // Telefone é opcional.
-    if (v.length < 10 || v.length > 11) return 'Telefone inválido.';
+    if (v.length < 8 || v.length > 15) {
+      return 'Telefone deve ter de 8 a 15 dígitos.';
+    }
     return null;
   }
 
-  /// Validação de CPF pelos dois dígitos verificadores.
-  static bool _cpfInvalido(String cpf) {
-    if (RegExp(r'^(\d)\1{10}$').hasMatch(cpf)) return true; // 000..., 111...
-
-    for (var tamanho = 9; tamanho < 11; tamanho++) {
-      var soma = 0;
-      for (var i = 0; i < tamanho; i++) {
-        soma += int.parse(cpf[i]) * (tamanho + 1 - i);
-      }
-      var digito = (soma * 10) % 11;
-      digito = digito == 10 ? 0 : digito;
-      if (digito != int.parse(cpf[tamanho])) return true;
-    }
-    return false;
-  }
-
   /// Máscara progressiva de telefone: (11) 98888-7777
+  ///
+  /// Aceita até 15 dígitos (o formato internacional E.164). O texto é
+  /// **sempre preservado**: nenhum dígito é cortado ao aplicar a
+  /// máscara.
   static String mascaraTelefone(String valor) {
     final d = somenteNumeros(valor);
     if (d.length <= 2) return d.isEmpty ? '' : '($d';
@@ -90,7 +98,13 @@ class Validadores {
     if (d.length <= 10) {
       return '(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}';
     }
-    return '(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7, 11)}';
+    if (d.length <= 11) {
+      return '(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}';
+    }
+    // Acima de 11 dígitos (E.164): o que sobra vai para o fim, em vez
+    // de ser descartado.
+    return '(${d.substring(0, 2)}) ${d.substring(2, 7)}-'
+        '${d.substring(7, 11)} ${d.substring(11)}';
   }
 
   /// Máscara progressiva de CPF: 111.222.333-44
@@ -108,12 +122,13 @@ class Validadores {
   /// Formatadores para o `CampoTexto` de telefone.
   ///
   /// Primeiro restringe o que pode ser digitado e depois aplica a máscara
-  /// a cada tecla. O `maxLength` impede que o comprimento estoure a
-  /// máscara e apague o texto (11 dígitos → 15 caracteres com máscara).
+  /// a cada tecla. O limite de 21 caracteres cobre os 15 dígitos do
+  /// formato internacional já com a máscara aplicada — e impede que a
+  /// máscara estoure e apague o texto.
   static List<TextInputFormatter> formatadoresTelefone() => [
         FilteringTextInputFormatter.allow(RegExp(r'[\d()\-\s]')),
         TextInputFormatter.withFunction((old, novo) {
-          final texto = novo.text.length > 16 ? old.text : novo.text;
+          final texto = novo.text.length > 21 ? old.text : novo.text;
           final mascarado = mascaraTelefone(texto);
           return TextEditingValue(
             text: mascarado,
