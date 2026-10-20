@@ -142,7 +142,6 @@ class _FormularioLoginState extends State<_FormularioLogin> {
               controlador: controller.senhaCtrl,
               senha: true,
               obscureText: controller.senhaOculta,
-              aoAlternarVisibilidade: controller.alternarVisibilidadeSenhaLogin,
               validator: controller.validarSenhaLogin,
               desabilitado: controller.carregando.value,
             ),

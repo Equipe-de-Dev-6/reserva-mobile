@@ -124,7 +124,6 @@ class AuthController extends GetxController {
     }
   }
 
-  void alternarVisibilidadeSenhaLogin() => senhaOculta.toggle();
 
   // =========================================================================
   // RF02 — CADASTRO DE COORDENADOR (RN01)
@@ -165,7 +164,6 @@ class AuthController extends GetxController {
     }
   }
 
-  void alternarVisibilidadeSenhaCadastro() => cadastroSenhaOculta.toggle();
 
   // =========================================================================
   // RF03 — RECUPERAÇÃO DE SENHA
@@ -259,7 +257,6 @@ class AuthController extends GetxController {
     aviso.value = '';
   }
 
-  void alternarVisibilidadeNovaSenha() => novaSenhaOculta.toggle();
 
   // =========================================================================
   // RF04 — LOGOUT

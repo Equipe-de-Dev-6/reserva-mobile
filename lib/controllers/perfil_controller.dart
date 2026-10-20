@@ -235,7 +235,6 @@ class PerfilController extends GetxController {
     editandoSenha.value = false;
   }
 
-  void alternarVisibilidadeSenha() => senhaOculta.toggle();
 
   Future<void> alterarSenha(FormState formulario) async {
     erro.value = '';
