@@ -220,6 +220,32 @@ token de sessão, não o número do documento.
 > `telefone()`), e o mesmo vale para os formulários de Coordenador,
 > Professor e Perfil — eles usam o mesmo validador.
 
+#### Onde o código de recuperação aparece (RF03)
+
+O backend **não envia e-mail**: ele gera o código de 6 dígitos e o
+**imprime no console do `api.exe`**. Testado contra o backend real:
+
+```
+[CÓDIGO]: 175106
+Expira em: 09:34:52 20/10/2026 (15m0s)
+```
+
+> **Atenção:** a mensagem sai no **stderr** do processo. Se você
+> redirigiu a saída para um arquivo, o código pode estar no arquivo de
+> erro — e não no de saída.
+
+Por isso a tela do app diz *"confira o console do `api.exe`"* em vez de
+prometer um e-mail que não chega. O fluxo completo é:
+
+| Etapa | Endpoint | O que acontece |
+|-------|----------|----------------|
+| 1 | `POST /auth/forgot-password` | Gera o código (15 min de validade) e imprime no console |
+| 2 | `POST /auth/verify-code` | Valida o código; `400` se estiver errado ou expirado |
+| 3 | `POST /auth/reset-password` | Troca a senha; a antiga deixa de valer |
+
+> Para o avaliador: iniciar o `api.exe` **em um terminal visível** é o
+> que permite completar o RF03 na mão.
+
 ### 2.3 Rodar o app
 
 ```bash

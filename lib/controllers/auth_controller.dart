@@ -6,6 +6,7 @@ import '../app/rotas.dart';
 import '../core/servicos/auth_service.dart';
 import '../core/servicos/sessao_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../core/utils/validadores.dart';
 import '../models/auth_requests.dart';
 
@@ -70,19 +71,25 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    emailCtrl.dispose();
-    senhaCtrl.dispose();
-    nomeCtrl.dispose();
-    cadastroEmailCtrl.dispose();
-    cadastroSenhaCtrl.dispose();
-    confirmarSenhaCtrl.dispose();
-    departamentoCtrl.dispose();
-    telefoneCtrl.dispose();
-    cpfCtrl.dispose();
-    recuperacaoEmailCtrl.dispose();
-    codigoCtrl.dispose();
-    novaSenhaCtrl.dispose();
-    novaSenhaConfirmarCtrl.dispose();
+    // Os campos são **limpos**, não descartados — ver
+    // `core/utils/text_controllers.dart` para o porquê (descartar
+    // aqui derrubava a tela de Login com "A TextEditingController was
+    // used after being disposed").
+    limparCampos([
+      emailCtrl,
+      senhaCtrl,
+      nomeCtrl,
+      cadastroEmailCtrl,
+      cadastroSenhaCtrl,
+      confirmarSenhaCtrl,
+      departamentoCtrl,
+      telefoneCtrl,
+      cpfCtrl,
+      recuperacaoEmailCtrl,
+      codigoCtrl,
+      novaSenhaCtrl,
+      novaSenhaConfirmarCtrl,
+    ]);
     super.onClose();
   }
 

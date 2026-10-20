@@ -43,7 +43,7 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
-implementados. **247 testes automatizados** passando.
+implementados. **266 testes automatizados** passando.
 
 | Requisito | Onde está |
 |----------|-----------|
@@ -262,6 +262,28 @@ Future<void> salvarDados(FormState formulario) async {
 }
 ```
 
+**6. Os campos de texto pertencem à tela, não ao Controller**
+
+O `AuthController`, o `PerfilController` e os Controllers de formulário
+guardam `TextEditingController` para que a regra de negócio fique em
+um lugar só. Mas o GetX descarta o Controller **no instante em que a
+rota é removida** — enquanto a View que usa aqueles campos ainda está
+saindo da árvore (a transição leva 280 ms).
+
+Ao ser desmontado, o `TextFormField` chama `removeListener` no
+controller: se ele já estiver descartado, o Flutter estoura com
+
+> A TextEditingController was used after being disposed.
+
+e a tela fica coberta pelo erro vermelho. Era exatamente o que acontecia
+ao sair do Login depois de entrar.
+
+A solução está em `core/utils/text_controllers.dart`: o Controller
+**limpa** os campos (para não deixar senha na memória) e **não** os
+descarta — eles são liberados junto com o Controller, pelo coletor de
+lixo. A varredura de telas (`test/varredura_telas_test.dart`) impede
+que a regressão volte.
+
 **7. Registro síncrono das dependências globais**
 
 `Get.putAsync` só registra a instância **depois** que o Future resolve.
@@ -399,10 +421,10 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (247 testes)
+flutter test             # suíte completa (266 testes)
 ```
 
-A suíte é dividida em dez arquivos:
+A suíte é dividida em treze arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
@@ -410,6 +432,7 @@ A suíte é dividida em dez arquivos:
 | `test/bindings_test.dart` | Grafo de dependências do `MainBinding` e guardas de rota | Não |
 | `test/device_preview_test.dart` | DevicePreview aplica o tamanho real do aparelho | Não |
 | `test/fluxo_rotas_test.dart` | Navegação, guards, validação e restauração de sessão | Não |
+| `test/varredura_telas_test.dart` | **Varredura de todas as 17 telas** em 3 tamanhos — nenhuma pode estourar layout nem disparar exceção | Não |
 | `test/patrimonio_test.dart` | Models, Services e widgets do acervo | Não |
 | `test/patrimonio_controller_test.dart` | Listagem, busca com debounce e filtros | Não |
 | `test/patrimonio_lista_view_test.dart` | Tela de listagem, estados assíncronos, overflow | Não |
