@@ -6,6 +6,7 @@ import '../../controllers/patrimonio_controller.dart';
 import '../../controllers/patrimonio_detalhe_controller.dart';
 import '../../controllers/patrimonio_form_controller.dart';
 import '../../controllers/patrimonio_historico_controller.dart';
+import '../../controllers/patrimonio_manutencao_controller.dart';
 import '../../core/servicos/api_client.dart';
 import '../../core/servicos/patrimonio_service.dart';
 import '../../core/servicos/professor_service.dart';
@@ -15,6 +16,7 @@ import 'patrimonio_devolucao_view.dart';
 import 'patrimonio_form_view.dart';
 import 'patrimonio_historico_view.dart';
 import 'patrimonio_lista_view.dart';
+import 'patrimonio_manutencao_view.dart';
 
 /// Nomes das rotas do módulo de Patrimônio.
 ///
@@ -42,6 +44,12 @@ class RotasPatrimonio {
   static const atribuicao = '/admin/patrimonios/atribuir';
   static const devolucao = '/admin/patrimonios/devolver';
   static const historico = '/admin/patrimonios/historico';
+
+  // --- manutenção (RN05) -----------------------------------------------
+  /// Envio para conserto e conclusão do conserto — dois movimentos
+  /// numa tela só, distinguidos pelo argumento `modo`
+  /// (`'enviar'` ou `'concluir'`).
+  static const manutencao = '/admin/patrimonios/manutencao';
 }
 
 /// Registra o [PatrimonioService] e os Controllers do módulo.
@@ -71,6 +79,9 @@ class PatrimonioBinding extends Bindings {
     Get.lazyPut<PatrimonioHistoricoController>(
       () => PatrimonioHistoricoController(Get.find<PatrimonioService>()),
     );
+    Get.lazyPut<PatrimonioManutencaoController>(
+      () => PatrimonioManutencaoController(Get.find<PatrimonioService>()),
+    );
 
     // O fluxo de atribuição precisa da lista de docentes para o seletor.
     Get.lazyPut<ProfessorService>(
@@ -87,16 +98,17 @@ class PatrimonioBinding extends Bindings {
 
 /// Páginas do módulo, prontas para entrar em `AppRotas.paginas`.
 ///
-/// Todas exigem sessão ativa ([AutenticadoMiddleware]). O bloqueio por
-/// papel é feito pelo próprio Controller: só o Coordenador vê o botão de
-/// cadastrar e as ações de escrita (RN03), e o backend recusa a operação
-/// com 403 de qualquer forma.
+/// Todas exigem sessão ativa ([AutenticadoMiddleware]) **e** papel de
+/// Coordenador ([AdminMiddleware]): todo o módulo é escrita de gestão —
+/// e um docente que force a rota é devolvido ao próprio painel sem ver
+/// a tela. A barreira real continua sendo o backend, que responde `403`
+/// a qualquer mutação de docente (RN03).
 List<GetPage> get paginasPatrimonio => [
       GetPage(
         name: RotasPatrimonio.lista,
         page: () => const PatrimonioListaView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.fadeIn,
         transitionDuration: const Duration(milliseconds: 280),
       ),
@@ -104,7 +116,7 @@ List<GetPage> get paginasPatrimonio => [
         name: RotasPatrimonio.detalhe,
         page: () => const PatrimonioDetalheView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.rightToLeftWithFade,
         transitionDuration: const Duration(milliseconds: 280),
       ),
@@ -112,7 +124,7 @@ List<GetPage> get paginasPatrimonio => [
         name: RotasPatrimonio.form,
         page: () => const PatrimonioFormView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.rightToLeftWithFade,
         transitionDuration: const Duration(milliseconds: 280),
       ),
@@ -124,7 +136,7 @@ List<GetPage> get paginasPatrimonio => [
         name: RotasPatrimonio.atribuicao,
         page: () => const PatrimonioAtribuicaoView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.rightToLeftWithFade,
         transitionDuration: const Duration(milliseconds: 280),
       ),
@@ -132,7 +144,7 @@ List<GetPage> get paginasPatrimonio => [
         name: RotasPatrimonio.devolucao,
         page: () => const PatrimonioDevolucaoView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.rightToLeftWithFade,
         transitionDuration: const Duration(milliseconds: 280),
       ),
@@ -140,7 +152,17 @@ List<GetPage> get paginasPatrimonio => [
         name: RotasPatrimonio.historico,
         page: () => const PatrimonioHistoricoView(),
         binding: PatrimonioBinding(),
-        middlewares: [AutenticadoMiddleware()],
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
+        transition: Transition.rightToLeftWithFade,
+        transitionDuration: const Duration(milliseconds: 280),
+      ),
+
+      // --- manutenção (RN05) --------------------------------------------
+      GetPage(
+        name: RotasPatrimonio.manutencao,
+        page: () => const PatrimonioManutencaoView(),
+        binding: PatrimonioBinding(),
+        middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
         transition: Transition.rightToLeftWithFade,
         transitionDuration: const Duration(milliseconds: 280),
       ),

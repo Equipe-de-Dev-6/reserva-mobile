@@ -266,4 +266,43 @@ class PatrimonioService {
       body: DesatribuirPatrimonioRequestModel(motivo: motivo).toJson(),
     );
   }
+
+  // -------------------------------------------------------------------------
+  // PUT /patrimonios/{id} — status: manutenção (RN05)
+  // -------------------------------------------------------------------------
+  //
+  // O backend não tem endpoint dedicado de manutenção: o `status` do
+  // `UpdatePatrimonioRequest` é o que move o bem entre estados. Por
+  // isso os métodos abaixo mandam um corpo mínimo — só `status` e
+  // `observacoes` — em vez de reaproveitar `toJsonAtualizacao()`, que
+  // reenviaria os campos cadastrais com o que estiver em memória.
+
+  /// Envia o bem para conserto: status vira `em_manutencao`.
+  ///
+  /// A `observacao` é o defeito relatado — é ela que entra na linha do
+  /// tempo e explica, meses depois, por que o bem saiu de circulação.
+  Future<void> enviarParaManutencao(int id, {String observacao = ''}) async {
+    await _mudarStatus(id, StatusPatrimonio.emManutencao, observacao);
+  }
+
+  /// Encerra o conserto: o bem volta ao almoxarifado (`disponivel`) e
+  /// fica pronto para uma nova atribuição (RN05).
+  Future<void> concluirManutencao(int id, {String observacao = ''}) async {
+    await _mudarStatus(id, StatusPatrimonio.disponivel, observacao);
+  }
+
+  /// Corpo enxuto do `PUT /patrimonios/{id}` para a troca de status.
+  Future<void> _mudarStatus(
+    int id,
+    StatusPatrimonio status,
+    String observacao,
+  ) async {
+    await _api.put(
+      '/patrimonios/$id',
+      body: {
+        'status': status.api,
+        'observacoes': observacao.trim(),
+      },
+    );
+  }
 }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/patrimonio_detalhe_controller.dart';
 import '../../core/utils/data_hora.dart';
 import '../../models/patrimonio_model.dart';
+import '../../models/status_patrimonio.dart';
 import '../../widgets/badge_status.dart';
 import '../../widgets/mensagem_erro.dart';
 import 'rotas_patrimonio.dart';
@@ -189,6 +190,40 @@ class _Ficha extends StatelessWidget {
               aoTocar: () => Get.toNamed(
                 RotasPatrimonio.devolucao,
                 arguments: {'id': patrimonio.id, 'patrimonio': patrimonio},
+              ),
+            ),
+          ],
+          // Enviar para conserto só faz sentido para um bem em estoque —
+          // um bem com docente precisa ser devolvido antes (RN05).
+          if (controller.statusPermiteAtribuicao &&
+              patrimonio.status != StatusPatrimonio.emManutencao) ...[
+            const SizedBox(height: 10),
+            _BotaoAcao(
+              icone: Icons.build_outlined,
+              texto: 'Enviar para manutenção',
+              aoTocar: () => Get.toNamed(
+                RotasPatrimonio.manutencao,
+                arguments: {
+                  'id': patrimonio.id,
+                  'patrimonio': patrimonio,
+                  'modo': 'enviar',
+                },
+              ),
+            ),
+          ],
+          // Concluir o conserto devolve o bem ao almoxarifado.
+          if (patrimonio.status == StatusPatrimonio.emManutencao) ...[
+            const SizedBox(height: 10),
+            _BotaoAcao(
+              icone: Icons.build_circle_outlined,
+              texto: 'Concluir manutenção',
+              aoTocar: () => Get.toNamed(
+                RotasPatrimonio.manutencao,
+                arguments: {
+                  'id': patrimonio.id,
+                  'patrimonio': patrimonio,
+                  'modo': 'concluir',
+                },
               ),
             ),
           ],
