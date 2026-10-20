@@ -306,7 +306,7 @@ void main() {
       await controller.salvarDados(await formStateDeTeste(tester));
 
       expect(api.chamadas, ['GET /profile']);
-      expect(controller.erro.value, 'Telefone inválido.');
+      expect(controller.erro.value, 'Telefone deve ter de 8 a 15 dígitos.');
     });
 
     testWidgets('erro do backend fica visível sem fechar a edição',

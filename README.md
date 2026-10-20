@@ -308,6 +308,23 @@ A API sobe na porta **8081** e a documentação fica em
 | Se o `data.db` for apagado? | Ele é recriado e populado automaticamente na próxima vez que `api.exe` rodar. Não há migração nem script de setup. |
 | Custa alguma coisa? | **R$ 0.** Nenhum serviço pago, nenhuma chave de API, nenhuma conta em nuvem. O app funciona com a API rodando na mesma máquina (ou na rede local da escola). |
 
+#### CPF e telefone: podem ser qualquer valor
+
+O app **não** confere o dígito verificador do CPF e **não** consulta
+nenhuma base de telefone. São dados de identificação, não dados
+fiscais — e o backend também não valida (testado: ele grava
+`123.456.789-45` sem reclamar).
+
+| Campo | Aceito | Motivo |
+|-------|--------|--------|
+| **CPF** | Qualquer sequência de **11 dígitos** (a máscara `000.000.000-00` é aplicada) | A escola cadastra professor convidado, servidor terceirizado e docente de outra instituição — todos sem CPF próprio. |
+| **Telefone** | De **8 a 15 dígitos** (fixo, celular ou E.164 internacional) | O app não tem como saber se o número existe. |
+
+**Para testar, digite qualquer coisa.** O que protege o patrimônio é o
+token de sessão, não o número do documento. A regra vive em
+`lib/core/utils/validadores.dart` e vale para os três formulários
+(Coordenador, Professor e Perfil).
+
 ### 2. App
 
 ```bash

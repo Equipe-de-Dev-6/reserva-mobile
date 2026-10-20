@@ -202,6 +202,24 @@ Usuário administrador semeado:
 |--------|-------|-------|
 | `admin@admin.com` | `admin123` | `admin` |
 
+#### CPF e telefone: dados livres
+
+**CPF e telefone são apenas dados de identificação — não precisam
+existir de verdade.** O app aceita qualquer valor:
+
+| Campo | O que o app aceita | Por quê |
+|-------|--------------------|---------|
+| **CPF** | Qualquer sequência de **11 dígitos** (a máscara `000.000.000-00` é aplicada). O **dígito verificador não é conferido**. | O backend também não confere (ele grava `123.456.789-45` sem reclamar). A escola precisa cadastrar professor convidado, servidor terceirizado e docente de outra instituição — todos sem CPF próprio. |
+| **Telefone** | De **8 a 15 dígitos** (fixo, celular ou E.164 internacional). | O app não consulta nenhuma base para saber se o número existe. |
+
+Consequência prática: **para testar, digite qualquer coisa**. Um CPF
+inventado não impede o cadastro — o que protege o patrimônio é o
+token de sessão, não o número do documento.
+
+> A regra está em `lib/core/utils/validadores.dart` (`cpf()` e
+> `telefone()`), e o mesmo vale para os formulários de Coordenador,
+> Professor e Perfil — eles usam o mesmo validador.
+
 ### 2.3 Rodar o app
 
 ```bash
