@@ -4,17 +4,55 @@ Sistema Integrado de Gestão de Patrimônio Escolar. Aplicativo mobile
 oficial para gestão e acompanhamento dos patrimônios de uma instituição
 de ensino, operando sobre a API REST em Go fornecida pela equipe.
 
+**Repositório:** <https://github.com/Equipe-de-Dev-6/reserva-mobile>
+
+---
+
+## 📸 Telas do aplicativo
+
+As imagens abaixo são **prints reais do app**, gerados pelo próprio
+código Flutter (não são mockups): cada tela é montada com as widgets de
+produção, no tamanho do iPhone 13 (390 × 844) e com os payloads do
+backend. O script que os gera está em `tool/gerar_prints_test.dart`.
+
+| | |
+|---|---|
+| ![Login](docs/prints/01-login.png) <br/> **Login** (RF01) | ![Cadastro de coordenador](docs/prints/02-cadastro-coordenador.png) <br/> **Cadastro de Coordenador** (RF02) |
+| ![Recuperar senha](docs/prints/03-recuperar-senha.png) <br/> **Recuperação de senha** (RF03) | ![Painel do Coordenador](docs/prints/04-painel-coordenador.png) <br/> **Painel do Coordenador** |
+| ![Indicadores](docs/prints/05-indicadores.png) <br/> **Indicadores** (RF05) | ![Lista de patrimônios](docs/prints/06-patrimonios-lista.png) <br/> **Patrimônios** (RF07a) |
+| ![Detalhe do bem](docs/prints/07-patrimonio-detalhe.png) <br/> **Detalhe do bem** (RF07a) | ![Formulário](docs/prints/08-patrimonio-form.png) <br/> **Cadastro / edição** (RF07a) |
+| ![Atribuição](docs/prints/09-atribuicao-bem.png) <br/> **Atribuição** (RF07b / RN05) | ![Devolução](docs/prints/10-devolucao-bem.png) <br/> **Devolução** (RF07b / RN05) |
+| ![Histórico](docs/prints/11-historico-bem.png) <br/> **Histórico** (RF07b) | ![Professores](docs/prints/12-professores-lista.png) <br/> **Professores** (RF06) |
+| ![Cadastro de professor](docs/prints/13-professor-cadastro.png) <br/> **Cadastro de professor** (RF06 / RN02) | ![Detalhe do professor](docs/prints/14-professor-detalhe.png) <br/> **Detalhe do professor** (RF06) |
+| ![Painel do Professor](docs/prints/15-painel-professor.png) <br/> **Painel do Professor** | ![Meus patrimônios](docs/prints/16-meus-patrimonios.png) <br/> **Meus Patrimônios** (RF08) |
+| ![Perfil](docs/prints/17-perfil.png) <br/> **Perfil** (RF09 / RN06) | |
+
 ---
 
 ## 📌 Status do Projeto
 
-| Parte | Módulo | Situação |
-|-------|--------|----------|
-| 1 | Base do projeto (estrutura, tema, rotas, DI) | ✅ Concluída |
-| 2 | **Autenticação e Sessão (RF01–RF04)** | ✅ **Concluída** |
-| 3 | Camada de dados + biblioteca de widgets | ⏳ Próxima |
-| 4 | Painel do Coordenador (RF05–RF07) | ⏳ Planejada |
-| 5 | Painel do Professor + Perfil (RF08–RF09) | ⏳ Planejada |
+| Módulo | Requisitos | Situação |
+|--------|-------------|----------|
+| 1 — Autenticação e Sessão | RF01–RF04 | ✅ Concluído |
+| 2 — Painel do Coordenador | RF05–RF07 | ✅ Concluído |
+| 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
+
+**Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
+implementados. **247 testes automatizados** passando.
+
+| Requisito | Onde está |
+|----------|-----------|
+| RF01 Login, JWT seguro, rota por `role` | `views/auth/login_view.dart` · `controllers/auth_controller.dart` · `core/servicos/sessao_service.dart` |
+| RF02 Cadastro de Coordenador (RN01) | `views/auth/cadastro_admin_view.dart` · `models/auth_requests.dart` |
+| RF03 Recuperação de senha em 3 etapas | `views/auth/recuperar_senha_view.dart` |
+| RF04 Logout seguro | `controllers/auth_controller.dart` · `widgets/dialogo_logout.dart` |
+| RF05 Dashboard de indicadores | `views/admin/dashboard_view.dart` · `controllers/dashboard_controller.dart` · `models/patrimonio_stats_model.dart` |
+| RF06 Gestão de professores (RN02) | `views/admin/professores/` · `controllers/professor_*_controller.dart` · `core/servicos/professor_service.dart` |
+| RF07a Cadastro, busca, filtros, edição, exclusão | `views/patrimonio/` · `controllers/patrimonio_*_controller.dart` · `core/servicos/patrimonio_service.dart` |
+| RF07b Atribuição e Devolução (RN05) | `views/patrimonio/patrimonio_atribuicao_view.dart` · `patrimonio_devolucao_view.dart` · `controllers/patrimonio_ciclo_vida_controller.dart` |
+| RF07b Histórico / linha do tempo | `views/patrimonio/patrimonio_historico_view.dart` · `controllers/patrimonio_historico_controller.dart` · `models/historico_model.dart` |
+| RF08 Meus Patrimônios (RN03) | `views/professor/meus_patrimonios_view.dart` · `controllers/meus_patrimonios_controller.dart` |
+| RF09 Perfil: dados e senha (RN06) | `views/perfil/perfil_view.dart` · `controllers/perfil_controller.dart` · `core/servicos/perfil_service.dart` |
 
 ---
 
@@ -30,48 +68,77 @@ lib/
 │   ├── bindings.dart             Injeção de dependências (Bindings do GetX)
 │   ├── middleware.dart           Guardas de rota (RBAC) e regra de roteamento
 │   ├── rotas.dart                Rotas nomeadas + transições
-│   └── tema.dart                 Paleta de cores, tipografia e estilos globais
+│   └── tema.dart                 Paleta, tipografia e estilos globais
 │
 ├── core/                         infraestrutura transversal
 │   ├── config/api_config.dart    URL base da API (detecta plataforma)
 │   ├── servicos/
 │   │   ├── api_client.dart       Cliente HTTP (Dio) + interceptors
 │   │   ├── auth_service.dart     Endpoints de autenticação
+│   │   ├── patrimonio_service.dart   Endpoints de patrimônio e ciclo de vida
+│   │   ├── professor_service.dart    Endpoints de gestão de docentes
+│   │   ├── perfil_service.dart       Endpoints de /profile
 │   │   └── sessao_service.dart   Persistência segura do JWT (GetxService)
 │   └── utils/
 │       ├── api_erros.dart        Conversão de erro HTTP → AppException
 │       ├── app_exception.dart    Exceção de negócio
+│       ├── data_hora.dart        Formatação de datas
 │       └── validadores.dart      Validações e máscaras reutilizáveis
 │
 ├── models/                       Modelos de dados (JSON ↔ objeto)
-│   ├── usuario_model.dart
-│   ├── auth_resposta.dart
-│   ├── auth_requests.dart
-│   ├── professor_request.dart
-│   └── patrimonio_model.dart
+│   ├── usuario_model.dart        Perfil do usuário + regras de RBAC
+│   ├── auth_resposta.dart        Resposta de login
+│   ├── auth_requests.dart        Corpos das requisições de autenticação
+│   ├── professor_model.dart      Docente + bens vinculados
+│   ├── professor_request.dart    Corpo do cadastro de docente
+│   ├── perfil_request.dart       Corpos do PUT /profile
+│   ├── patrimonio_model.dart     Bem do acervo
+│   ├── patrimonio_criacao_model.dart  Resposta enxuta do POST
+│   ├── patrimonio_stats_model.dart    Indicadores do dashboard (RF05)
+│   ├── ciclo_vida_patrimonio_model.dart  Corpos de atribuir/devolver
+│   ├── historico_model.dart      Linha do tempo do bem
+│   └── status_patrimonio.dart    Enum de status + ações do histórico
 │
 ├── controllers/                  Controller (regras de negócio da tela)
 │   ├── splash_controller.dart
-│   └── auth_controller.dart
+│   ├── auth_controller.dart
+│   ├── dashboard_controller.dart            RF05
+│   ├── patrimonio_controller.dart            RF07a — listagem
+│   ├── patrimonio_detalhe_controller.dart    RF07a — detalhe
+│   ├── patrimonio_form_controller.dart      RF07a — cadastro/edição
+│   ├── patrimonio_ciclo_vida_controller.dart RF07b — atribuir/devolver
+│   ├── patrimonio_historico_controller.dart  RF07b — linha do tempo
+│   ├── professor_lista_controller.dart       RF06
+│   ├── professor_cadastro_controller.dart    RF06
+│   ├── professor_detalhe_controller.dart     RF06
+│   ├── meus_patrimonios_controller.dart      RF08
+│   ├── perfil_controller.dart                RF09
 │
 ├── views/                        Views (apenas desenham)
 │   ├── splash/splash_view.dart
 │   ├── auth/                     login · cadastro_admin · recuperar_senha
-│   ├── admin/admin_home_view.dart
-│   └── professor/professor_home_view.dart
+│   ├── admin/                    admin_home · dashboard · professores/
+│   ├── patrimonio/               lista · detalhe · form · atribuição · devolução · histórico
+│   ├── professor/                professor_home · meus_patrimonios
+│   └── perfil/perfil_view.dart
 │
 └── widgets/                      Widgets reutilizáveis (RNF04)
-    ├── botao_primario.dart
-    ├── campo_texto.dart
-    ├── cabecalho_usuario.dart
-    ├── dialogo_logout.dart
-    ├── estado_vazio.dart
-    └── mensagem_erro.dart
+    ├── botao_primario.dart       Botão com estado de carregamento
+    ├── campo_texto.dart          Input padronizado (senha, máscara, validação)
+    ├── cabecalho_usuario.dart    Faixa de identificação do usuário
+    ├── card_patrimonio.dart      Card de bem (usado em 3 telas)
+    ├── cartao_professor.dart     Card de docente com contador de bens
+    ├── cartao_indicador.dart     Card de indicador do dashboard
+    ├── badge_status.dart         Etiqueta de status
+    ├── estado_vazio.dart         Estado vazio (RNF02)
+    ├── esqueleto_lista.dart       Skeleton de carregamento (RNF02)
+    ├── linha_dado.dart           Linha rótulo/valor e título de seção
+    ├── mensagem_erro.dart        Mensagens de erro, aviso e sucesso
+    └── dialogo_logout.dart       Confirmação de saída
 
-dev/
-└── main_dev.dart                 Entry point de DESENVOLVimento (device_preview)
-                                 Fica fora de lib/ de propósito: a dependência
-                                 é dev-only e não entra no build de produção.
+design/                           Protótipo de alta fidelidade
+tool/gerar_prints_test.dart       Gerador dos prints do app
+docs/prints/                      PNGs das telas
 ```
 
 ### Onde cada responsabilidade mora
@@ -85,16 +152,7 @@ dev/
 
 ---
 
-## 🔐 Parte 2 — Autenticação e Sessão (RF01–RF04)
-
-| RF | Requisito | Onde está |
-|----|-----------|-----------|
-| RF01 | Login com e-mail/senha, token JWT seguro e roteamento por role | `views/auth/login_view.dart` · `controllers/auth_controller.dart` |
-| RF02 | Cadastro de Coordenador | `views/auth/cadastro_admin_view.dart` |
-| RF03 | Recuperação de senha em 3 etapas | `views/auth/recuperar_senha_view.dart` |
-| RF04 | Logout seguro | `controllers/auth_controller.dart` · `widgets/dialogo_logout.dart` |
-
-### Decisões técnicas
+## 🔐 Decisões técnicas
 
 **1. Armazenamento seguro do token (RF01 / RNF03)**
 
@@ -167,10 +225,17 @@ Perfil desconhecido cai no painel do docente — a opção mais restrita.
 
 **5. Defesas de interface (não substituem o backend)**
 
-`AutenticadoMiddleware` e `AnonimoMiddleware` bloqueiam navegações
-indevidas pela interface. A segurança real continua no servidor: um
-professor que tentar escrever recebe **403 Forbidden** da API. Isso é
-coberto por um teste de integração.
+Três guardas de rota protegem a navegação:
+
+| Guarda | Onde age | Regra |
+|--------|----------|-------|
+| `AutenticadoMiddleware` | telas internas | exige sessão válida |
+| `AnonimoMiddleware` | Login, Cadastro, Recuperação | quem já está logado não volta para elas |
+| `AdminMiddleware` | `/admin/...` | só o Coordenador (docente é devolvido ao próprio painel) |
+
+A segurança real continua no servidor: um professor que tentar escrever
+recebe **403 Forbidden** da API. Isso é coberto por um teste de
+integração (`test/integracao_auth_test.dart`).
 
 **6. FormKeys pertencem às Views**
 
@@ -178,7 +243,19 @@ Uma `GlobalKey<FormState>` guardada no Controller seria reutilizada por
 duas instâncias da mesma tela durante uma transição de rota, e o
 Flutter lançaria `Duplicate GlobalKey`. Por isso cada View cria a sua
 própria key e passa o `FormState` ao Controller, que aplica as regras
-de validação.
+de validação — e **também** as revalida, para que a tela não seja o
+único guardião da regra:
+
+```dart
+// controllers/perfil_controller.dart
+Future<void> salvarDados(FormState formulario) async {
+  if (!formulario.validate()) return;
+
+  final erroNome = validarNome(nomeCtrl.text);
+  if (erroNome != null) { erro.value = erroNome; return; }
+  ...
+}
+```
 
 **7. Registro síncrono das dependências globais**
 
@@ -188,19 +265,15 @@ faz o `ApiClient` nunca ser registrado — e o login, que depende dele,
 quebra em toda execução. O `MainBinding` por isso registra de forma
 síncrona, e a leitura do armazenamento (assíncrona) fica a cargo do
 `SplashController`, que é justamente a tela que decide o destino com
-base na sessão salva:
+base na sessão salva.
 
-```dart
-// app/bindings.dart
-final sessao = Get.put(SessaoService(), permanent: true);
-Get.put(ApiClient(sessao), permanent: true);
-```
+**8. Um widget de patrimônio para as três telas (RNF04)**
 
-```dart
-// controllers/splash_controller.dart
-final sessao = Get.find<SessaoService>();
-await sessao.init();      // restaura token e perfil do armazenamento
-```
+O mesmo `CardPatrimonio` é usado na listagem do acervo, nos bens de um
+docente e em "Meus Patrimônios". Ele é **estritamente informativo**:
+nenhum botão de escrever mora no card, e quem tem ação de escrita
+(Coordenador) coloca o botão na tela, fora dele. Assim o mesmo widget
+serve ao docente sem precisar de uma variante "sem botões" (RN03).
 
 ---
 
@@ -216,6 +289,10 @@ await sessao.init();      // restaura token e perfil do armazenamento
 A API sobe na porta **8081** e a documentação fica em
 <http://localhost:8081/swagger/>.
 
+> O `api.exe` acompanha o repositório para que ninguém precise instalar
+> Go. O banco (`data.db`) **não** é versionado: ele é criado e
+> alterado pelo servidor a cada execução.
+
 ### 2. App
 
 ```bash
@@ -225,9 +302,9 @@ flutter run
 
 ### 2.1 Device Preview — emular o celular no Chrome
 
-Para conferir o comportamento responsivo (RNF01) sem trocar de emulador,
-o app tem um ponto de entrada de desenvolvimento que o envolve no
-`device_preview`:
+Para conferir o comportamento responsivo (RNF01) sem trocar de
+emulador, o app tem um ponto de entrada de desenvolvimento que o
+envelopa no `device_preview`:
 
 ```bash
 # abre direto no Chrome, com o app dentro da moldura de um celular
@@ -248,8 +325,6 @@ A barra lateral do DevicePreview permite trocar de aparelho, girar a
 tela, alternar o dark mode, ajustar o tamanho do texto e ligar o teclado
 virtual.
 
-Aparelhos mais úteis para conferir o app:
-
 | Situação | Device |
 |----------|--------|
 | Checar overflow em tela pequena | `Devices.ios.iPhoneSE` · `Devices.android.smallPhone` |
@@ -262,21 +337,7 @@ Go já responde com `Access-Control-Allow-Origin: *`, então o navegador
 consegue chamar o backend normalmente — o login funciona direto no
 Chrome, sem configuração extra.
 
-O DevicePreview não é só uma moldura: ele troca o `MediaQuery` do app
-pelo tamanho real do aparelho. Isso é verificado automaticamente em
-`test/device_preview_test.dart` (iPhone 13 → 390x844, iPhone SE →
-375x667, iPhone 16 Pro Max → 440x956).
-
-O arquivo fica em `dev/` e **não** em `lib/` de propósito: o
-`device_preview` é uma `dev_dependency` e não deve entrar no build de
-produção. Comparando os dois builds fica evidente:
-
-```bash
-flutter build bundle -t dev/main_dev.dart   # 73,5 MB (com preview)
-flutter build bundle                        # 66,3 MB (produção)
-```
-
-### Endereço da API
+### 3. Endereço da API
 
 `core/config/api_config.dart` escolhe o endereço automaticamente:
 
@@ -292,14 +353,24 @@ Para apontar manualmente, sem alterar o código:
 flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 ```
 
-### 3. Testes
+> **No iOS e no macOS**, a API de desenvolvimento responde em HTTP sem
+> TLS. O projeto já traz a exceção do App Transport Security
+> (`NSAllowsLocalNetworking`) em `ios/Runner/Info.plist` e
+> `macos/Runner/Info.plist` — ela libera **apenas** a rede local, sem
+> desligar a segurança para a internet.
+>
+> **No Android**, a permissão `INTERNET` está no manifest principal
+> (`android/app/src/main/AndroidManifest.xml`). Sem ela, o APK de
+> *release* não consegue abrir nenhuma conexão.
+
+### 4. Testes
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (44 testes)
+flutter test             # suíte completa (247 testes)
 ```
 
-A suíte é dividida em cinco arquivos:
+A suíte é dividida em dez arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
@@ -307,7 +378,15 @@ A suíte é dividida em cinco arquivos:
 | `test/bindings_test.dart` | Grafo de dependências do `MainBinding` e guardas de rota | Não |
 | `test/device_preview_test.dart` | DevicePreview aplica o tamanho real do aparelho | Não |
 | `test/fluxo_rotas_test.dart` | Navegação, guards, validação e restauração de sessão | Não |
+| `test/patrimonio_test.dart` | Models, Services e widgets do acervo | Não |
+| `test/patrimonio_controller_test.dart` | Listagem, busca com debounce e filtros | Não |
+| `test/patrimonio_lista_view_test.dart` | Tela de listagem, estados assíncronos, overflow | Não |
+| `test/patrimonio_form_view_test.dart` | Formulário em modo cadastro e edição | Não |
+| `test/ciclo_vida_patrimonio_test.dart` | RF05, RF07b e RF08 (dashboard, atribuição, devolução, histórico) | Não |
+| `test/professores_test.dart` | RF06 e RBAC das telas de professores | Não |
+| `test/perfil_test.dart` | RF09 / RN06 | Não |
 | `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
+| `test/integracao_patrimonio_test.dart` | Listagem, filtros e ciclo completo contra a API | Sim (ignorados se a API estiver fora) |
 
 > **Detalhe importante:** dentro de `testWidgets` o tempo é *fake*, então
 > chamadas reais de plataforma (o `flutter_secure_storage`) nunca
@@ -315,6 +394,67 @@ A suíte é dividida em cinco arquivos:
 > seguro em `test/helpers/test_armazenamento.dart`. Com ele, o ciclo
 > "gravar sessão → reabrir o app → restaurar sessão" é testado de ponta
 > a ponta, pelo mesmo caminho usado pelo app real.
+
+> **Concorrência:** o `dart_test.yaml` define `concurrency: 1`. Dois
+> arquivos de teste de integração batem na API real ao mesmo tempo e o
+> backend em Go tem uma corrida na tabela de refresh token
+> (`Erro ao salvar sessão de refresh token`). Rodando um arquivo por
+> vez, a suíte inteira passa.
+
+### 5. Gerar os prints
+
+```bash
+flutter test tool/gerar_prints_test.dart
+```
+
+Monta as 17 telas com as widgets reais e grava os PNGs em
+`docs/prints/`. É o mesmo mecanismo que produz as imagens deste
+README.
+
+### 6. ⚠️ Caminho com espaço no Windows
+
+Se o caminho do projeto (ou do perfil do Windows) tiver **espaço**, o
+`flutter test` falha com `Building native assets for package:objective_c
+failed`. A causa é o hook de native assets do pacote `objective_c`
+(dependência transitiva do `flutter_secure_storage` para macOS), que
+invoca o `dart` com o caminho sem aspas.
+
+Duas saídas:
+
+```bash
+# 1. apontar o PUB_CACHE para um caminho sem espaços
+set PUB_CACHE=C:\pubcache
+flutter pub get
+flutter test
+
+# 2. (recomendado) clonar o projeto em um caminho sem espaços
+#    C:\dev\reserva-mobile
+```
+
+### 7. Integração contínua
+
+`.github/workflows/ci.yml` roda `flutter analyze --fatal-infos` e
+`flutter test` em cada Pull Request para a `main`. O badge fica no
+topo deste README.
+
+---
+
+## 🎨 Protótipo de alta fidelidade
+
+O protótipo visual está em [`design/prototipo.html`](design/prototipo.html):
+um arquivo HTML autocontido com as **17 telas** do app desenhadas na
+grade de 390 × 844 do iPhone 13, com a mesma paleta e a mesma
+tipografia do Flutter.
+
+Para levar para o Figma (gratuito):
+
+1. Sirva a pasta do projeto (`npx serve .` ou `python -m http.server`);
+2. No Figma, use o plugin **HTML to Design** apontando para
+   `design/prototipo.html`;
+3. Cada frame vira um artboard de 390 × 844.
+
+O documento [`design/PROTOTIPO.md`](design/PROTOTIPO.md) traz o
+inventário de telas, os tokens de design e o passo a passo.
 
 ---
 
@@ -324,6 +464,19 @@ A suíte é dividida em cinco arquivos:
 |--------|------------------|-------|
 | _a preencher_ | Estrutura base, tema, rotas e DI | 1 |
 | _a preencher_ | Autenticação, sessão e comunicação com a API | 2 |
-| _a preencher_ | Biblioteca de widgets e camada de dados | 3 |
-| _a preencher_ | Painel do Coordenador | 4 |
-| _a preencher_ | Painel do Professor e Perfil | 5 |
+| _a preencher_ | Modelos, Services e biblioteca de widgets | 3 |
+| _a preencher_ | Painel do Coordenador: dashboard, professores e patrimônio | 4 |
+| _a preencher_ | Painel do Professor, perfil e ciclo de vida do bem | 5 |
+
+> **Preencher antes da entrega:** o §8 do enunciado exige que a
+> participação de cada integrante fique **evidenciada no histórico de
+> commits e Pull Requests** do GitHub, e que o README identifique cada
+> membro com as respectivas responsabilidades. A tabela acima e os
+> commits já estão prontos para receber essa informação.
+
+---
+
+## 📄 Licença
+
+Projeto acadêmico. O backend (`api.exe`) é fornecido pela equipe de
+backend da instituição.

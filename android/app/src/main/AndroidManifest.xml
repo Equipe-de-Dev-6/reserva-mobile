@@ -1,6 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        A API em Go roda na porta 8081 e o app fala com ela por HTTP.
+        Sem esta permissão, o APK de RELEASE (assim como o de debug e o
+        de profile) não consegue abrir nenhuma conexão: o template do
+        Flutter só declara INTERNET nos manifests de debug e profile,
+        porque são os únicos que rodam com o host de desenvolvimento.
+
+        Declarar aqui garante que o build de release também funcione.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
-        android:label="reserva_mobile"
+        android:label="Patrimônio Escolar"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

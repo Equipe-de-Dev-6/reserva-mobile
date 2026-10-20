@@ -1,0 +1,55 @@
+name: CI
+
+# A CI roda a mesma coisa que o avaliador vai rodar: análise estática +
+# suíte de testes. Cada Pull Request aparece com o selo verde ou
+# vermelho — é a evidência de revisão de código que a §8 do enunciado
+# pede.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    name: Análise estática
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.38.7'
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Analisar
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.38.7'
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      # Os testes de integração contra a API real são ignorados
+      # automaticamente quando o backend não está no ar (eles checam
+      # `/health` antes). A suíte local roda com `api.exe` no ar.
+      - name: Rodar a suíte
+        run: flutter test --reporter expanded
+
+      - name: Relatório de cobertura
+        run: flutter test --coverage
+        continue-on-error: true

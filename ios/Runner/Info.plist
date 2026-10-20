@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Reserva Mobile</string>
+	<string>Patrimônio Escolar</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,5 +45,26 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!--
+		App Transport Security (ATS) bloqueia, por padrão, toda conexão
+		HTTP sem TLS. A API em Go deste projeto é servida em
+		`http://localhost:8081/api` (no emulador) ou
+		`http://192.168.x.x:8081/api` (no aparelho físico), ou seja, sem
+		certificado.
+
+		`NSAllowsLocalNetworking` libera **apenas** o tráfego da rede
+		local (localhost, 127.0.0.1 e endereços .local) — o suficiente
+		para o app falar com o backend de desenvolvimento sem desligar a
+		segurança para a internet toda, que seria o que
+		`NSAllowsArbitraryLoads` faria.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<!-- A API pode ser apontada para outro host com --dart-define. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>O app consulta a API de patrimônio escolar que roda na rede local da escola.</string>
 </dict>
 </plist>

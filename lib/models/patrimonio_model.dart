@@ -1,3 +1,4 @@
+import '../core/utils/data_hora.dart';
 import 'status_patrimonio.dart';
 
 /// Um bem do acervo escolar.
@@ -128,6 +129,38 @@ class PatrimonioModel {
       ? '$rotuloStatus · $professorNomeFormatado'
       : rotuloStatus;
 
+  /// `true` quando o bem está em uso (independentemente de ter ou não
+  /// professor vinculado).
+  bool get emUso => status == StatusPatrimonio.emUso;
+
+  /// `true` quando o bem está disponível no almoxarifado (RN05).
+  bool get disponivel => status == StatusPatrimonio.disponivel;
+
+  /// `true` quando o bem está em manutenção (RN05).
+  bool get emManutencao => status == StatusPatrimonio.emManutencao;
+
+  /// Descrição curta do equipamento: `Samsung · Galaxy Tab A8 SM-X200`.
+  ///
+  /// Junta marca e modelo, pulando o que estiver vazio. É o subtítulo do
+  /// card — o nome do bem já ocupa a linha de cima, então aqui entra a
+  /// identificação técnica.
+  String get resumoEquipamento {
+    final partes = <String>[
+      if (marca.trim().isNotEmpty) marca.trim(),
+      if (modelo.trim().isNotEmpty) modelo.trim(),
+    ];
+    if (partes.isEmpty) return descricao.trim();
+    return partes.join(' · ');
+  }
+
+  /// `06/10/2026` — a data em que o bem foi entregue ao docente.
+  ///
+  /// Vazio (e não `—`) quando o bem nunca foi atribuído: o card decide
+  /// se a linha aparece, e uma data vazia é mais fácil de testar do que
+  /// um traço.
+  String get dataAtribuicaoFormatada =>
+      dataAtribuicao == null ? '' : DataHora.data(dataAtribuicao);
+
   // --- Serialização -----------------------------------------------------
 
   factory PatrimonioModel.fromJson(Map<String, dynamic> json) {
@@ -144,8 +177,17 @@ class PatrimonioModel {
       localizacao: _texto(json['localizacao']),
       status: StatusPatrimonio.fromValor(json['status']),
       adminId: _int(json['adminId']),
-      professorId: _int(json['professorId']),
-      professorNome: _textoOpcional(json['professorNome']),
+      // O Swagger documenta `professorId`, mas o backend também devolve
+      // `responsavelId` em algumas respostas. O fallback só vale quando a
+      // chave principal **não existe** — se `professorId` veio presente
+      // (mesmo valendo `null`), ele é a resposta definitiva: é assim que
+      // um bem `disponivel` sem responsável continua sem responsável.
+      professorId: json.containsKey('professorId')
+          ? _int(json['professorId'])
+          : _int(json['responsavelId']),
+      professorNome: json.containsKey('professorNome')
+          ? _textoOpcional(json['professorNome'])
+          : _textoOpcional(json['responsavelNome']),
       professorEmail: _textoOpcional(json['professorEmail']),
       dataAtribuicao: _data(json['dataAtribuicao']),
       observacoes: _texto(json['observacoes']),

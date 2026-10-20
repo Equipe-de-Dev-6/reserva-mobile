@@ -28,5 +28,17 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<!--
+		Mesma política do iOS: a API de desenvolvimento roda em
+		`http://localhost:8081/api`, sem TLS. `NSAllowsLocalNetworking`
+		libera só a rede local, sem afrouxar a segurança da internet.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>O app consulta a API de patrimônio escolar que roda na rede local da escola.</string>
 </dict>
 </plist>

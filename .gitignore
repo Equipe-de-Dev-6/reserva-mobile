@@ -44,7 +44,23 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Banco do backend (Go): criado e alterado pelo pi.exe a cada execucao.
+# ---------------------------------------------------------------------------
+# Backend (Go) — artefatos de execução, não código do app
+# ---------------------------------------------------------------------------
+# `api.exe` é o binário fornecido pela equipe de backend. Ele acompanha o
+# repositório para que qualquer membro consiga subir a API sem instalar Go,
+# mas o BANCO (`data.db`) NÃO é versionado: o `api.exe` o modifica a cada
+# requisição e versioná-lo gera conflito de merge binário a cada PR.
+# Para recriar o banco, basta rodar `api.exe` na raiz (ele se auto-inicializa)
 /data.db
 /data.db-shm
 /data.db-wal
+*.db-journal
+
+# ---------------------------------------------------------------------------
+# IDE — artefatos gerados, nunca versionados
+# ---------------------------------------------------------------------------
+# `.widget_preview/` é o cache do "Widget Preview" do Android Studio:
+# ~16 mil linhas de código gerado que não fazem parte do app.
+/.widget_preview/
+**/.widget_preview/

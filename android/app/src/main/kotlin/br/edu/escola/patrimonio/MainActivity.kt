@@ -1,4 +1,4 @@
-package com.example.reserva_mobile
+package br.edu.escola.patrimonio
 
 import io.flutter.embedding.android.FlutterActivity
 

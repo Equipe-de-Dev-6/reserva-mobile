@@ -141,8 +141,9 @@ class _FormularioLoginState extends State<_FormularioLogin> {
               icone: Icons.lock_outline_rounded,
               controlador: controller.senhaCtrl,
               senha: true,
-              validator: controller.validarSenhaLogin,
+              obscureText: controller.senhaOculta,
               aoAlternarVisibilidade: controller.alternarVisibilidadeSenhaLogin,
+              validator: controller.validarSenhaLogin,
               desabilitado: controller.carregando.value,
             ),
             Align(

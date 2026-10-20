@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patrimônio Escolar — Protótipo de Alta Fidelidade</title>
+<style>
+  /* ==========================================================================
+     PATRIMÔNIO ESCOLAR — PROTÓTIPO DE ALTA FIDELIDADE
+     --------------------------------------------------------------------------
+     Este arquivo é a versão navegável do protótipo. Todas as telas estão
+     desenhadas com os mesmos valores do app Flutter (`lib/app/tema.dart`),
+     na mesma grade de 390 x 844 do iPhone 13.
+
+     Para levar para o Figma:
+       1. Suba o arquivo em um servidor local (`npx serve .` ou
+          `python -m http.server`);
+       2. No Figma, use o plugin "HTML to Design" (gratuito) apontando
+          para este arquivo;
+       3. Cada frame vira um artboard de 390 x 844.
+
+     As telas são estáticas — não há interação. O objetivo é o desenho.
+     ========================================================================== */
+
+  :root {
+    /* Paleta — espelha `lib/app/tema.dart` */
+    --azul:        #1B4DB1;
+    --azul-escuro: #0F2E6B;
+    --fundo:       #F4F6FB;
+    --sucesso:     #1B8A5A;
+    --alerta:      #D9822B;
+    --perigo:      #C0392B;
+    --borda:       #E8EDF6;
+    --campo:       #DDE3EE;
+    --texto:       #1A1D26;
+    --texto-fraco: rgba(26, 29, 38, .55);
+    --branco:      #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: #22262E;
+    color: var(--texto);
+    padding: 48px 32px 80px;
+  }
+
+  header {
+    max-width: 1400px;
+    margin: 0 auto 56px;
+    color: var(--branco);
+  }
+  header h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; }
+  header p  { margin-top: 10px; color: #B9C0CE; font-size: 15px; max-width: 760px; line-height: 1.6; }
+  header .meta { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  header .meta span {
+    background: rgba(255,255,255,.09);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 12.5px;
+    color: #D6DBE6;
+  }
+
+  section {
+    max-width: 1400px;
+    margin: 0 auto 64px;
+  }
+  section > h2 {
+    color: var(--branco);
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  section > p.sub {
+    color: #97A0B2;
+    font-size: 14px;
+    margin-bottom: 26px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 34px;
+  }
+
+  .frame { display: flex; flex-direction: column; gap: 12px; }
+
+  .frame__caption { color: #E4E8F0; font-size: 14px; font-weight: 700; }
+  .frame__caption span { display: block; color: #8E97A9; font-weight: 400; font-size: 12.5px; margin-top: 3px; }
+
+  /* --- O aparelho: 390 x 844 (iPhone 13) ------------------------------- */
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: var(--fundo);
+    border-radius: 44px;
+    border: 11px solid #0B0D12;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 26px 60px rgba(0,0,0,.45);
+  }
+  .phone--dark .phone__body { background: #0B0E14; }
+
+  /* Barra de status do aparelho (decorativa) */
+  .phone__status {
+    height: 44px;
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 26px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--texto);
+    background: transparent;
+    position: relative;
+    z-index: 3;
+  }
+  .phone--dark .phone__status { color: var(--branco); }
+  .phone__status .notch {
+    position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+    width: 120px; height: 30px; background: #0B0D12; border-radius: 999px;
+  }
+
+  .phone__body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--fundo); }
+
+  /* --- AppBar ------------------------------------------------------------ */
+  .appbar {
+    background: var(--azul);
+    color: var(--branco);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+  .appbar--plain { background: transparent; color: var(--texto); }
+  .appbar h3 { font-size: 17px; font-weight: 700; flex: 1; }
+  .appbar .icon { width: 24px; height: 24px; opacity: .95; }
+  .appbar__back { font-size: 22px; line-height: 1; }
+
+  /* --- Cabeçalho do usuário (gradiente) ---------------------------------- */
+  .userbar {
+    background: linear-gradient(135deg, var(--azul), var(--azul-escuro));
+    color: var(--branco);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+  }
+  .avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 16px;
+  }
+  .avatar--sm { width: 42px; height: 42px; font-size: 14px; }
+  .userbar .nome { font-weight: 700; font-size: 16px; }
+  .userbar .papel { font-size: 13px; opacity: .8; margin-top: 2px; }
+
+  /* --- Corpo ------------------------------------------------------------- */
+  .body { flex: 1; overflow: hidden; padding: 18px; }
+  .body--flush { padding: 0; }
+  .body--center { display: grid; place-items: center; }
+
+  .scroll { height: 100%; overflow: hidden; }
+
+  /* --- Cartões ------------------------------------------------------------ */
+  .card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card--tight { padding: 14px; }
+  .card h4 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .card .sub { font-size: 13px; color: var(--texto-fraco); }
+
+  .row { display: flex; align-items: center; gap: 12px; }
+  .row--between { justify-content: space-between; }
+  .grow { flex: 1; min-width: 0; }
+
+  .title { font-size: 16px; font-weight: 700; }
+  .title--sm { font-size: 15px; font-weight: 600; }
+  .muted { font-size: 13px; color: var(--texto-fraco); line-height: 1.45; }
+  .muted--xs { font-size: 11.5px; }
+  .mono { font-size: 12.5px; font-weight: 700; color: var(--azul); letter-spacing: .3px; }
+  .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* --- Badges -------------------------------------------------------------- */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 999px; padding: 4px 9px;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+    border: 1px solid;
+  }
+  .badge--azul     { color: var(--azul);     background: rgba(27,79,177,.10);  border-color: rgba(27,79,177,.35); }
+  .badge--verde    { color: var(--sucesso);  background: rgba(27,138,90,.10);  border-color: rgba(27,138,90,.35); }
+  .badge--laranja  { color: var(--alerta);   background: rgba(217,130,43,.10);  border-color: rgba(217,130,43,.35); }
+  .badge--vermelho { color: var(--perigo);   background: rgba(192,57,43,.10);   border-color: rgba(192,57,43,.35); }
+  .badge--cinza    { color: #6B7280;          background: rgba(107,114,128,.10); border-color: rgba(107,114,128,.30); }
+
+  /* --- Campos -------------------------------------------------------------- */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--texto-fraco); margin-bottom: 6px; }
+  .input {
+    background: var(--branco);
+    border: 1px solid var(--campo);
+    border-radius: 12px;
+    padding: 13px 15px;
+    font-size: 15px;
+    color: var(--texto);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .input--error { border-color: var(--perigo); }
+  .input .ph { color: #A9B0BF; }
+  .input .err { font-size: 12px; color: var(--perigo); margin-top: 5px; }
+  .input .lead { color: #9AA2B2; font-size: 17px; }
+
+  /* --- Botões -------------------------------------------------------------- */
+  .btn {
+    border-radius: 12px; padding: 15px 18px;
+    font-size: 15.5px; font-weight: 700; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .btn--primary { background: var(--azul); color: var(--branco); }
+  .btn--danger  { background: var(--perigo); color: var(--branco); }
+  .btn--ghost   { border: 1px solid var(--campo); color: var(--azul); background: var(--branco); }
+  .btn--link    { color: var(--azul); background: transparent; font-size: 14px; padding: 10px; }
+  .btn--block   { width: 100%; }
+
+  /* --- Atalhos do painel ---------------------------------------------------- */
+  .atalho {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 14px;
+  }
+  .atalho__ico {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: rgba(27,79,177,.10);
+    display: grid; place-items: center;
+    color: var(--azul); font-size: 22px;
+  }
+  .chevron { color: rgba(0,0,0,.3); font-size: 20px; }
+
+  /* --- Indicadores ---------------------------------------------------------- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi {
+    border-radius: 16px; padding: 16px;
+    border: 1px solid;
+  }
+  .kpi__label { font-size: 12.5px; font-weight: 600; }
+  .kpi__value { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 10px; }
+  .kpi__foot  { font-size: 11.5px; color: rgba(0,0,0,.5); margin-top: 2px; }
+  .kpi--azul     { color: var(--azul);     background: rgba(27,79,177,.07);   border-color: rgba(27,79,177,.28); }
+  .kpi--escuro   { color: var(--azul-escuro); background: rgba(15,46,107,.07); border-color: rgba(15,46,107,.28); }
+  .kpi--verde    { color: var(--sucesso);  background: rgba(27,138,90,.07);   border-color: rgba(27,138,90,.28); }
+  .kpi--laranja  { color: var(--alerta);   background: rgba(217,130,43,.07);  border-color: rgba(217,130,43,.28); }
+
+  .bar { height: 8px; border-radius: 999px; background: rgba(27,79,177,.10); overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: var(--azul); border-radius: 999px; }
+
+  /* --- Barra de filtro ------------------------------------------------------ */
+  .filters { background: var(--branco); border-bottom: 1px solid var(--borda); padding: 12px 16px; }
+  .chips { display: flex; gap: 8px; margin-top: 10px; overflow: hidden; }
+  .chip {
+    border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600;
+    border: 1px solid; white-space: nowrap;
+  }
+  .chip--on    { color: var(--branco); background: var(--azul);   border-color: var(--azul); }
+  .chip--off   { color: var(--azul);   background: rgba(27,79,177,.08); border-color: rgba(27,79,177,.35); }
+  .chip--green { color: var(--sucesso); background: rgba(27,138,90,.08); border-color: rgba(27,138,90,.35); }
+  .chip--grey  { color: #6B7280; background: #EFF3FA; border-color: var(--campo); }
+
+  /* --- Card de patrimônio ---------------------------------------------------- */
+  .pat { display: flex; gap: 14px; }
+  .pat__ico {
+    width: 46px; height: 46px; border-radius: 12px; flex: 0 0 46px;
+    background: rgba(27,79,177,.09);
+    display: grid; place-items: center; color: var(--azul); font-size: 22px;
+  }
+  .meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 12.5px; color: rgba(0,0,0,.5); }
+  .meta b { font-weight: 400; }
+
+  /* --- Linha do tempo -------------------------------------------------------- */
+  .tl { display: flex; gap: 12px; }
+  .tl__rail { width: 34px; flex: 0 0 34px; display: flex; flex-direction: column; align-items: center; }
+  .tl__dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 13px;
+    border: 1px solid;
+  }
+  .tl__line { width: 2px; flex: 1; background: rgba(27,79,177,.18); margin: 4px 0; }
+
+  /* --- Estado vazio ----------------------------------------------------------- */
+  .empty { text-align: center; padding: 40px 32px; }
+  .empty__ico {
+    width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 20px;
+    background: rgba(27,79,177,.08); color: var(--azul);
+    display: grid; place-items: center; font-size: 38px;
+  }
+  .empty h4 { font-size: 17px; font-weight: 600; }
+  .empty p { margin-top: 8px; font-size: 14px; color: var(--texto-fraco); line-height: 1.45; }
+
+  /* --- Mensagem de erro --------------------------------------------------------- */
+  .msg {
+    border-radius: 12px; padding: 12px 14px; font-size: 13.5px; line-height: 1.35;
+    display: flex; gap: 10px; align-items: flex-start; border: 1px solid;
+  }
+  .msg--erro    { color: var(--perigo);  background: rgba(192,57,43,.08);  border-color: rgba(192,57,43,.35); }
+  .msg--aviso   { color: var(--alerta);  background: rgba(217,130,43,.08); border-color: rgba(217,130,43,.35); }
+  .msg--sucesso { color: var(--sucesso); background: rgba(27,138,90,.08);  border-color: rgba(27,138,90,.35); }
+
+  /* --- Dados em lista (rótulo: valor) ------------------------------------------ */
+  .dado { display: flex; gap: 10px; padding: 9px 0; }
+  .dado__rot { width: 132px; flex: 0 0 132px; font-size: 13px; color: rgba(0,0,0,.55); }
+  .dado__val { font-size: 14px; font-weight: 600; line-height: 1.35; }
+
+  /* --- Seletor de professor ------------------------------------------------------ */
+  .sel {
+    border: 1px solid; border-radius: 16px; padding: 14px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 8px; background: var(--branco);
+  }
+  .sel--on  { border-color: var(--azul); border-width: 1.8px; }
+  .sel--off { border-color: rgba(0,0,0,.08); }
+  .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,0,0,.3); flex: 0 0 22px; }
+  .radio--on { border-color: var(--azul); background: radial-gradient(circle, var(--azul) 0 42%, transparent 44%); }
+
+  /* --- Bottom bar / rodapé --------------------------------------------------------- */
+  .foot { padding: 0 24px 28px; }
+
+  /* --- FAB ------------------------------------------------------------------------ */
+  .fab {
+    position: absolute; right: 18px; bottom: 26px;
+    background: var(--azul); color: var(--branco);
+    border-radius: 999px; padding: 13px 18px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700;
+    box-shadow: 0 8px 20px rgba(27,79,177,.35);
+  }
+
+  /* --- Toast --------------------------------------------------------------------- */
+  .toast {
+    position: absolute; left: 16px; right: 16px; bottom: 18px;
+    background: var(--sucesso); color: var(--branco);
+    border-radius: 12px; padding: 13px 16px; font-size: 13.5px; font-weight: 600;
+    box-shadow: 0 10px 26px rgba(0,0,0,.28);
+  }
+
+  /* --- Skeleton -------------------------------------------------------------------- */
+  .sk { background: rgba(0,0,0,.06); border-radius: 16px; }
+  .sk--h { height: 116px; margin-bottom: 10px; }
+
+  /* --- Lista compacta de dados ------------------------------------------------------- */
+  .lista { display: flex; flex-direction: column; }
+  .lista > * + * { border-top: 1px solid var(--borda); }
+  .item { padding: 13px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Patrimônio Escolar — Protótipo de Alta Fidelidade</h1>
+  <p>
+    App mobile (Flutter) do Sistema Integrado de Gestão de Patrimônio Escolar.
+    Este protótipo desenha as <strong>17 telas</strong> do aplicativo na grade de
+    390 × 844 do iPhone 13, com a mesma paleta, tipografia e componentes do app
+    Flutter (<code>lib/app/tema.dart</code>).
+  </p>
+  <div class="meta">
+    <span>17 telas</span>
+    <span>390 × 844 (iPhone 13)</span>
+    <span>Flutter 3.38 · GetX 4.7</span>
+    <span>RF01–RF09 · RN01–RN07</span>
+    <span>Importável no Figma via "HTML to Design"</span>
+  </div>
+</header>
+
+<!-- ==========================================================================
+     MÓDULO 1 — AUTENTICAÇÃO E SESSÃO
+     ========================================================================== -->
+<section>
+  <h2>Módulo 1 — Autenticação e Sessão</h2>
+  <p class="sub">RF01 Login · RF02 Cadastro de Coordenador · RF03 Recuperação de senha · RF04 Logout</p>
+  <div class="grid">
+
+    <!-- RF01 — Login -->
+    <div class="frame">
+      <div class="frame__caption">RF01 — Login<span>E-mail e senha · roteia por role</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div style="padding:44px 26px 0; text-align:center;">
+            <div style="width:70px;height:70px;border-radius:20px;margin:0 auto 18px;background:linear-gradient(135deg,var(--azul),var(--azul-escuro));display:grid;place-items:center;color:#fff;font-size:30px;">🏫</div>
+            <div style="font-size:23px;font-weight:800;">Patrimônio Escolar</div>
+            <div class="muted" style="margin-top:6px;">Gestão de patrimônio da escola</div>
+          </div>
+          <div style="padding:30px 26px 0;">
+            <div class="field">
+              <div class="input"><span class="lead">✉</span><span class="ph">seu@email.com</span></div>
+            </div>
+            <div class="field">
+              <div class="input"><span class="lead">🔒</span><span class="ph">••••••••</span><span style="margin-left:auto;color:#9AA2B2;">👁</span></div>
+            </div>
+            <div style="text-align:right; margin-top:-4px;">
+              <span class="btn btn--link" style="padding:6px 0;">Esqueci minha senha</span>
+            </div>
+            <div class="btn btn--primary btn--block" style="margin-top:14px;">Entrar</div>
+            <div style="text-align:center; margin-top:18px;">
+              <span class="muted">Ainda não tem conta?</span>
+              <span style="color:var(--azul);font-weight:700;font-size:13.5px;">Cadastrar coordenador</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF02 — Cadastro de Coordenador -->
+    <div class="frame">
+      <div class="frame__caption">RF02 — Cadastro de Coordenador<span>RN01: cria apenas role "admin"</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Cadastro de coordenador</h3>
+          </div>
+          <div class="body">
+            <div class="msg msg--aviso" style="margin-bottom:16px;">
+              <span>⚠</span>
+              <span>Este cadastro cria um <strong>Coordenador</strong>. Os professores são cadastrados pela coordenação, dentro do app.</span>
+            </div>
+            <div class="field"><div class="input"><span class="ph">Nome completo</span></div></div>
+            <div class="field"><div class="input"><span class="ph">E-mail institucional</span></div></div>
+            <div class="field"><div class="input"><span class="ph">Senha</span><span style="margin-left:auto;color:#9AA2B2;">👁</span></div></div>
+            <div class="field"><div class="input input--error"><span class="ph">Confirmar senha</span></div><div class="err">As senhas não conferem.</div></div>
+            <div class="field"><div class="input"><span class="ph">Departamento</span></div></div>
+            <div class="field"><div class="input"><span class="ph">Telefone</span></div></div>
+            <div class="btn btn--primary btn--block" style="margin-top:6px;">Cadastrar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF03 — Recuperar senha: etapa 1 -->
+    <div class="frame">
+      <div class="frame__caption">RF03 — Recuperar senha · etapa 1<span>Solicita o código de 6 dígitos</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Recuperar senha</h3>
+          </div>
+          <div class="body">
+            <div style="display:flex;gap:8px;margin-bottom:22px;">
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--campo);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--campo);"></div>
+            </div>
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(27,79,177,.10);display:grid;place-items:center;color:var(--azul);font-size:28px;margin-bottom:16px;">✉</div>
+            <div class="title" style="font-size:19px;">Digite seu e-mail</div>
+            <div class="muted" style="margin:8px 0 20px;">Enviaremos um código de 6 dígitos para redefinir sua senha.</div>
+            <div class="field"><div class="input"><span class="lead">✉</span><span class="ph">seu@email.com</span></div></div>
+            <div class="btn btn--primary btn--block">Enviar código</div>
+            <div style="text-align:center;margin-top:16px;"><span class="btn btn--link">Voltar para o login</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF03 — Recuperar senha: etapa 2 -->
+    <div class="frame">
+      <div class="frame__caption">RF03 — Recuperar senha · etapa 2<span>Validação do código de 6 dígitos</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Recuperar senha</h3>
+          </div>
+          <div class="body">
+            <div style="display:flex;gap:8px;margin-bottom:22px;">
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--campo);"></div>
+            </div>
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(27,79,177,.10);display:grid;place-items:center;color:var(--azul);font-size:28px;margin-bottom:16px;">#</div>
+            <div class="title" style="font-size:19px;">Digite o código</div>
+            <div class="muted" style="margin:8px 0 20px;">Enviamos o código para <strong>admin@escola.com</strong>.</div>
+            <div class="field">
+              <div class="input" style="letter-spacing:12px;font-size:20px;font-weight:700;justify-content:center;">4 8 2 1 6 0</div>
+              <div class="err" style="color:var(--perigo);">O código tem 6 dígitos.</div>
+            </div>
+            <div class="btn btn--primary btn--block">Validar código</div>
+            <div style="text-align:center;margin-top:16px;"><span class="btn btn--link">Reenviar código</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF03 — Recuperar senha: etapa 3 -->
+    <div class="frame">
+      <div class="frame__caption">RF03 — Recuperar senha · etapa 3<span>Definição da nova senha</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Recuperar senha</h3>
+          </div>
+          <div class="body">
+            <div style="display:flex;gap:8px;margin-bottom:22px;">
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+              <div style="flex:1;height:4px;border-radius:999px;background:var(--azul);"></div>
+            </div>
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(27,138,90,.10);display:grid;place-items:center;color:var(--sucesso);font-size:28px;margin-bottom:16px;">🔒</div>
+            <div class="title" style="font-size:19px;">Nova senha</div>
+            <div class="muted" style="margin:8px 0 20px;">Mínimo de 6 caracteres.</div>
+            <div class="field"><div class="input"><span class="lead">🔒</span><span class="ph">Nova senha</span><span style="margin-left:auto;color:#9AA2B2;">👁</span></div></div>
+            <div class="field"><div class="input"><span class="lead">🔒</span><span class="ph">Confirmar nova senha</span><span style="margin-left:auto;color:#9AA2B2;">👁</span></div></div>
+            <div class="btn btn--primary btn--block">Salvar nova senha</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     MÓDULO 2 — PAINEL DO COORDENADOR
+     ========================================================================== -->
+<section>
+  <h2>Módulo 2 — Painel do Coordenador</h2>
+  <p class="sub">RF05 Indicadores · RF06 Professores · RF07 Patrimônios (cadastro, atribuição, devolução e histórico)</p>
+  <div class="grid">
+
+    <!-- Menu do Coordenador -->
+    <div class="frame">
+      <div class="frame__caption">Painel do Coordenador<span>Menu dos módulos de gestão</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Painel do Coordenador</h3>
+            <span class="icon">👤</span><span class="icon">⏻</span>
+          </div>
+          <div class="userbar">
+            <div class="avatar">CG</div>
+            <div class="grow">
+              <div class="nome">Coordenador Geral</div>
+              <div class="papel">Coordenador (admin)</div>
+            </div>
+          </div>
+          <div class="body" style="padding-top:20px;">
+            <div class="atalho">
+              <div class="atalho__ico">📊</div>
+              <div class="grow">
+                <div class="title">Indicadores</div>
+                <div class="muted">Total de bens, em uso, disponíveis, manutenção e por categoria.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="atalho">
+              <div class="atalho__ico">📦</div>
+              <div class="grow">
+                <div class="title">Patrimônios</div>
+                <div class="muted">Consulte, cadastre, entregue e devolva os equipamentos.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="atalho">
+              <div class="atalho__ico">🎓</div>
+              <div class="grow">
+                <div class="title">Professores</div>
+                <div class="muted">Cadastre docentes e veja quantos bens cada um tem.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="atalho">
+              <div class="atalho__ico">🙂</div>
+              <div class="grow">
+                <div class="title">Meu perfil</div>
+                <div class="muted">Telefone, contato e senha de acesso.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+          </div>
+          <div class="foot"><div class="btn btn--danger btn--block">Encerrar sessão</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF05 — Dashboard -->
+    <div class="frame">
+      <div class="frame__caption">RF05 — Indicadores<span>Cards de totais e distribuição por categoria</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Indicadores</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body">
+            <div class="grid2">
+              <div class="kpi kpi--azul">
+                <div class="kpi__label">Total de bens</div>
+                <div class="kpi__value">8</div>
+              </div>
+              <div class="kpi kpi--escuro">
+                <div class="kpi__label">Em uso</div>
+                <div class="kpi__value">5</div>
+                <div class="kpi__foot">atribuídos a docentes</div>
+              </div>
+              <div class="kpi kpi--verde">
+                <div class="kpi__label">Disponíveis</div>
+                <div class="kpi__value">2</div>
+                <div class="kpi__foot">no almoxarifado</div>
+              </div>
+              <div class="kpi kpi--laranja">
+                <div class="kpi__label">Em manutenção</div>
+                <div class="kpi__value">1</div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <div class="row" style="margin-bottom:14px;">
+                <span style="color:var(--azul);">🎓</span>
+                <div class="title--sm" style="font-weight:700;">Corpo docente</div>
+              </div>
+              <div class="row row--between" style="margin-bottom:8px;">
+                <span class="muted">Docentes cadastrados</span><strong>4</strong>
+              </div>
+              <div class="row row--between">
+                <span class="muted">Com equipamentos sob responsabilidade</span><strong>3</strong>
+              </div>
+            </div>
+            <div class="card">
+              <div class="row" style="margin-bottom:16px;">
+                <span style="color:var(--azul);">🗂</span>
+                <div class="title--sm" style="font-weight:700;">Acervo por categoria</div>
+              </div>
+              <div class="muted" style="font-size:13px;">Informática</div>
+              <div class="bar"><i style="width:100%"></i></div>
+              <div class="row row--between" style="margin-top:2px;"><span class="muted muted--xs">Informática</span><strong style="font-size:13.5px;color:var(--azul);">3</strong></div>
+              <div class="muted" style="font-size:13px;margin-top:10px;">Audiovisual</div>
+              <div class="bar"><i style="width:66%"></i></div>
+              <div class="row row--between" style="margin-top:2px;"><span class="muted muted--xs">Audiovisual</span><strong style="font-size:13.5px;color:var(--azul);">2</strong></div>
+              <div class="muted" style="font-size:13px;margin-top:10px;">Laboratório</div>
+              <div class="bar"><i style="width:33%"></i></div>
+              <div class="row row--between" style="margin-top:2px;"><span class="muted muted--xs">Laboratório</span><strong style="font-size:13.5px;color:var(--azul);">1</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07a — Lista de patrimônios -->
+    <div class="frame">
+      <div class="frame__caption">RF07a — Lista de patrimônios<span>Busca + filtros por status e categoria</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Patrimônios</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="filters">
+            <div class="input" style="padding:11px 14px;"><span class="lead" style="font-size:16px;">🔍</span><span class="ph">Buscar por tombamento, nome ou marca</span></div>
+            <div class="chips">
+              <span class="chip chip--on">Todos</span>
+              <span class="chip chip--off">Disponível</span>
+              <span class="chip chip--off">Em uso</span>
+              <span class="chip chip--grey">Categoria ▾</span>
+            </div>
+          </div>
+          <div class="body" style="padding-top:14px;">
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">💻</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-007</div>
+                    <span class="badge badge--azul">◉ Em uso</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Notebook Dell Latitude 3420</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Informática · Dell · Latitude 3420</div>
+                  <div class="meta">📍 <b>Gabinete dos Professores - Mesa 04</b></div>
+                  <div class="meta">🗓 <b>Atribuído em 14/09/2026</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">📽</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-008</div>
+                    <span class="badge badge--verde">✓ Disponível</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Projetor Laser BenQ LW500</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Audiovisual · BenQ · LW500</div>
+                  <div class="meta">📍 <b>Sala 204</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">🔬</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-009</div>
+                    <span class="badge badge--laranja">🔧 Em manutenção</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Microscópio binocular</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Laboratório · Zeiss · Axio</div>
+                  <div class="meta">📍 <b>Laboratório de Biologia</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="fab">＋ Novo bem</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07a — Detalhe -->
+    <div class="frame">
+      <div class="frame__caption">RF07a — Detalhe do bem<span>Ações de escrita só para o Coordenador</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Detalhe do bem</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body">
+            <div class="card">
+              <div class="row" style="align-items:flex-start;">
+                <div class="grow">
+                  <div style="font-size:19px;font-weight:700;">Notebook Dell Latitude 3420</div>
+                  <div class="mono" style="margin-top:6px;">PAT-2024-007</div>
+                </div>
+                <span class="badge badge--azul">◉ Em uso</span>
+              </div>
+              <div style="margin-top:10px;background:rgba(27,79,177,.07);border-radius:10px;padding:10px;font-size:13px;color:var(--azul);">
+                Atribuído a um professor
+              </div>
+            </div>
+            <div class="card">
+              <div style="font-size:17px;font-weight:700;margin-bottom:12px;">Identificação</div>
+              <div class="dado"><div class="dado__rot">Tombamento</div><div class="dado__val">PAT-2024-007</div></div>
+              <div class="dado"><div class="dado__rot">Categoria</div><div class="dado__val">Informática</div></div>
+              <div class="dado"><div class="dado__rot">Marca</div><div class="dado__val">Dell</div></div>
+              <div class="dado"><div class="dado__rot">Modelo</div><div class="dado__val">Latitude 3420</div></div>
+              <div class="dado"><div class="dado__rot">Número de série</div><div class="dado__val">DL-992831</div></div>
+              <div class="dado"><div class="dado__rot">Conservação</div><div class="dado__val">Excelente</div></div>
+            </div>
+            <div class="card">
+              <div style="font-size:17px;font-weight:700;margin-bottom:12px;">Responsável</div>
+              <div class="dado"><div class="dado__rot">Professor</div><div class="dado__val">Prof. Carlos Drummond</div></div>
+              <div class="dado"><div class="dado__rot">E-mail</div><div class="dado__val">professor@escola.com</div></div>
+              <div class="dado"><div class="dado__rot">Atribuído em</div><div class="dado__val">14/09/2026</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+              <div class="btn btn--ghost">🕘 Ver histórico do bem</div>
+              <div class="btn btn--ghost">🤝 Entregar a um professor</div>
+              <div class="btn btn--ghost">↩ Registrar devolução</div>
+              <div class="btn btn--ghost">✎ Editar cadastro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07a — Formulário -->
+    <div class="frame">
+      <div class="frame__caption">RF07a — Novo patrimônio<span>Mesmo formulário do cadastro e da edição</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Novo patrimônio</h3>
+          </div>
+          <div class="body">
+            <div class="field">
+              <label>Código de tombamento *</label>
+              <div class="input"><span class="ph">PAT-2024-010</span></div>
+            </div>
+            <div class="field">
+              <label>Nome do bem *</label>
+              <div class="input"><span class="ph">Ex.: Projetor Laser BenQ LW500</span></div>
+            </div>
+            <div class="field"><label>Descrição / especificações</label><div class="input"><span class="ph">Projetor WXGA LED 3300 lumens</span></div></div>
+            <div class="field"><label>Categoria</label><div class="input"><span class="ph">Audiovisual</span><span style="margin-left:auto;color:#9AA2B2;">▾</span></div></div>
+            <div class="field"><label>Marca</label><div class="input"><span class="ph">BenQ</span></div></div>
+            <div class="field"><label>Modelo</label><div class="input"><span class="ph">LW500</span></div></div>
+            <div class="field"><label>Número de série</label><div class="input"><span class="ph">BQ-5519</span></div></div>
+            <div class="field"><label>Estado de conservação</label><div class="input"><span class="ph">Novo</span><span style="margin-left:auto;color:#9AA2B2;">▾</span></div></div>
+            <div class="field"><label>Localização</label><div class="input"><span class="ph">Sala 204</span></div></div>
+            <div class="btn btn--primary btn--block" style="margin-top:8px;">Cadastrar bem</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07b — Atribuição -->
+    <div class="frame">
+      <div class="frame__caption">RF07b — Atribuição<span>Escolhe o docente que recebe o bem (RN05)</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Atribuir bem</h3>
+          </div>
+          <div class="body">
+            <div class="card">
+              <div class="title--sm" style="font-weight:700;">Equipamento a entregar</div>
+              <div style="margin-top:10px;font-size:15px;font-weight:700;">Projetor Laser BenQ LW500</div>
+              <div class="mono" style="margin-top:4px;">PAT-2024-008</div>
+            </div>
+            <div class="input" style="margin-bottom:14px;"><span class="lead" style="font-size:16px;">🔍</span><span class="ph">Buscar professor por nome, e-mail ou matrícula</span></div>
+            <div class="sel sel--on">
+              <div class="avatar avatar--sm" style="background:rgba(27,79,177,.12);color:var(--azul);">PD</div>
+              <div class="grow">
+                <div class="title--sm">Prof. Carlos Drummond</div>
+                <div class="muted" style="font-size:12.5px;">PROF-2024-01 · Língua Portuguesa e Literatura</div>
+              </div>
+              <span class="radio radio--on"></span>
+            </div>
+            <div class="sel sel--off">
+              <div class="avatar avatar--sm" style="background:rgba(27,79,177,.12);color:var(--azul);">MS</div>
+              <div class="grow">
+                <div class="title--sm">Profa. Maria Silva</div>
+                <div class="muted" style="font-size:12.5px;">PROF-2024-02 · Ciências e Biologia</div>
+              </div>
+              <span class="radio"></span>
+            </div>
+            <div class="sel sel--off">
+              <div class="avatar avatar--sm" style="background:rgba(27,79,177,.12);color:var(--azul);">FO</div>
+              <div class="grow">
+                <div class="title--sm">Prof. Fernando Oliveira</div>
+                <div class="muted" style="font-size:12.5px;">PROF-2024-03 · História e Filosofia</div>
+              </div>
+              <span class="radio"></span>
+            </div>
+            <div class="field" style="margin-top:16px;">
+              <label>Observações (opcional)</label>
+              <div class="input"><span class="ph">Termo de responsabilidade assinado</span></div>
+            </div>
+            <div class="btn btn--primary btn--block">Confirmar entrega</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07b — Devolução -->
+    <div class="frame">
+      <div class="frame__caption">RF07b — Devolução<span>Motivo obrigatório, vai para o histórico (RN05)</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Registrar devolução</h3>
+          </div>
+          <div class="body">
+            <div class="card">
+              <div class="title--sm" style="font-weight:700;">Equipamento devolvido</div>
+              <div style="margin-top:10px;font-size:15px;font-weight:700;">Notebook Dell Latitude 3420</div>
+              <div class="mono" style="margin-top:4px;">PAT-2024-007</div>
+              <div class="meta" style="margin-top:10px;">👤 <b>Responsável atual: Prof. Carlos Drummond</b></div>
+            </div>
+            <div class="field">
+              <label>Motivo da devolução *</label>
+              <div class="input input--error"><span class="ph">Ex.: encerramento do ano letivo</span></div>
+              <div class="err">Descreva o motivo com pelo menos 5 letras.</div>
+            </div>
+            <div class="muted" style="font-size:12.5px;margin-top:-6px;">O motivo fica registrado na linha do tempo do bem.</div>
+            <div class="btn btn--primary btn--block" style="margin-top:18px;">Confirmar devolução</div>
+            <div class="msg msg--erro" style="margin-top:14px;">
+              <span>⚠</span><span>Este bem já não possui professor atribuído.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF07b — Histórico -->
+    <div class="frame">
+      <div class="frame__caption">RF07b — Histórico do bem<span>Linha do tempo das movimentações</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Histórico do bem</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body">
+            <div class="tl">
+              <div class="tl__rail">
+                <div class="tl__dot" style="background:rgba(27,79,177,.12);border-color:rgba(27,79,177,.4);color:var(--azul);">📤</div>
+                <div class="tl__line"></div>
+              </div>
+              <div class="grow" style="padding-bottom:18px;">
+                <div class="card card--tight">
+                  <div class="row row--between">
+                    <div style="font-size:14.5px;font-weight:700;color:var(--azul);">Atribuição a docente</div>
+                    <span class="muted" style="font-size:12px;">14/09/2026</span>
+                  </div>
+                  <div style="font-size:13.5px;margin-top:8px;line-height:1.4;">Termo de responsabilidade assinado</div>
+                  <div class="meta">👤 <b>Coordenador Geral (Admin)</b></div>
+                  <div class="meta">🎓 <b>Prof. Carlos Drummond</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="tl">
+              <div class="tl__rail">
+                <div class="tl__dot" style="background:rgba(107,114,128,.12);border-color:rgba(107,114,128,.4);color:#6B7280;">📦</div>
+              </div>
+              <div class="grow">
+                <div class="card card--tight">
+                  <div class="row row--between">
+                    <div style="font-size:14.5px;font-weight:700;color:#6B7280;">Cadastro do bem</div>
+                    <span class="muted" style="font-size:12px;">10/09/2026</span>
+                  </div>
+                  <div style="font-size:13.5px;margin-top:8px;line-height:1.4;">Cadastro inicial do bem</div>
+                  <div class="meta">👤 <b>Coordenador Geral (Admin)</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF06 — Lista de professores -->
+    <div class="frame">
+      <div class="frame__caption">RF06 — Lista de professores<span>Contador de bens por docente</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Professores</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="filters">
+            <div class="input" style="padding:11px 14px;"><span class="lead" style="font-size:16px;">🔍</span><span class="ph">Buscar por nome, e-mail ou matrícula</span></div>
+          </div>
+          <div class="body" style="padding-top:14px;">
+            <div class="card card--tight">
+              <div class="row" style="align-items:flex-start;">
+                <div class="avatar avatar--sm" style="background:rgba(27,79,177,.12);color:var(--azul);">PD</div>
+                <div class="grow">
+                  <div style="font-size:16px;font-weight:700;">Prof. Carlos Drummond</div>
+                  <div class="muted" style="margin-top:3px;font-size:13px;">PROF-2024-01 · Língua Portuguesa e Literatura</div>
+                </div>
+              </div>
+              <div class="row row--between" style="margin-top:14px;">
+                <span class="badge badge--azul">📦 3 bens sob responsabilidade</span>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="row" style="align-items:flex-start;">
+                <div class="avatar avatar--sm" style="background:rgba(27,138,90,.12);color:var(--sucesso);">MS</div>
+                <div class="grow">
+                  <div style="font-size:16px;font-weight:700;">Profa. Maria Silva</div>
+                  <div class="muted" style="margin-top:3px;font-size:13px;">PROF-2024-02 · Ciências e Biologia</div>
+                </div>
+              </div>
+              <div class="row row--between" style="margin-top:14px;">
+                <span class="badge badge--verde">📦 1 bem sob responsabilidade</span>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="row" style="align-items:flex-start;">
+                <div class="avatar avatar--sm" style="background:rgba(27,138,90,.12);color:var(--sucesso);">FO</div>
+                <div class="grow">
+                  <div style="font-size:16px;font-weight:700;">Prof. Fernando Oliveira</div>
+                  <div class="muted" style="margin-top:3px;font-size:13px;">PROF-2024-03 · História e Filosofia</div>
+                </div>
+              </div>
+              <div class="row row--between" style="margin-top:14px;">
+                <span class="badge badge--verde">📦 0 bens sob responsabilidade</span>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+          </div>
+          <div class="fab">＋ Novo professor</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF06 — Cadastro de professor -->
+    <div class="frame">
+      <div class="frame__caption">RF06 — Cadastro de professor<span>RN02: senha provisória definida pela coordenação</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Novo professor</h3>
+          </div>
+          <div class="body">
+            <div class="field"><label>Nome *</label><div class="input"><span class="ph">Prof. Fernando Pessoa</span></div></div>
+            <div class="field"><label>E-mail institucional *</label><div class="input"><span class="ph">fernando.pessoa@escola.com</span></div></div>
+            <div class="field"><label>Senha provisória *</label><div class="input"><span class="ph">prof123</span><span style="margin-left:auto;color:#9AA2B2;">👁</span></div></div>
+            <div class="field"><label>Matrícula</label><div class="input"><span class="ph">PROF-2024-03</span></div></div>
+            <div class="field"><label>Departamento</label><div class="input"><span class="ph">História e Filosofia</span></div></div>
+            <div class="field"><label>Telefone</label><div class="input"><span class="ph">(11) 98765-1003</span></div></div>
+            <div class="field"><label>CPF</label><div class="input"><span class="ph">234.567.890-11</span></div></div>
+            <div class="msg msg--aviso" style="margin-top:4px;">
+              <span>⚠</span><span>O docente entra com esta senha e pode alterá-la depois (RN06).</span>
+            </div>
+            <div class="btn btn--primary btn--block" style="margin-top:14px;">Cadastrar professor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF06 — Detalhe do professor -->
+    <div class="frame">
+      <div class="frame__caption">RF06 — Detalhe do professor<span>Docente + bens sob responsabilidade</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Detalhe do professor</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body">
+            <div style="background:linear-gradient(135deg,var(--azul),var(--azul-escuro));border-radius:18px;padding:20px;color:#fff;">
+              <div class="row">
+                <div class="avatar">PD</div>
+                <div class="grow">
+                  <div style="font-size:18px;font-weight:700;">Prof. Carlos Drummond</div>
+                  <div style="font-size:13px;opacity:.85;margin-top:2px;">Professor (docente)</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+                <span class="badge" style="color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);">PROF-2024-01</span>
+                <span class="badge" style="color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);">3 bens</span>
+              </div>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <div style="font-size:17px;font-weight:700;margin-bottom:10px;">Contato</div>
+              <div class="dado"><div class="dado__rot">E-mail</div><div class="dado__val">professor@escola.com</div></div>
+              <div class="dado"><div class="dado__rot">Telefone</div><div class="dado__val">(11) 98765-1001</div></div>
+              <div class="dado"><div class="dado__rot">Departamento</div><div class="dado__val">Língua Portuguesa e Literatura</div></div>
+            </div>
+            <div style="font-size:17px;font-weight:700;margin:16px 0 10px;">Bens sob responsabilidade</div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">💻</div>
+                <div class="grow">
+                  <div class="row row--between"><div class="mono">PAT-2024-007</div><span class="badge badge--azul">Em uso</span></div>
+                  <div class="title--sm" style="margin-top:6px;">Notebook Dell Latitude 3420</div>
+                  <div class="meta">📍 <b>Gabinete dos Professores</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">📽</div>
+                <div class="grow">
+                  <div class="row row--between"><div class="mono">PAT-2024-003</div><span class="badge badge--azul">Em uso</span></div>
+                  <div class="title--sm" style="margin-top:6px;">Projetor Epson PowerLite E20</div>
+                  <div class="meta">📍 <b>Sala de Aula 102 - Bloco A</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     MÓDULO 3 — PAINEL DO PROFESSOR
+     ========================================================================== -->
+<section>
+  <h2>Módulo 3 — Painel do Professor</h2>
+  <p class="sub">RF08 Meus patrimônios (leitura estrita — RN03) · RF09 Perfil</p>
+  <div class="grid">
+
+    <!-- Painel do Professor -->
+    <div class="frame">
+      <div class="frame__caption">Painel do Professor<span>Somente leitura + acesso ao próprio perfil</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Painel do Professor</h3>
+            <span class="icon">👤</span><span class="icon">⏻</span>
+          </div>
+          <div class="userbar">
+            <div class="avatar">PD</div>
+            <div class="grow">
+              <div class="nome">Prof. Carlos Drummond</div>
+              <div class="papel">Professor (docente)</div>
+            </div>
+          </div>
+          <div class="body" style="padding-top:20px;">
+            <div class="atalho">
+              <div class="atalho__ico">💼</div>
+              <div class="grow">
+                <div class="title">Meus equipamentos</div>
+                <div class="muted">Bens sob sua responsabilidade, com tombamento, data e localização.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="atalho">
+              <div class="atalho__ico">🙂</div>
+              <div class="grow">
+                <div class="title">Meu perfil</div>
+                <div class="muted">Atualizar telefone e contato, e alterar sua senha.</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="msg msg--aviso" style="margin-top:8px;">
+              <span>🔒</span>
+              <span>Como docente, seu acesso é <strong>apenas de leitura</strong> sobre os bens. Alterações são feitas pela coordenação.</span>
+            </div>
+          </div>
+          <div class="foot"><div class="btn btn--danger btn--block">Encerrar sessão</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF08 — Meus patrimônios -->
+    <div class="frame">
+      <div class="frame__caption">RF08 — Meus equipamentos<span>Cards com tombamento, data e localização — sem ações</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Meus Patrimônios</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body">
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">💻</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-007</div>
+                    <span class="badge badge--azul">◉ Em uso</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Notebook Dell Latitude 3420</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Informática · Dell · Latitude 3420</div>
+                  <div class="meta">📍 <b>Gabinete dos Professores - Mesa 04</b></div>
+                  <div class="meta">🗓 <b>Atribuído em 14/09/2026</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">📽</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-003</div>
+                    <span class="badge badge--azul">◉ Em uso</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Projetor Epson PowerLite E20</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Audiovisual · Epson · PowerLite E20</div>
+                  <div class="meta">📍 <b>Sala de Aula 102 - Bloco A</b></div>
+                  <div class="meta">🗓 <b>Atribuído em 02/03/2026</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card card--tight">
+              <div class="pat">
+                <div class="pat__ico">🔬</div>
+                <div class="grow">
+                  <div class="row row--between" style="align-items:flex-start;">
+                    <div class="mono">PAT-2024-011</div>
+                    <span class="badge badge--azul">◉ Em uso</span>
+                  </div>
+                  <div class="title--sm" style="margin-top:6px;">Microscópio binocular Zeiss</div>
+                  <div class="muted" style="font-size:13px;margin-top:3px;">Laboratório · Zeiss · Axio 2</div>
+                  <div class="meta">📍 <b>Laboratório de Biologia</b></div>
+                  <div class="meta">🗓 <b>Atribuído em 18/02/2026</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF08 — Estado vazio do docente -->
+    <div class="frame">
+      <div class="frame__caption">RF08 — Meu patrimônio · estado vazio<span>RNF02: mensagem útil, não uma tela em branco</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Meus Patrimônios</h3>
+            <span class="icon">⟳</span>
+          </div>
+          <div class="body body--center">
+            <div class="empty">
+              <div class="empty__ico">💼</div>
+              <h4>Nenhum equipamento</h4>
+              <p>Você ainda não tem equipamentos sob sua responsabilidade. Procure a coordenação do almoxarifado da escola.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF09 — Perfil -->
+    <div class="frame">
+      <div class="frame__caption">RF09 — Meu perfil<span>Leitura, edição de contato e troca de senha (RN06)</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Meu Perfil</h3>
+          </div>
+          <div class="body">
+            <div style="background:linear-gradient(135deg,var(--azul),var(--azul-escuro));border-radius:18px;padding:20px;color:#fff;">
+              <div class="row">
+                <div class="avatar" style="width:60px;height:60px;font-size:20px;">PD</div>
+                <div class="grow">
+                  <div style="font-size:18px;font-weight:700;">Prof. Carlos Drummond</div>
+                  <div style="font-size:13px;opacity:.85;margin-top:2px;">professor@escola.com</div>
+                  <span style="display:inline-block;margin-top:8px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.18);font-size:11.5px;font-weight:700;">Professor (docente)</span>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <div class="row row--between" style="margin-bottom:12px;">
+                <span class="muted" style="font-weight:700;font-size:12px;letter-spacing:.7px;">DADOS CADASTRAIS</span>
+                <span style="color:var(--azul);font-weight:700;font-size:13.5px;">✎ Editar</span>
+              </div>
+              <div class="dado"><div class="dado__rot">Nome</div><div class="dado__val">Prof. Carlos Drummond</div></div>
+              <div class="dado"><div class="dado__rot">E-mail</div><div class="dado__val">professor@escola.com</div></div>
+              <div class="dado"><div class="dado__rot">Matrícula</div><div class="dado__val">PROF-2024-01</div></div>
+              <div class="dado"><div class="dado__rot">Departamento</div><div class="dado__val">Língua Portuguesa</div></div>
+              <div class="dado"><div class="dado__rot">CPF</div><div class="dado__val" style="font-style:italic;font-weight:400;color:rgba(0,0,0,.4);">Não informado</div></div>
+            </div>
+            <div class="card">
+              <div class="muted" style="font-weight:700;font-size:12px;letter-spacing:.7px;margin-bottom:12px;">CONTATO</div>
+              <div class="dado"><div class="dado__rot">Telefone</div><div class="dado__val">(11) 98765-1001</div></div>
+              <div class="dado"><div class="dado__rot">E-mail emergência</div><div class="dado__val" style="font-style:italic;font-weight:400;color:rgba(0,0,0,.4);">Não informado</div></div>
+              <div class="dado"><div class="dado__rot">Endereço</div><div class="dado__val" style="font-style:italic;font-weight:400;color:rgba(0,0,0,.4);">Não informado</div></div>
+              <div class="dado"><div class="dado__rot">Cidade/UF</div><div class="dado__val" style="font-style:italic;font-weight:400;color:rgba(0,0,0,.4);">Não informado</div></div>
+            </div>
+            <div class="card">
+              <div class="row">
+                <span style="color:var(--azul);">🔒</span>
+                <div class="grow">
+                  <div class="muted" style="font-weight:700;font-size:12px;letter-spacing:.7px;">ALTERAR SENHA</div>
+                  <div class="muted" style="margin-top:4px;">Troque sua senha de acesso a qualquer momento.</div>
+                </div>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF09 — Perfil em edição -->
+    <div class="frame">
+      <div class="frame__caption">RF09 — Meu perfil · edição<span>Só o campo alterado é enviado ao servidor</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Meu Perfil</h3>
+          </div>
+          <div class="body">
+            <div class="card">
+              <div class="muted" style="font-weight:700;font-size:12px;letter-spacing:.7px;margin-bottom:12px;">DADOS CADASTRAIS</div>
+              <div class="field"><label>Nome</label><div class="input"><span>Prof. Carlos Drummond</span></div></div>
+              <div class="field"><label>Telefone</label><div class="input"><span>(11) 98888-7777</span></div></div>
+              <div class="field"><label>Departamento</label><div class="input"><span>Língua Portuguesa</span></div></div>
+              <div class="field"><label>Endereço</label><div class="input"><span class="ph">Rua das Letras, 50</span></div></div>
+              <div class="field"><label>Cidade / UF</label><div class="input"><span class="ph">São Paulo / SP</span></div></div>
+              <div class="field"><label>Contato de emergência</label><div class="input"><span class="ph">Helena (11) 98888-0000</span></div></div>
+              <div class="msg msg--sucesso" style="margin-bottom:14px;">
+                <span>✓</span><span>Dados atualizados com sucesso.</span>
+              </div>
+              <div class="btn btn--primary btn--block">💾 Salvar alterações</div>
+              <div style="text-align:center;margin-top:6px;"><span class="btn btn--link">Descartar alterações</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     ESTADOS ASSÍNCRONOS (RNF02)
+     ========================================================================== -->
+<section>
+  <h2>Estados Assíncronos — RNF02</h2>
+  <p class="sub">Loading com skeleton · Estado vazio · Mensagem de erro com ação de recuperação</p>
+  <div class="grid">
+
+    <!-- Loading -->
+    <div class="frame">
+      <div class="frame__caption">Loading com skeleton<span>Mostra onde os cards vão aparecer</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Patrimônios</h3>
+          </div>
+          <div class="body">
+            <div class="sk sk--h"></div>
+            <div class="sk sk--h"></div>
+            <div class="sk sk--h"></div>
+            <div class="sk sk--h"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Erro -->
+    <div class="frame">
+      <div class="frame__caption">Erro de rede<span>Mensagem amigável + "Tentar novamente"</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Patrimônios</h3>
+          </div>
+          <div class="body body--center">
+            <div style="text-align:center;width:100%;">
+              <div style="font-size:46px;color:rgba(0,0,0,.32);margin-bottom:14px;">☁</div>
+              <div class="msg msg--erro">
+                <span>⚠</span>
+                <span>Não foi possível conectar ao servidor. Confira sua internet e o endereço da API.</span>
+              </div>
+              <div class="btn btn--ghost" style="margin-top:16px;display:inline-flex;padding:11px 20px;font-size:14px;">⟳ Tentar novamente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 403 -->
+    <div class="frame">
+      <div class="frame__caption">Acesso negado (403)<span>Defesa de interface + bloqueio real do backend</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <span class="appbar__back">‹</span>
+            <h3>Detalhe do bem</h3>
+          </div>
+          <div class="body body--center">
+            <div style="text-align:center;width:100%;">
+              <div style="font-size:44px;color:var(--perigo);margin-bottom:14px;">⚠</div>
+              <div class="msg msg--erro">
+                <span>⚠</span>
+                <span>Você não tem permissão para realizar esta ação.</span>
+              </div>
+              <div class="btn btn--ghost" style="margin-top:16px;display:inline-flex;padding:11px 20px;font-size:14px;">⟳ Tentar novamente</div>
+              <div style="margin-top:8px;"><span class="btn btn--link">Voltar para a lista</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="frame">
+      <div class="frame__caption">RF04 — Confirmação de logout<span>Encerramento seguro da sessão (RF04)</span></div>
+      <div class="phone">
+        <div class="phone__status"><span>9:41</span><span class="notch"></span><span>●●● ⌁ 100%</span></div>
+        <div class="phone__body">
+          <div class="appbar">
+            <h3>Painel do Professor</h3>
+            <span class="icon">👤</span><span class="icon">⏻</span>
+          </div>
+          <div style="flex:1;display:grid;place-items:center;padding:24px;background:rgba(0,0,0,.35);">
+            <div style="background:#fff;border-radius:16px;padding:22px;width:100%;">
+              <div style="font-size:17px;font-weight:700;">Encerrar sessão?</div>
+              <div class="muted" style="margin-top:8px;">Você precisará entrar novamente com e-mail e senha.</div>
+              <div style="display:flex;gap:10px;margin-top:18px;">
+                <div class="btn btn--ghost" style="flex:1;">Cancelar</div>
+                <div class="btn btn--danger" style="flex:1;">Sair</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer style="max-width:1400px;margin:0 auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);color:#8E97A9;font-size:13px;line-height:1.7;">
+  <p>
+    <strong>Patrimônio Escolar</strong> — Sistema Integrado de Gestão de Patrimônio Escolar.
+    Protótipo de alta fidelidade gerado a partir da identidade visual do app Flutter
+    (<code>lib/app/tema.dart</code>). Para importar no Figma, use o plugin gratuito
+    <em>HTML to Design</em> apontando para <code>design/prototipo.html</code>.
+  </p>
+</footer>
+
+</body>
+</html>

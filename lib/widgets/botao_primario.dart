@@ -58,11 +58,18 @@ class BotaoPrimario extends StatelessWidget {
                     Icon(icone, size: 20),
                     const SizedBox(width: 10),
                   ],
-                  Text(
-                    texto,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  // `Flexible` + ellipsis: um rótulo longo ("Cadastrar
+                  // coordenador", "Confirmar devolução") precisa caber
+                  // em telas de 360 px sem estourar a linha do botão.
+                  Flexible(
+                    child: Text(
+                      texto,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

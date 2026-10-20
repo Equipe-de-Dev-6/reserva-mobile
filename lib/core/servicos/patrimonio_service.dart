@@ -1,6 +1,8 @@
+import '../../models/ciclo_vida_patrimonio_model.dart';
 import '../../models/historico_model.dart';
 import '../../models/patrimonio_criacao_model.dart';
 import '../../models/patrimonio_model.dart';
+import '../../models/patrimonio_stats_model.dart';
 import '../../models/status_patrimonio.dart';
 import 'api_client.dart';
 
@@ -191,5 +193,77 @@ class PatrimonioService {
   Future<HistoricoPatrimonioModel> historico(int id) async {
     final json = await _api.get('/admin/patrimonios/$id/historico');
     return HistoricoPatrimonioModel.fromJson(json);
+  }
+
+  // -------------------------------------------------------------------------
+  // GET /admin/patrimonios/stats — RF05 (dashboard de indicadores)
+  // -------------------------------------------------------------------------
+
+  /// Indicadores do acervo escolar.
+  ///
+  /// Somente o Coordenador tem acesso: o backend responde `403` para
+  /// qualquer outro papel.
+  Future<PatrimonioStatsModel> estatisticas() async {
+    final json = await _api.get('/admin/patrimonios/stats');
+    return PatrimonioStatsModel.fromJson(json);
+  }
+
+  // -------------------------------------------------------------------------
+  // GET /patrimonios/meus — RF08 (bens do docente autenticado)
+  // -------------------------------------------------------------------------
+
+  /// Bens atribuídos ao professor logado.
+  ///
+  /// É o mesmo acervo que `GET /patrimonios` devolve para um docente,
+  /// mas pelo endpoint que não aceita filtros: o servidor garante que
+  /// só volte o que pertence a quem está perguntando (RN03).
+  ///
+  /// A lista é devolvida vazia — e **não** um erro — quando o docente
+  /// ainda não tem nenhum bem.
+  Future<List<PatrimonioModel>> meus() async {
+    final json = await _api.get('/patrimonios/meus');
+    return _itens(json);
+  }
+
+  // -------------------------------------------------------------------------
+  // POST /admin/patrimonios/{id}/atribuir — RF07b (RN05)
+  // -------------------------------------------------------------------------
+
+  /// Entrega o bem a um docente (RN05).
+  ///
+  /// O backend muda o status para `em_uso`, grava a data de atribuição e
+  /// registra a movimentação no histórico. Erros esperados:
+  /// `400` (professor inválido), `404` (bem ou docente inexistente) e
+  /// `403` (quem chamou não é Coordenador).
+  Future<void> atribuir(
+    int id,
+    int professorId, {
+    String observacoes = '',
+  }) async {
+    await _api.post(
+      '/admin/patrimonios/$id/atribuir',
+      body: AtribuirPatrimonioRequestModel(
+        professorId: professorId,
+        observacoes: observacoes,
+      ).toJson(),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // POST /admin/patrimonios/{id}/desatribuir — RF07b (RN05)
+  // -------------------------------------------------------------------------
+
+  /// Registra a devolução do bem (RN05).
+  ///
+  /// O vínculo com o docente é desfeito, o status volta para
+  /// `disponivel` (almoxarifado) e a ocorrência entra no histórico — é
+  /// o que retira o bem da visão do docente.
+  ///
+  /// Erro esperado: `400`, quando o bem já não tem professor atribuído.
+  Future<void> desatribuir(int id, {String motivo = ''}) async {
+    await _api.post(
+      '/admin/patrimonios/$id/desatribuir',
+      body: DesatribuirPatrimonioRequestModel(motivo: motivo).toJson(),
+    );
   }
 }
