@@ -3,6 +3,8 @@ import 'package:get/get.dart' hide Response;
 
 import '../config/api_config.dart';
 import '../utils/api_erros.dart';
+import '../utils/app_exception.dart';
+import '../../models/resultado_diagnostico.dart';
 import 'sessao_service.dart';
 
 /// Callback disparado quando a sessão não pode mais ser renovada.
@@ -165,6 +167,59 @@ class ApiClient extends GetxService {
     );
     return _corpo(resposta);
   }
+
+  // -------------------------------------------------------------------------
+  // Diagnóstico de conexão
+  // -------------------------------------------------------------------------
+
+  /// Verifica se a API está de pé, chamando `GET /health`.
+  ///
+  /// Não usa o [dio] com interceptors (não precisa de token) e **não**
+  /// joga exceção: devolve um [ResultadoDiagnostico] com o endereço
+  /// usado, para que a tela de login possa mostrar exatamente onde o
+  /// app está tentando chegar.
+  ///
+  /// É a ferramenta de diagnóstico do projeto: cada pessoa precisa do
+  /// `api.exe` rodando na própria máquina, e o endereço muda conforme o
+  /// dispositivo.
+  Future<ResultadoDiagnostico> verificarConexao() async {
+    final endereco = ApiConfig.baseUrl;
+    final inicio = DateTime.now();
+
+    try {
+      // Usa o método `get` (e não o cliente cru) para que o dublê de
+      // teste consiga responder a esta chamada, como responde às outras.
+      final resposta = await get('/health');
+
+      return ResultadoDiagnostico(
+        endereco: endereco,
+        conseguiuConectar: true,
+        detalhe: resposta['message']?.toString() ?? 'API operacional.',
+        duracao: DateTime.now().difference(inicio),
+      );
+    } on AppException catch (e) {
+      // `statusCode` nulo = a requisição nem chegou ao servidor
+      // (API fora do ar, endereço errado, firewall).
+      return ResultadoDiagnostico(
+        endereco: endereco,
+        conseguiuConectar: false,
+        detalhe: e.statusCode == null
+            ? 'Não foi possível abrir conexão com $endereco.'
+            : 'A API respondeu ${e.statusCode}: ${e.mensagem}',
+        duracao: DateTime.now().difference(inicio),
+      );
+    } catch (e) {
+      return ResultadoDiagnostico(
+        endereco: endereco,
+        conseguiuConectar: false,
+        detalhe: 'Falha inesperada: $e',
+        duracao: DateTime.now().difference(inicio),
+      );
+    }
+  }
+
+  /// Endereço base em uso — exposto para as mensagens de erro.
+  String get enderecoBase => ApiConfig.baseUrl;
 
   /// POST.
   Future<Map<String, dynamic>> post(String caminho,

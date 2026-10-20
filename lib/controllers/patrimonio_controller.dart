@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../core/servicos/patrimonio_service.dart';
 import '../core/servicos/sessao_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../models/patrimonio_model.dart';
 import '../models/status_patrimonio.dart';
 
@@ -108,7 +109,8 @@ class PatrimonioController extends GetxController {
   @override
   void onClose() {
     _timerBusca?.cancel();
-    buscaCtrl.dispose();
+    // Limpa, em vez de descartar (ver `core/utils/text_controllers.dart`).
+    limparCampos([buscaCtrl]);
     super.onClose();
   }
 

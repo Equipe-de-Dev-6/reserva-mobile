@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../core/servicos/perfil_service.dart';
 import '../core/servicos/sessao_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../core/utils/validadores.dart';
 import '../models/perfil_request.dart';
 import '../models/usuario_model.dart';
@@ -80,25 +81,21 @@ class PerfilController extends GetxController {
 
   @override
   void onClose() {
-    // Limpar antes de descartar: `dispose()` libera os ouvintes, mas o
-    // texto continua na memória do controller. Esvaziar garante que
-    // nenhum dado de contato fique pendurado depois que a tela sai.
-    nomeCtrl.clear();
-    telefoneCtrl.clear();
-    departamentoCtrl.clear();
-    enderecoCtrl.clear();
-    cidadeUfCtrl.clear();
-    contatoEmergenciaCtrl.clear();
-    _limparCamposSenha();
-
-    nomeCtrl.dispose();
-    telefoneCtrl.dispose();
-    departamentoCtrl.dispose();
-    enderecoCtrl.dispose();
-    cidadeUfCtrl.dispose();
-    contatoEmergenciaCtrl.dispose();
-    novaSenhaCtrl.dispose();
-    confirmarSenhaCtrl.dispose();
+    // Limpa, em vez de descartar (ver `core/utils/text_controllers.dart`).
+    // Esvaziar garante que nenhum dado de contato nem a senha fiquem
+    // pendurados na memória depois que a tela sai — e descartar aqui
+    // derrubaria a tela com "A TextEditingController was used after
+    // being disposed".
+    limparCampos([
+      nomeCtrl,
+      telefoneCtrl,
+      departamentoCtrl,
+      enderecoCtrl,
+      cidadeUfCtrl,
+      contatoEmergenciaCtrl,
+      novaSenhaCtrl,
+      confirmarSenhaCtrl,
+    ]);
     super.onClose();
   }
 
@@ -238,7 +235,6 @@ class PerfilController extends GetxController {
     editandoSenha.value = false;
   }
 
-  void alternarVisibilidadeSenha() => senhaOculta.toggle();
 
   Future<void> alterarSenha(FormState formulario) async {
     erro.value = '';

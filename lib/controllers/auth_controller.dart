@@ -3,11 +3,14 @@ import 'package:get/get.dart';
 
 import '../app/middleware.dart';
 import '../app/rotas.dart';
+import '../core/servicos/api_client.dart';
 import '../core/servicos/auth_service.dart';
 import '../core/servicos/sessao_service.dart';
 import '../core/utils/app_exception.dart';
+import '../core/utils/text_controllers.dart';
 import '../core/utils/validadores.dart';
 import '../models/auth_requests.dart';
+import '../models/resultado_diagnostico.dart';
 
 /// Controller do módulo de autenticação (RF01 a RF04).
 ///
@@ -36,6 +39,17 @@ class AuthController extends GetxController {
 
   /// Mensagem de sucesso (usada na recuperação de senha).
   final RxString aviso = ''.obs;
+
+  /// `true` durante a verificação de conexão com a API.
+  final RxBool verificandoConexao = false.obs;
+
+  /// Resultado da última verificação de conexão (null = nunca feita).
+  ///
+  /// Aparece na tela de Login para dizer **qual endereço** o app está
+  /// usando e se a API respondeu — é o que resolve o "não foi possível
+  /// conectar ao servidor" na hora, sem precisar abrir o terminal.
+  final Rxn<ResultadoDiagnostico> diagnostico =
+      Rxn<ResultadoDiagnostico>();
 
   // --- Campos de Login (RF01) -------------------------------------------
 
@@ -70,19 +84,25 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    emailCtrl.dispose();
-    senhaCtrl.dispose();
-    nomeCtrl.dispose();
-    cadastroEmailCtrl.dispose();
-    cadastroSenhaCtrl.dispose();
-    confirmarSenhaCtrl.dispose();
-    departamentoCtrl.dispose();
-    telefoneCtrl.dispose();
-    cpfCtrl.dispose();
-    recuperacaoEmailCtrl.dispose();
-    codigoCtrl.dispose();
-    novaSenhaCtrl.dispose();
-    novaSenhaConfirmarCtrl.dispose();
+    // Os campos são **limpos**, não descartados — ver
+    // `core/utils/text_controllers.dart` para o porquê (descartar
+    // aqui derrubava a tela de Login com "A TextEditingController was
+    // used after being disposed").
+    limparCampos([
+      emailCtrl,
+      senhaCtrl,
+      nomeCtrl,
+      cadastroEmailCtrl,
+      cadastroSenhaCtrl,
+      confirmarSenhaCtrl,
+      departamentoCtrl,
+      telefoneCtrl,
+      cpfCtrl,
+      recuperacaoEmailCtrl,
+      codigoCtrl,
+      novaSenhaCtrl,
+      novaSenhaConfirmarCtrl,
+    ]);
     super.onClose();
   }
 
@@ -117,7 +137,6 @@ class AuthController extends GetxController {
     }
   }
 
-  void alternarVisibilidadeSenhaLogin() => senhaOculta.toggle();
 
   // =========================================================================
   // RF02 — CADASTRO DE COORDENADOR (RN01)
@@ -158,7 +177,6 @@ class AuthController extends GetxController {
     }
   }
 
-  void alternarVisibilidadeSenhaCadastro() => cadastroSenhaOculta.toggle();
 
   // =========================================================================
   // RF03 — RECUPERAÇÃO DE SENHA
@@ -252,7 +270,24 @@ class AuthController extends GetxController {
     aviso.value = '';
   }
 
-  void alternarVisibilidadeNovaSenha() => novaSenhaOculta.toggle();
+
+  // =========================================================================
+  // DIAGNÓSTICO DE CONEXÃO
+  // =========================================================================
+
+  /// Verifica se a API está de pé e guarda o resultado em [diagnostico].
+  ///
+  /// É o botão "Verificar conexão" da tela de Login: em vez de só dizer
+  /// que não conectou, o app mostra **qual endereço** tentou e o que a
+  /// API respondeu.
+  Future<void> verificarConexao() async {
+    verificandoConexao.value = true;
+    try {
+      diagnostico.value = await Get.find<ApiClient>().verificarConexao();
+    } finally {
+      verificandoConexao.value = false;
+    }
+  }
 
   // =========================================================================
   // RF04 — LOGOUT

@@ -43,7 +43,7 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
-implementados. **247 testes automatizados** passando.
+implementados. **280 testes automatizados** passando.
 
 | Requisito | Onde está |
 |----------|-----------|
@@ -262,6 +262,28 @@ Future<void> salvarDados(FormState formulario) async {
 }
 ```
 
+**6. Os campos de texto pertencem à tela, não ao Controller**
+
+O `AuthController`, o `PerfilController` e os Controllers de formulário
+guardam `TextEditingController` para que a regra de negócio fique em
+um lugar só. Mas o GetX descarta o Controller **no instante em que a
+rota é removida** — enquanto a View que usa aqueles campos ainda está
+saindo da árvore (a transição leva 280 ms).
+
+Ao ser desmontado, o `TextFormField` chama `removeListener` no
+controller: se ele já estiver descartado, o Flutter estoura com
+
+> A TextEditingController was used after being disposed.
+
+e a tela fica coberta pelo erro vermelho. Era exatamente o que acontecia
+ao sair do Login depois de entrar.
+
+A solução está em `core/utils/text_controllers.dart`: o Controller
+**limpa** os campos (para não deixar senha na memória) e **não** os
+descarta — eles são liberados junto com o Controller, pelo coletor de
+lixo. A varredura de telas (`test/varredura_telas_test.dart`) impede
+que a regressão volte.
+
 **7. Registro síncrono das dependências globais**
 
 `Get.putAsync` só registra a instância **depois** que o Future resolve.
@@ -307,6 +329,35 @@ A API sobe na porta **8081** e a documentação fica em
 | O que o app guarda no celular? | Apenas o **JWT**, em `flutter_secure_storage` (criptografado), para não logar toda hora. Todo o domínio (bens, docentes, histórico) vive no backend. |
 | Se o `data.db` for apagado? | Ele é recriado e populado automaticamente na próxima vez que `api.exe` rodar. Não há migração nem script de setup. |
 | Custa alguma coisa? | **R$ 0.** Nenhum serviço pago, nenhuma chave de API, nenhuma conta em nuvem. O app funciona com a API rodando na mesma máquina (ou na rede local da escola). |
+
+#### ⚠️ "Não foi possível conectar ao servidor"
+
+O erro mais comum de desenvolvimento com este projeto. Ele significa que
+o app **não conseguiu abrir conexão** com a API.
+
+> **Cada pessoa precisa do `api.exe` rodando na própria máquina.** O
+> backend é um servidor local — não está "na nuvem" e não é
+> compartilhado. Rode `./api.exe` **antes** de rodar o app.
+
+A tela de Login tem um botão **"Verificar conexão com a API"** que faz
+o diagnóstico na hora: mostra **qual endereço** o app está usando, se a
+API respondeu e o que fazer.
+
+| Onde o app roda | Endereço | Por quê |
+|------------------|----------|---------|
+| Emulador Android (oficial) | `http://10.0.2.2:8081/api` | `10.0.2.2` é o alias da máquina, visto de dentro do emulador |
+| Simulador iOS / desktop / Chrome | `http://localhost:8081/api` | app e backend na mesma máquina |
+| Celular físico (Wi-Fi) | `http://192.168.x.x:8081/api` | o IP da máquina na rede local |
+
+Checklist rápido (detalhes no [guia](docs/GUIA.md)):
+
+1. O `api.exe` está rodando? Se a janela do console **some na hora**,
+   o Windows bloqueou o executável: clique com o botão direito →
+   **Propriedades** → **Desbloquear**.
+2. A porta 8081 está livre? `netstat -ano | findstr :8081`.
+3. No celular físico: mesmo Wi-Fi e `api.exe` liberado no firewall.
+4. Emulador Android em máquina virtual (Genymotion/WSA): o `10.0.2.2`
+   pode não existir — use `--dart-define=API_BASE_URL=http://<ip>:8081/api`.
 
 #### CPF e telefone: podem ser qualquer valor
 
@@ -399,10 +450,10 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (247 testes)
+flutter test             # suíte completa (280 testes)
 ```
 
-A suíte é dividida em dez arquivos:
+A suíte é dividida em quinze arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
@@ -410,6 +461,7 @@ A suíte é dividida em dez arquivos:
 | `test/bindings_test.dart` | Grafo de dependências do `MainBinding` e guardas de rota | Não |
 | `test/device_preview_test.dart` | DevicePreview aplica o tamanho real do aparelho | Não |
 | `test/fluxo_rotas_test.dart` | Navegação, guards, validação e restauração de sessão | Não |
+| `test/varredura_telas_test.dart` | **Varredura de todas as 17 telas** em 3 tamanhos — nenhuma pode estourar layout nem disparar exceção | Não |
 | `test/patrimonio_test.dart` | Models, Services e widgets do acervo | Não |
 | `test/patrimonio_controller_test.dart` | Listagem, busca com debounce e filtros | Não |
 | `test/patrimonio_lista_view_test.dart` | Tela de listagem, estados assíncronos, overflow | Não |
@@ -417,8 +469,11 @@ A suíte é dividida em dez arquivos:
 | `test/ciclo_vida_patrimonio_test.dart` | RF05, RF07b e RF08 (dashboard, atribuição, devolução, histórico) | Não |
 | `test/professores_test.dart` | RF06 e RBAC das telas de professores | Não |
 | `test/perfil_test.dart` | RF09 / RN06 | Não |
+| `test/campo_texto_senha_test.dart` | Botão de mostrar/ocultar senha, no widget e nas telas reais | Não |
+| `test/diagnostico_conexao_test.dart` | Diagnóstico de conexão com a API (tela de Login) | Não |
 | `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
 | `test/integracao_patrimonio_test.dart` | Listagem, filtros e ciclo completo contra a API | Sim (ignorados se a API estiver fora) |
+| `test/integracao_diagnostico_test.dart` | Diagnóstico contra a API real (ligada e desligada) | Sim (ignorado se a API estiver fora) |
 
 > **Detalhe importante:** dentro de `testWidgets` o tempo é *fake*, então
 > chamadas reais de plataforma (o `flutter_secure_storage`) nunca

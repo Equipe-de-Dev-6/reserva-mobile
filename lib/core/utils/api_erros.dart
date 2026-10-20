@@ -43,8 +43,14 @@ String mensagemDeErro(DioException erro) {
     case DioExceptionType.transformTimeout:
       return 'O servidor demorou para responder. Verifique sua conexão.';
     case DioExceptionType.connectionError:
-      return 'Não foi possível conectar ao servidor. Confira sua internet '
-          'e o endereço da API.';
+      // O endereço entra na mensagem: é a informação que falta quando o
+      // app roda em outro dispositivo (o emulador Android usa
+      // `10.0.2.2`, o celular físico usa o IP da máquina na rede) e o
+      // backend não está no lugar esperado.
+      final endereco = erro.requestOptions.uri.toString();
+      return 'Não foi possível conectar ao servidor ($endereco). '
+          'Confira se o api.exe está rodando e use "Verificar conexão" '
+          'para ver o endereço que o app está usando.';
     case DioExceptionType.badCertificate:
       return 'Certificado de segurança inválido.';
     case DioExceptionType.cancel:

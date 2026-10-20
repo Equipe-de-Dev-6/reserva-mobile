@@ -63,14 +63,14 @@ class CartaoIndicador extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               valor,
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 24,
                 height: 1.1,
                 fontWeight: FontWeight.w800,
                 color: cor,
