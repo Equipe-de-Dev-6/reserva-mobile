@@ -1,14 +1,20 @@
 name: CI
 
 # A CI roda a mesma coisa que o avaliador vai rodar: análise estática +
-# suíte de testes. Cada Pull Request aparece com o selo verde ou
-# vermelho — é a evidência de revisão de código que a §8 do enunciado
-# pede.
+# suíte de testes **com o backend no ar**. Cada Pull Request aparece com o
+# selo verde ou vermelho — é a evidência de revisão de código que o §8
+# do enunciado pede.
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+env:
+  # Caminho do backend. O `api.exe` é um binário Windows versionado no
+  # repositório (é ele que a equipe de backend forneceu), então a CI
+  # precisa de uma máquina Windows para conseguir subi-lo.
+  API_EXE: api.exe
 
 jobs:
   analyze:
@@ -31,7 +37,9 @@ jobs:
 
   test:
     name: Testes
-    runs-on: ubuntu-latest
+    # Windows de propósito: é o único SO em que o `api.exe` (backend)
+    # roda, e a suíte de integração fala com ele de verdade.
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -44,12 +52,44 @@ jobs:
       - name: Instalar dependências
         run: flutter pub get
 
-      # Os testes de integração contra a API real são ignorados
-      # automaticamente quando o backend não está no ar (eles checam
-      # `/health` antes). A suíte local roda com `api.exe` no ar.
-      - name: Rodar a suíte
-        run: flutter test --reporter expanded
+      # ------------------------------------------------------------------
+      # Sobe o backend. Sem ele, os testes de integração seriam pulados —
+      # e a CI perderia a cobertura mais valiosa do projeto (a que prova
+      # o RBAC de verdade, com o 403 real do servidor).
+      # ------------------------------------------------------------------
+      - name: Subir a API
+        shell: pwsh
+        run: |
+          Start-Process -FilePath ".\$env:API_EXE" -WindowStyle Hidden
+          $ok = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            Start-Sleep -Seconds 1
+            try {
+              $r = Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing -TimeoutSec 2
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch { }
+          }
+          if (-not $ok) { throw "A API nao subiu na porta 8081" }
+          Write-Host "API no ar em http://localhost:8081"
 
-      - name: Relatório de cobertura
-        run: flutter test --coverage
-        continue-on-error: true
+      # Uma execução só: `--coverage` já roda a suíte inteira e gera o
+      # relatório.
+      - name: Rodar a suíte
+        run: flutter test --coverage --reporter expanded
+
+      - name: Publicar a cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+      # ------------------------------------------------------------------
+      # Derruba o backend, para o runner não terminar com o processo
+      # pendurado.
+      # ------------------------------------------------------------------
+      - name: Desligar a API
+        if: always()
+        shell: pwsh
+        run: Get-Process api -ErrorAction SilentlyContinue | Stop-Process -Force
