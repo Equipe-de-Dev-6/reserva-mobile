@@ -43,7 +43,7 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
-implementados. **266 testes automatizados** passando.
+implementados. **280 testes automatizados** passando.
 
 | Requisito | Onde está |
 |----------|-----------|
@@ -450,10 +450,10 @@ flutter run --dart-define=API_BASE_URL=http://192.168.0.10:8081/api
 
 ```bash
 flutter analyze          # análise estática
-flutter test             # suíte completa (266 testes)
+flutter test             # suíte completa (280 testes)
 ```
 
-A suíte é dividida em treze arquivos:
+A suíte é dividida em quinze arquivos:
 
 | Arquivo | Escopo | Precisa do backend? |
 |---------|--------|---------------------|
@@ -469,8 +469,11 @@ A suíte é dividida em treze arquivos:
 | `test/ciclo_vida_patrimonio_test.dart` | RF05, RF07b e RF08 (dashboard, atribuição, devolução, histórico) | Não |
 | `test/professores_test.dart` | RF06 e RBAC das telas de professores | Não |
 | `test/perfil_test.dart` | RF09 / RN06 | Não |
+| `test/campo_texto_senha_test.dart` | Botão de mostrar/ocultar senha, no widget e nas telas reais | Não |
+| `test/diagnostico_conexao_test.dart` | Diagnóstico de conexão com a API (tela de Login) | Não |
 | `test/integracao_auth_test.dart` | Login, cadastro, recuperação e 403 do docente | Sim (ignorados se a API estiver fora) |
 | `test/integracao_patrimonio_test.dart` | Listagem, filtros e ciclo completo contra a API | Sim (ignorados se a API estiver fora) |
+| `test/integracao_diagnostico_test.dart` | Diagnóstico contra a API real (ligada e desligada) | Sim (ignorado se a API estiver fora) |
 
 > **Detalhe importante:** dentro de `testWidgets` o tempo é *fake*, então
 > chamadas reais de plataforma (o `flutter_secure_storage`) nunca
