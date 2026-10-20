@@ -46,7 +46,10 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
-implementados. **280 testes automatizados** passando.
+implementados. **317 testes automatizados** passando, com **80% de cobertura**
+de linhas — o `dart_test.yaml` garante que a suíte rode um arquivo por
+vez (o backend em Go tem uma corrida na tabela de refresh token que
+falharia os testes de integração em paralelo).
 
 | Requisito | Onde está |
 |----------|-----------|
@@ -265,7 +268,7 @@ Future<void> salvarDados(FormState formulario) async {
 }
 ```
 
-**6. Os campos de texto pertencem à tela, não ao Controller**
+**7. Os campos de texto pertencem à tela, não ao Controller**
 
 O `AuthController`, o `PerfilController` e os Controllers de formulário
 guardam `TextEditingController` para que a regra de negócio fique em
@@ -287,7 +290,27 @@ descarta — eles são liberados junto com o Controller, pelo coletor de
 lixo. A varredura de telas (`test/varredura_telas_test.dart`) impede
 que a regressão volte.
 
-**7. Registro síncrono das dependências globais**
+**8. A regra mora no Controller - e também no Form**
+
+Toda validação é exposta pelo Controller (`validator:` nas Views) **e
+reaplicada dentro do Controller**, antes da requisição:
+
+```dart
+Future<void> login(FormState formulario) async {
+  if (!formulario.validate()) return;
+
+  final erroEmail = validarEmailLogin(emailCtrl.text);
+  if (erroEmail != null) { erro.value = erroEmail; return; }
+  ...
+}
+```
+
+O motivo é prático: se a View esquecer de ligar o `validator` em algum
+campo, o dado inválido ainda não chega na API — e o login não gasta uma
+requisição à toa. O mesmo vale para o código de recuperação de senha, a
+senha nova e o cadastro do coordenador.
+
+**9. Registro síncrono das dependências globais**
 
 `Get.putAsync` só registra a instância **depois** que o Future resolve.
 Usá-lo para a sessão e logo em seguida fazer `Get.find<SessaoService>()`
@@ -297,7 +320,7 @@ síncrona, e a leitura do armazenamento (assíncrona) fica a cargo do
 `SplashController`, que é justamente a tela que decide o destino com
 base na sessão salva.
 
-**8. Um widget de patrimônio para as três telas (RNF04)**
+**10. Um widget de patrimônio para as três telas (RNF04)**
 
 O mesmo `CardPatrimonio` é usado na listagem do acervo, nos bens de um
 docente e em "Meus Patrimônios". Ele é **estritamente informativo**:
