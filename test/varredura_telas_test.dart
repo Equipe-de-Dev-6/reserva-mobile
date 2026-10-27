@@ -19,6 +19,7 @@ import 'package:get/get.dart';
 import 'package:reserva_mobile/app/bindings.dart';
 import 'package:reserva_mobile/app/rotas.dart';
 import 'package:reserva_mobile/app/tema.dart';
+import 'package:reserva_mobile/controllers/admin_usuarios_controller.dart';
 import 'package:reserva_mobile/controllers/auth_controller.dart';
 import 'package:reserva_mobile/controllers/dashboard_controller.dart';
 import 'package:reserva_mobile/controllers/meus_patrimonios_controller.dart';
@@ -32,6 +33,7 @@ import 'package:reserva_mobile/controllers/professor_cadastro_controller.dart';
 import 'package:reserva_mobile/controllers/professor_detalhe_controller.dart';
 import 'package:reserva_mobile/controllers/professor_lista_controller.dart';
 import 'package:reserva_mobile/core/servicos/api_client.dart';
+import 'package:reserva_mobile/core/servicos/admin_service.dart';
 import 'package:reserva_mobile/core/servicos/auth_service.dart';
 import 'package:reserva_mobile/core/servicos/patrimonio_service.dart';
 import 'package:reserva_mobile/core/servicos/perfil_service.dart';
@@ -40,6 +42,7 @@ import 'package:reserva_mobile/core/servicos/sessao_service.dart';
 import 'package:reserva_mobile/models/usuario_model.dart';
 import 'package:reserva_mobile/views/admin/admin_home_view.dart';
 import 'package:reserva_mobile/views/admin/dashboard_view.dart';
+import 'package:reserva_mobile/views/admin/usuarios/usuarios_lista_view.dart';
 import 'package:reserva_mobile/views/admin/professores/professor_cadastro_view.dart';
 import 'package:reserva_mobile/views/admin/professores/professor_detalhe_view.dart';
 import 'package:reserva_mobile/views/admin/professores/professores_lista_view.dart';
@@ -134,6 +137,12 @@ Future<void> montar(
     PerfilController(Get.find<PerfilService>(), sessao),
   );
 
+  // Parte 6 — usuários do sistema.
+  Get.put<AdminService>(AdminService(api), permanent: true);
+  Get.put<AdminUsuariosController>(
+    AdminUsuariosController(Get.find<AdminService>()),
+  );
+
   await tester.pumpWidget(
     GetMaterialApp(
       theme: Tema.claro,
@@ -199,6 +208,11 @@ ApiClient apiFalsaDoTeste() {
       return payloadDetalheProfessor();
     }
     if (caminho == '/profile') return payloadPerfil();
+    if (caminho == '/admin/users') return payloadListaUsuarios();
+    if (caminho.startsWith('/admin/users/')) {
+      return payloadAlterarPapel(int.tryParse(caminho.split('/').elementAt(3) ?? '0') ?? 0, 'admin');
+    }
+    if (caminho == '/admin/stats') return payloadStatsAdmin();
     return <String, dynamic>{};
   });
 }
@@ -409,6 +423,15 @@ void main() {
         () => const ProfessorDetalheView(),
         usuario: admin,
         nome: 'Detalhe do professor',
+      );
+    });
+
+    testWidgets('Usuários do sistema (Parte 6)', (tester) async {
+      await semErroEmTodosOsTamanhos(
+        tester,
+        () => const UsuariosListaView(),
+        usuario: admin,
+        nome: 'Usuários do sistema',
       );
     });
   });

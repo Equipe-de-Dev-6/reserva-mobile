@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../app/tema.dart';
 import '../../controllers/dashboard_controller.dart';
+import '../../models/admin_stats_model.dart';
 import '../../models/patrimonio_stats_model.dart';
 import '../../widgets/cartao_indicador.dart';
 import '../../widgets/estado_vazio.dart';
@@ -12,10 +13,12 @@ import '../../widgets/mensagem_erro.dart';
 ///
 /// A situação patrimonial da escola em uma tela: total de bens, itens
 /// em uso, disponíveis, em manutenção, número de docentes e a
-/// distribuição do acervo por categoria.
+/// distribuição do acervo por categoria. A partir da Parte 6, também
+/// mostra métricas do sistema (total de usuários, sessões ativas etc.).
 ///
-/// Todos os números vêm do backend (`GET /admin/patrimonios/stats`) —
-/// o app não conta nada, para não divergir do servidor.
+/// Todos os números vêm do backend (`GET /admin/patrimonios/stats` e
+/// `GET /admin/stats`) — o app não conta nada, para não divergir do
+/// servidor.
 class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});
 
@@ -85,6 +88,8 @@ class DashboardView extends GetView<DashboardController> {
           _GradeIndicadores(dados: dados),
           const SizedBox(height: 20),
           _SecaoDocentes(dados: dados),
+          const SizedBox(height: 20),
+          _SecaoSistema(dados: controller.adminStats.value),
           if (dados.categoriasOrdenadas.isNotEmpty) ...[
             const SizedBox(height: 20),
             _SecaoCategorias(dados: dados),
@@ -221,6 +226,49 @@ class _SecaoCategorias extends StatelessWidget {
                 quantidade: entrada.value,
                 fracao: dados.percentualDe(entrada.key),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bloco de métricas do sistema (Parte 6): total de usuários, sessões
+/// ativas, códigos de recuperação pendentes.
+class _SecaoSistema extends StatelessWidget {
+  const _SecaoSistema({this.dados});
+
+  final AdminStatsModel? dados;
+
+  @override
+  Widget build(BuildContext context) {
+    if (dados == null) return const SizedBox.shrink();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.people_outlined,
+                    size: 18, color: Tema.azulPrimario),
+                const SizedBox(width: 8),
+                Text(
+                  'Administração do sistema',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _Linha(rotulo: 'Usuários cadastrados', valor: '${dados!.totalUsers}'),
+            _Linha(rotulo: 'Coordenadores', valor: '${dados!.totalAdmins}'),
+            _Linha(rotulo: 'Professores', valor: '${dados!.totalProfessores}'),
+            _Linha(rotulo: 'Usuários comuns', valor: '${dados!.standardUsers}'),
+            _Linha(rotulo: 'Sessões ativas', valor: '${dados!.activeRefreshTokens}'),
+            _Linha(rotulo: 'Códigos de recuperação pendentes',
+                valor: '${dados!.pendingResetCodes}'),
           ],
         ),
       ),

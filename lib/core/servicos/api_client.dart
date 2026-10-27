@@ -243,6 +243,13 @@ class ApiClient extends GetxService {
     return _corpo(resposta);
   }
 
+  /// PATCH.
+  Future<Map<String, dynamic>> patch(String caminho, {Object? body}) async {
+    final resposta =
+        await chamar(() => dio.patch<dynamic>(caminho, data: body));
+    return _corpo(resposta);
+  }
+
   /// DELETE.
   Future<Map<String, dynamic>> delete(String caminho) async {
     final resposta = await chamar(() => dio.delete<dynamic>(caminho));

@@ -50,6 +50,7 @@ backend. O script que os gera está em `tool/gerar_prints_test.dart`.
 | 1 — Autenticação e Sessão | RF01–RF04 | ✅ Concluído |
 | 2 — Painel do Coordenador | RF05–RF07 | ✅ Concluído |
 | 3 — Painel do Professor | RF08–RF09 | ✅ Concluído |
+| 4 — Administração Geral | RF10 | ✅ Concluído |
 
 **Cobertura:** 9 de 9 requisitos funcionais e 7 de 7 regras de negócio
 implementados. **319 testes automatizados** passando, com **80% de cobertura**
@@ -77,6 +78,7 @@ histórico → logout** — com as telas reais contra a **API real**.
 | RF07b Histórico / linha do tempo | `views/patrimonio/patrimonio_historico_view.dart` · `controllers/patrimonio_historico_controller.dart` · `models/historico_model.dart` |
 | RF08 Meus Patrimônios (RN03) | `views/professor/meus_patrimonios_view.dart` · `controllers/meus_patrimonios_controller.dart` |
 | RF09 Perfil: dados e senha (RN06) | `views/perfil/perfil_view.dart` · `controllers/perfil_controller.dart` · `core/servicos/perfil_service.dart` |
+| RF10 Administração de usuários (Parte 6) | `views/admin/usuarios/` · `controllers/admin_usuarios_controller.dart` · `core/servicos/admin_service.dart` · `models/usuario_admin_model.dart` |
 
 ---
 
@@ -102,6 +104,7 @@ lib/
 │   │   ├── patrimonio_service.dart   Endpoints de patrimônio e ciclo de vida
 │   │   ├── professor_service.dart    Endpoints de gestão de docentes
 │   │   ├── perfil_service.dart       Endpoints de /profile
+│   │   ├── admin_service.dart    Endpoints de administração geral (RF10)
 │   │   └── sessao_service.dart   Persistência segura do JWT (GetxService)
 │   └── utils/
 │       ├── api_erros.dart        Conversão de erro HTTP → AppException
@@ -111,6 +114,8 @@ lib/
 │
 ├── models/                       Modelos de dados (JSON ↔ objeto)
 │   ├── usuario_model.dart        Perfil do usuário + regras de RBAC
+│   ├── usuario_admin_model.dart  Usuário do sistema + métricas (RF10)
+│   ├── admin_stats_model.dart    Métricas do sistema (RF10)
 │   ├── auth_resposta.dart        Resposta de login
 │   ├── auth_requests.dart        Corpos das requisições de autenticação
 │   ├── professor_model.dart      Docente + bens vinculados
@@ -136,15 +141,16 @@ lib/
 │   ├── professor_cadastro_controller.dart    RF06
 │   ├── professor_detalhe_controller.dart     RF06
 │   ├── meus_patrimonios_controller.dart      RF08
+│   ├── admin_usuarios_controller.dart        RF10 — usuários do sistema
 │   ├── perfil_controller.dart                RF09
 │
 ├── views/                        Views (apenas desenham)
 │   ├── splash/splash_view.dart
 │   ├── auth/                     login · cadastro_admin · recuperar_senha
-│   ├── admin/                    admin_home · dashboard · professores/
+│   ├── admin/                    admin_home · dashboard · professores/ · usuarios/
 │   ├── patrimonio/               lista · detalhe · form · atribuição · devolução · histórico
 │   ├── professor/                professor_home · meus_patrimonios
-│   └── perfil/perfil_view.dart
+│   ├── perfil/perfil_view.dart
 │
 └── widgets/                      Widgets reutilizáveis (RNF04)
     ├── botao_primario.dart       Botão com estado de carregamento
@@ -608,7 +614,7 @@ citados.
 | 3 — Dados e widgets | — (Services e Models) | `api_client` · `sessao_service` · `auth_service` |
 | 4 — Coordenador | `admin_home` · `dashboard` · `professores/*` · `patrimonio/*` | `dashboard_controller` · `professor_*_controller` · `patrimonio_controller` · `patrimonio_detalhe_controller` · `patrimonio_form_controller` · `patrimonio_ciclo_vida_controller` · `patrimonio_historico_controller` |
 | 5 — Professor | `professor_home` · `meus_patrimonios` · `perfil` | `meus_patrimonios_controller` · `perfil_controller` |
-| 6 — Administração Geral | `usuarios/*` (em andamento) | `admin_usuarios_controller` |
+| 6 — Administração Geral | `usuarios/*` | `admin_usuarios_controller` |
 
 O plano de cada parte, com o passo a passo e os critérios de
 aceitação, fica em [`docs/partes/`](docs/partes/).

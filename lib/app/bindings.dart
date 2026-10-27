@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../controllers/admin_usuarios_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../controllers/meus_patrimonios_controller.dart';
@@ -8,6 +9,7 @@ import '../controllers/professor_cadastro_controller.dart';
 import '../controllers/professor_detalhe_controller.dart';
 import '../controllers/professor_lista_controller.dart';
 import '../controllers/splash_controller.dart';
+import '../core/servicos/admin_service.dart';
 import '../core/servicos/api_client.dart';
 import '../core/servicos/auth_service.dart';
 import '../core/servicos/patrimonio_service.dart';
@@ -113,6 +115,19 @@ class PerfilBinding extends Bindings {
   }
 }
 
+/// Binding da tela de usuários do sistema (Parte 6).
+class AdminBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<AdminService>(
+      () => AdminService(Get.find<ApiClient>()),
+    );
+    Get.lazyPut<AdminUsuariosController>(
+      () => AdminUsuariosController(Get.find<AdminService>()),
+    );
+  }
+}
+
 /// Binding do dashboard de indicadores (RF05).
 class DashboardBinding extends Bindings {
   @override
@@ -121,8 +136,15 @@ class DashboardBinding extends Bindings {
       PatrimonioService(Get.find<ApiClient>()),
       permanent: true,
     );
+    Get.put<AdminService>(
+      AdminService(Get.find<ApiClient>()),
+      permanent: true,
+    );
     Get.lazyPut<DashboardController>(
-      () => DashboardController(Get.find<PatrimonioService>()),
+      () => DashboardController(
+        Get.find<PatrimonioService>(),
+        Get.find<AdminService>(),
+      ),
     );
   }
 }

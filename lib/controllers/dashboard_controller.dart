@@ -1,23 +1,26 @@
 import 'package:get/get.dart';
 
+import '../core/servicos/admin_service.dart';
 import '../core/servicos/patrimonio_service.dart';
 import '../core/utils/app_exception.dart';
+import '../models/admin_stats_model.dart';
 import '../models/patrimonio_stats_model.dart';
 
 /// Controller do **dashboard de indicadores** do Coordenador (RF05).
 ///
 /// A tela mostra a situação patrimonial da escola em números: total de
 /// bens, em uso, disponíveis, em manutenção e a distribuição por
-/// categoria.
+/// categoria. A partir da Parte 6, também mostra métricas do sistema
+/// (total de usuários, sessões ativas etc.).
 ///
-/// Todos os números vêm prontos do backend
-/// (`GET /admin/patrimonios/stats`): o Controller não conta nada. Isso
-/// evita que o cliente e o servidor discordem sobre o que é "disponível"
-/// ou "em uso" — e o servidor é quem manda.
+/// Todos os números vêm prontos do backend: o Controller não conta
+/// nada. Isso evita que o cliente e o servidor discordem — e o servidor
+/// é quem manda.
 class DashboardController extends GetxController {
-  DashboardController(this._service);
+  DashboardController(this._patrimonio, this._admin);
 
-  final PatrimonioService _service;
+  final PatrimonioService _patrimonio;
+  final AdminService _admin;
 
   // --- Estado reativo ---------------------------------------------------
 
@@ -27,9 +30,13 @@ class DashboardController extends GetxController {
   /// Mensagem de erro pronta para exibição (RNF02).
   final RxString erro = ''.obs;
 
-  /// Os indicadores. `null` enquanto a carga não termina ou falhou.
+  /// Os indicadores patrimoniais. `null` enquanto a carga não termina
+  /// ou falhou.
   final Rxn<PatrimonioStatsModel> indicadores =
       Rxn<PatrimonioStatsModel>();
+
+  /// Métricas do sistema (Parte 6). `null` enquanto não carregado.
+  final Rxn<AdminStatsModel> adminStats = Rxn<AdminStatsModel>();
 
   @override
   void onInit() {
@@ -37,7 +44,7 @@ class DashboardController extends GetxController {
     carregar();
   }
 
-  /// Carrega os indicadores.
+  /// Carrega os indicadores patrimoniais e as métricas do sistema.
   ///
   /// [silencioso] suprime o spinner: usado pelo "Atualizar" quando já
   /// há dados na tela, para não piscar o painel inteiro.
@@ -46,7 +53,10 @@ class DashboardController extends GetxController {
     erro.value = '';
 
     try {
-      indicadores.value = await _service.estatisticas();
+      await Future.wait([
+        _patrimonio.estatisticas().then((v) => indicadores.value = v),
+        _admin.estatisticas().then((v) => adminStats.value = v),
+      ]);
     } on AppException catch (e) {
       erro.value = e.mensagem;
     } finally {

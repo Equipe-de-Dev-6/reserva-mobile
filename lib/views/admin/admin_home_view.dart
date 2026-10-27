@@ -84,6 +84,15 @@ class AdminHomeView extends GetView<AuthController> {
                         'senha de acesso.',
                     aoTocar: () => Get.toNamed(Rotas.perfil),
                   ),
+                  const SizedBox(height: 14),
+                  _AtalhoPainel(
+                    icone: Icons.people_alt_outlined,
+                    titulo: 'Usuários do sistema',
+                    descricao:
+                        'Lista todos os usuários da escola, o papel de cada '
+                        'um e permite promover ou rebaixar o acesso.',
+                    aoTocar: () => Get.toNamed(Rotas.usuarios),
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     'Sessão ativa como $email.',

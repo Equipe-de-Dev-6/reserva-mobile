@@ -16,6 +16,7 @@ import '../views/patrimonio/rotas_patrimonio.dart';
 import '../views/professor/meus_patrimonios_view.dart';
 import '../views/professor/professor_home_view.dart';
 import '../views/professor/rotas_professor.dart';
+import '../views/admin/usuarios/usuarios_lista_view.dart';
 
 /// Nomes das rotas. Nunca use strings soltas no `Get.toNamed`:
 /// um erro de digitação quebraria a navegação silenciosamente.
@@ -53,6 +54,12 @@ class Rotas {
   /// Liberada para admin e professor: o RN06 dá autonomia ao docente
   /// sobre os próprios dados.
   static const perfil = '/perfil';
+
+  // --- Parte 6: administração geral ------------------------------------
+  /// Exclusiva do Coordenador: lista de usuários, alteração de papel e
+  /// métricas do sistema. O backend responde `403` para qualquer outro
+  /// papel (RN03).
+  static const usuarios = '/admin/usuarios';
 }
 
 /// Mapa de navegação nomeada da aplicação.
@@ -177,6 +184,17 @@ class AppRotas {
       page: () => const MeusPatrimoniosView(),
       binding: MeusPatrimoniosBinding(),
       middlewares: [AutenticadoMiddleware()],
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: _transicao,
+    ),
+
+    // Parte 6 — Administração Geral (usuários do sistema).
+    // Exclusiva do Coordenador.
+    GetPage(
+      name: Rotas.usuarios,
+      page: () => const UsuariosListaView(),
+      binding: AdminBinding(),
+      middlewares: [AutenticadoMiddleware(), AdminMiddleware()],
       transition: Transition.rightToLeftWithFade,
       transitionDuration: _transicao,
     ),

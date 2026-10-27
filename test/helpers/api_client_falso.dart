@@ -37,6 +37,10 @@ class ApiClientFalso extends ApiClient {
       _registrar('PUT', caminho, body);
 
   @override
+  Future<Map<String, dynamic>> patch(String caminho, {Object? body}) =>
+      _registrar('PATCH', caminho, body);
+
+  @override
   Future<Map<String, dynamic>> delete(String caminho) =>
       _registrar('DELETE', caminho, null);
 
@@ -71,6 +75,10 @@ class ApiClientComErro extends ApiClient {
 
   @override
   Future<Map<String, dynamic>> put(String caminho, {Object? body}) async =>
+      throw erro;
+
+  @override
+  Future<Map<String, dynamic>> patch(String caminho, {Object? body}) async =>
       throw erro;
 
   @override
@@ -186,4 +194,126 @@ Map<String, dynamic> payloadPerfil() => {
 Map<String, dynamic> payloadPerfilAtualizado() => {
       'message': 'Perfil atualizado com sucesso',
       'user': {...payloadPerfil(), 'telefone': '(11) 98888-7777', 'totalPatrimonios': 0},
+    };
+
+// ---------------------------------------------------------------------------
+// Payloads da Parte 6 — Administração Geral
+// ---------------------------------------------------------------------------
+
+/// `GET /api/admin/users`
+Map<String, dynamic> payloadListaUsuarios() => {
+      'total': 3,
+      'users': [
+        {
+          'id': 1,
+          'email': 'admin@admin.com',
+          'nome': 'Coordenador Geral',
+          'role': 'admin',
+          'matricula': 'ADM-2024-01',
+          'departamento': 'Coordenação',
+          'telefone': '(11) 98765-1000',
+          'totalPatrimonios': 0,
+          'createdAt': '2026-10-20T11:26:42Z',
+        },
+        {
+          'id': 2,
+          'email': 'professor@escola.com',
+          'nome': 'Prof. Carlos Drummond',
+          'role': 'professor',
+          'matricula': 'PROF-2024-01',
+          'departamento': 'Língua Portuguesa e Literatura',
+          'telefone': '(11) 98765-1001',
+          'totalPatrimonios': 3,
+          'createdAt': '2026-10-20T11:26:42Z',
+        },
+        {
+          'id': 3,
+          'email': 'usuario@escola.com',
+          'nome': 'Usuário Comum',
+          'role': 'user',
+          'matricula': '',
+          'departamento': '',
+          'telefone': '',
+          'totalPatrimonios': 0,
+          'createdAt': '2026-10-21T09:00:00Z',
+        },
+      ],
+    };
+
+/// `PATCH /api/admin/users/{id}/role` — resposta de sucesso
+Map<String, dynamic> payloadAlterarPapel(int id, String novoPapel) => {
+      'message': 'Role do usuário atualizada com sucesso',
+      'newRole': novoPapel,
+      'userId': id,
+    };
+
+/// `GET /api/admin/stats`
+Map<String, dynamic> payloadStatsAdmin() => {
+      'totalUsers': 9,
+      'totalAdmins': 1,
+      'totalProfessores': 8,
+      'standardUsers': 0,
+      'activeRefreshTokens': 41,
+      'pendingResetCodes': 0,
+    };
+
+// ---------------------------------------------------------------------------
+// Payloads da Parte 6 — Administração Geral
+// ---------------------------------------------------------------------------
+
+/// `GET /api/admin/users`
+Map<String, dynamic> payloadListaUsuarios() => {
+      'total': 3,
+      'users': [
+        {
+          'id': 1,
+          'email': 'admin@admin.com',
+          'nome': 'Coordenador Geral',
+          'role': 'admin',
+          'matricula': 'ADM-2024-01',
+          'departamento': 'Coordenação',
+          'telefone': '(11) 98765-1000',
+          'totalPatrimonios': 0,
+          'createdAt': '2026-10-20T11:26:42Z',
+        },
+        {
+          'id': 2,
+          'email': 'professor@escola.com',
+          'nome': 'Prof. Carlos Drummond',
+          'role': 'professor',
+          'matricula': 'PROF-2024-01',
+          'departamento': 'Língua Portuguesa e Literatura',
+          'telefone': '(11) 98765-1001',
+          'totalPatrimonios': 3,
+          'createdAt': '2026-10-20T11:26:42Z',
+        },
+        {
+          'id': 3,
+          'email': 'usuario@escola.com',
+          'nome': 'Usuário Comum',
+          'role': 'user',
+          'matricula': '',
+          'departamento': '',
+          'telefone': '',
+          'totalPatrimonios': 0,
+          'createdAt': '2026-10-21T09:00:00Z',
+        },
+      ],
+    };
+
+/// `PATCH /api/admin/users/{id}/role` — resposta de sucesso
+Map<String, dynamic> payloadAlterarPapel(int id, String novoPapel) => {
+      'message': 'Role do usuário atualizada com sucesso',
+      'newRole': novoPapel,
+      'userId': id,
+    };
+
+/// `GET /api/admin/stats`
+Map<String, dynamic> payloadStatsAdmin() => {
+      'totalUsers': 9,
+      'totalAdmins': 1,
+      'totalProfessores': 8,
+      'standardUsers': 0,
+      'activeRefreshTokens': 41,
+      'pendingResetCodes': 0,
     };
